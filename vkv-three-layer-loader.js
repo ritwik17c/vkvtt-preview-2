@@ -1,0 +1,1 @@
+(async()=>{try{let s=await (await fetch('https://raw.githubusercontent.com/ritwik17c/vkvtt-preview-2/main/v66-staff-identity-once.js?fix=1',{cache:'no-store'})).text();s=s.replace("if(!u)return,db=F.getFirestore(app);","if(!u)return;");(0,eval)(s)}catch(e){console.error('Three-layer loader failed',e)}})();
