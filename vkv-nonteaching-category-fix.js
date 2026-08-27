@@ -41,6 +41,7 @@ async function resolve(){
     return cat;
   }catch(e){console.warn('Preview2 canonical category fix:',e);return''}
 }
+function reminderPanel(){return $('#periodReminderControl')||$('.periodReminderControl')||$$('div').find(e=>/Period Reminder/.test(e.textContent||'')&&/Test Voice/.test(e.textContent||''))||null}
 function ensureOfficeDuty(){
   const sec=$('#vkvSecCategory');if(!sec)return;
   const h=sec.querySelector('h2'),p=sec.querySelector('p'),g=sec.querySelector('.vkvSecGrid');if(h)h.textContent='My Work · Non-Teaching';if(p)p.textContent='Staff-category specific work area.';if(!g)return;
@@ -48,11 +49,17 @@ function ensureOfficeDuty(){
   let b=$('#vkvCard_officeDuty');if(!b){b=document.createElement('button');b.id='vkvCard_officeDuty';b.className='vkvVirtual vkvRegistryCard vkvTone1';b.dataset.vkvCard='officeDuty';b.textContent='🏢 Office Duty Schedule';b.onclick=()=>{document.querySelectorAll('.vkvExpand.open').forEach(x=>x.classList.remove('open'));document.querySelectorAll('.vkvSecGrid>button.active').forEach(x=>x.classList.remove('active'));b.classList.add('active');let out=$('#vkvOfficeDutyDetails');if(!out){out=document.createElement('div');out.id='vkvOfficeDutyDetails';out.className='vkvExpand';g.append(out)}out.innerHTML='<div class="vkvExpandTitle">Office Duty Schedule</div><div class="vkvTime">Office sitting duty and after-school stay-back roster.</div>';out.classList.add('open')}}g.append(b)
 }
 function apply(cat){
-  if(cat!=='nonTeaching')return;
-  ensureOfficeDuty();
-  const reminder=$('#periodReminderControl')||$('.periodReminderControl')||$$('div').find(e=>/Period Reminder/.test(e.textContent||'')&&/Test Voice/.test(e.textContent||''));if(reminder)reminder.style.setProperty('display','none','important');
-  ['#myTimetableBtn','#myProxyTodayBtn','#myProxyHistoryBtn','#vkvCard_periodReminder'].forEach(q=>{const e=$(q);if(e)e.style.setProperty('display','none','important')});
+  const reminder=reminderPanel();
+  if(cat==='nonTeaching'){
+    ensureOfficeDuty();
+    if(reminder){reminder.style.setProperty('display','none','important');reminder.style.setProperty('visibility','hidden','important')}
+    ['#myTimetableBtn','#myProxyTodayBtn','#myProxyHistoryBtn','#vkvCard_periodReminder'].forEach(q=>{const e=$(q);if(e)e.style.setProperty('display','none','important')});
+    return;
+  }
+  if(cat==='teaching'){
+    if(reminder){reminder.style.removeProperty('display');reminder.style.setProperty('visibility','visible','important')}
+  }
 }
-async function run(){const c=await resolve();apply(c)}
-setTimeout(run,800);let n=0;const t=setInterval(async()=>{await run();if(++n>24)clearInterval(t)},500);window.addEventListener('focus',run);
+async function run(){const c=await resolve();if(c)apply(c)}
+setTimeout(run,250);let n=0;const t=setInterval(async()=>{await run();if(++n>10)clearInterval(t)},700);window.addEventListener('focus',run);
 })();
