@@ -9,7 +9,7 @@ function exact(label){const n=clean(label),all=$$('button,a,[role="button"]').fi
 function get(id,label){return(id&&$('#'+id))||exact(label)}
 function put(grid,id,label){const e=get(id,label);if(!e)return null;e.style.removeProperty('display');e.style.removeProperty('visibility');e.style.removeProperty('position');if(e.parentElement!==grid)grid.appendChild(e);return e}
 function placeholder(grid,id,label,cls=''){let e=$('#'+id);if(!e){e=document.createElement('button');e.type='button';e.id=id;e.textContent=label;e.className=('vkvPlaceholder '+cls).trim();e.dataset.placementOnly='1'}if(e.parentElement!==grid)grid.appendChild(e);return e}
-function link(grid,id,label,href,cls=''){let e=$('#'+id);if(!e){e=document.createElement('a');e.id=id;e.textContent=label;e.href=href;e.className=cls}if(e.parentElement!==grid)grid.appendChild(e);return e}
+function link(grid,id,label,href,cls=''){let e=$('#'+id);if(!e){e=document.createElement('a');e.id=id;e.textContent=label;e.href=href;e.className=cls}else e.href=href;if(e.parentElement!==grid)grid.appendChild(e);return e}
 function isVisible(el){if(!el)return false;const s=getComputedStyle(el);return s.display!=='none'&&s.visibility!=='hidden'}
 function category(){const ntHints=['#officeDutyScheduleBtn','#vkvCard_officeDuty','#officeDutyBtn'].map($).find(Boolean);if(isVisible(ntHints))return'nonTeaching';const tt=$('#myTimetableBtn');if(tt&&!isVisible(tt))return'nonTeaching';return'teaching'}
 function delegatedCandidates(){const labels=['Proxy Manager','Leave Editor','Attendance Manager','Admin Dashboard'];const out=[];for(const l of labels){const e=exact(l);if(e&&isVisible(e)&&!out.includes(e))out.push(e)}return out}
@@ -36,7 +36,7 @@ function build(){css();const anchor=$('#activeScheduleBanner')||$('.activeSchedu
    put(g2,'myProxyHistoryBtn','My Past Proxy History')||placeholder(g2,'myProxyHistoryBtn','🕘 My Past Proxy History');
    put(g2,'vkvCard_periodReminder','Period Reminder')||placeholder(g2,'vkvCard_periodReminder','🔔 Period Reminder');
    put(g2,'vkvCard_teacherSpecialDuty','Teacher Special Duty')||placeholder(g2,'vkvCard_teacherSpecialDuty','🗓 Teacher Special Duty');
-   link(g2,'vkvQuestionBankTile','🧠 Question Bank & Paper Builder','https://ritwik17c.github.io/vkvtt-preview/qb-module.html?v=preview2-qb-3','vkvQbTile')}
+   link(g2,'vkvQuestionBankTile','🧠 Question Bank & Paper Builder','https://ritwik17c.github.io/vkvtt-preview-2/qb-module.html?v=teacher-access-1','vkvQbTile')}
  const s3=section('vkvSection3','Section 3 · Delegated Responsibilities','Additional tools appear only when responsibility has been assigned.'),g3=s3.querySelector('.vkv3grid');const dc=delegatedCandidates();dc.forEach(e=>g3.appendChild(e));if(!dc.length&&!g3.children.length)g3.innerHTML='<div class="vkv3empty">No delegated responsibility is assigned to this account.</div>';
  const parent=anchor.parentNode;parent.insertBefore(s3,anchor.nextSibling);parent.insertBefore(s2,s3);parent.insertBefore(s1,s2);['#myAreaGrid','#myAreaTitle'].forEach(q=>{const e=$(q);if(e)e.style.display='none'});hideLegacyShell();return true}
 let tries=0;const t=setInterval(()=>{tries++;if(build()||tries>=20){clearInterval(t);const anchor=$('#activeScheduleBanner')||$('.activeScheduleBanner')||$('#myAreaGrid');let nr=0;const nt=setInterval(()=>{nr++;if(anchor&&renderTopNotice(anchor)||nr>=30)clearInterval(nt)},400)}},350);
