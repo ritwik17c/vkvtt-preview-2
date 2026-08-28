@@ -2,7 +2,7 @@
 (()=>{'use strict';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)], clean=s=>String(s||'').replace(/[\u{1F300}-\u{1FAFF}\u2600-\u27BF]/gu,' ').replace(/[^A-Za-z0-9&?'’]+/g,' ').replace(/\s+/g,' ').trim().toLowerCase().replace(/’/g,"'");
 function css(){if($('#vkvSectionPlacementCss'))return;const s=document.createElement('style');s.id='vkvSectionPlacementCss';s.textContent=`
-.vkv3sec{margin:16px 0 22px}.vkv3sec h2{font-size:1.08rem;color:#17364f;margin:0 0 4px}.vkv3sec>p{margin:0 0 10px;color:#647985;font-size:.86rem}.vkv3grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.vkv3grid>button,.vkv3grid>a{box-sizing:border-box;min-height:76px;text-align:left;padding:15px 17px!important;border:1px solid #c7d8e2!important;border-left:5px solid #24739d!important;border-radius:16px!important;background:#fff!important;color:#17364f!important;font:inherit;font-weight:800!important;text-decoration:none;box-shadow:0 5px 16px rgba(18,63,90,.06);cursor:pointer;width:100%!important;margin:0!important;position:static!important;transform:none!important}.vkv3grid>button:nth-child(4n+2),.vkv3grid>a:nth-child(4n+2){border-left-color:#2f8a57!important}.vkv3grid>button:nth-child(4n+3),.vkv3grid>a:nth-child(4n+3){border-left-color:#d49517!important}.vkv3grid>button:nth-child(4n),.vkv3grid>a:nth-child(4n){border-left-color:#7353a6!important}.vkvQbTile{border-left-color:#7a4ea3!important;background:linear-gradient(135deg,#fff,#f8f3ff)!important}.vkvPlaceholder{opacity:.96}.vkv3empty{grid-column:1/-1;padding:11px;border:1px dashed #cbdce5;border-radius:12px;color:#647985;background:#fbfefd}@media(max-width:700px){.vkv3grid{grid-template-columns:1fr 1fr}}@media(max-width:480px){.vkv3grid{grid-template-columns:1fr}}
+.vkv3sec{margin:16px 0 22px}.vkv3sec h2{font-size:1.08rem;color:#17364f;margin:0 0 4px}.vkv3sec>p{margin:0 0 10px;color:#647985;font-size:.86rem}.vkv3grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.vkv3grid>button,.vkv3grid>a{box-sizing:border-box;min-height:76px;text-align:left;padding:15px 17px!important;border:1px solid #c7d8e2!important;border-left:5px solid #24739d!important;border-radius:16px!important;background:#fff!important;color:#17364f!important;font:inherit;font-weight:800!important;text-decoration:none;box-shadow:0 5px 16px rgba(18,63,90,.06);cursor:pointer;width:100%!important;margin:0!important;position:static!important;transform:none!important}.vkv3grid>button:nth-child(4n+2),.vkv3grid>a:nth-child(4n+2){border-left-color:#2f8a57!important}.vkv3grid>button:nth-child(4n+3),.vkv3grid>a:nth-child(4n+3){border-left-color:#d49517!important}.vkv3grid>button:nth-child(4n),.vkv3grid>a:nth-child(4n){border-left-color:#7353a6!important}.vkvQbTile{border-left-color:#7a4ea3!important;background:linear-gradient(135deg,#fff,#f8f3ff)!important}.vkvPlaceholder{opacity:.96}.vkv3empty{grid-column:1/-1;padding:11px;border:1px dashed #cbdce5;border-radius:12px;color:#647985;background:#fbfefd}#vkvTopStaffNotice{margin:14px 0 16px;padding:14px 17px;border:1px solid #dfb64b;border-left:6px solid #c98512;border-radius:15px;background:linear-gradient(100deg,#fff8df,#fffdf5);color:#17364f;box-shadow:0 5px 14px rgba(107,78,14,.06)}#vkvTopStaffNotice .nHead{font-size:.78rem;font-weight:900;letter-spacing:.07em;color:#8c5d05;text-transform:uppercase;margin-bottom:5px}#vkvTopStaffNotice .nTitle{font-weight:900;font-size:1.05rem;margin-bottom:3px}#vkvTopStaffNotice .nBody{font-size:.94rem;font-weight:650;line-height:1.42;white-space:pre-wrap}#vkvTopStaffNotice .nItem+.nItem{border-top:1px solid #ead9a7;margin-top:10px;padding-top:10px}@media(max-width:700px){.vkv3grid{grid-template-columns:1fr 1fr}}@media(max-width:480px){.vkv3grid{grid-template-columns:1fr}}
 `;document.head.appendChild(s)}
 function section(id,title,sub){let s=$('#'+id);if(!s){s=document.createElement('section');s.id=id;s.className='vkv3sec';s.innerHTML=`<h2>${title}</h2><p>${sub}</p><div class="vkv3grid"></div>`}else{s.querySelector('h2').textContent=title;s.querySelector('p').textContent=sub}return s}
 function exact(label){const n=clean(label),all=$$('button,a,[role="button"]').filter(e=>!e.closest('.vkv3sec'));return all.find(e=>clean(e.textContent)===n)||all.find(e=>clean(e.textContent).includes(n))||null}
@@ -13,14 +13,11 @@ function link(grid,id,label,href,cls=''){let e=$('#'+id);if(!e){e=document.creat
 function isVisible(el){if(!el)return false;const s=getComputedStyle(el);return s.display!=='none'&&s.visibility!=='hidden'}
 function category(){const ntHints=['#officeDutyScheduleBtn','#vkvCard_officeDuty','#officeDutyBtn'].map($).find(Boolean);if(isVisible(ntHints))return'nonTeaching';const tt=$('#myTimetableBtn');if(tt&&!isVisible(tt))return'nonTeaching';return'teaching'}
 function delegatedCandidates(){const labels=['Proxy Manager','Leave Editor','Attendance Manager','Admin Dashboard'];const out=[];for(const l of labels){const e=exact(l);if(e&&isVisible(e)&&!out.includes(e))out.push(e)}return out}
-function hideLegacyShell(){
- const selectors=['.nav','.homebar','.opsGrid','#opsGrid'];
- selectors.forEach(q=>$$(q).forEach(e=>{if(!e.closest('.vkv3sec'))e.style.display='none'}));
- $$('h1,h2,h3,h4,div').forEach(e=>{if(e.closest('.vkv3sec'))return;const t=clean(e.textContent);if(t==='daily management'&&e.children.length===0)e.style.display='none'});
-}
-function build(){css();const anchor=$('#activeScheduleBanner')||$('.activeScheduleBanner')||$('#myAreaGrid');if(!anchor)return false;
+function hideLegacyShell(){const selectors=['.nav','.homebar','.opsGrid','#opsGrid'];selectors.forEach(q=>$$(q).forEach(e=>{if(!e.closest('.vkv3sec'))e.style.display='none'}));$$('h1,h2,h3,h4,div').forEach(e=>{if(e.closest('.vkv3sec'))return;const t=clean(e.textContent);if(t==='daily management'&&e.children.length===0)e.style.display='none'})}
+function renderTopNotice(anchor){const D=window.DATA||{},items=Array.isArray(D.staffNotices)?D.staffNotices.filter(n=>n&&n.active!==false):[];let box=$('#vkvTopStaffNotice');if(!items.length){box?.remove();return}if(!box){box=document.createElement('div');box.id='vkvTopStaffNotice'}box.innerHTML='<div class="nHead">📢 Staff Notice</div>'+items.map(n=>`<div class="nItem"><div class="nTitle">${n.priority==='important'?'📌 ':''}${String(n.title||'Notice').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}</div><div class="nBody">${String(n.body||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}</div></div>`).join('');anchor.insertAdjacentElement('afterend',box)}
+function build(){css();const anchor=$('#activeScheduleBanner')||$('.activeScheduleBanner')||$('#myAreaGrid');if(!anchor)return false;renderTopNotice(anchor);
  const s1=section('vkvSection1','Section 1 · Common to All Staff','School-wide and personal information available to every staff member.'),g1=s1.querySelector('.vkv3grid');
- put(g1,'vkvCard_notice','Staff Notice')||placeholder(g1,'vkvCard_notice','📢 Staff Notice');
+ const noticeBtn=put(g1,'vkvCard_notice','Staff Notice')||placeholder(g1,'vkvCard_notice','📢 Staff Notice and Circulars');noticeBtn.textContent='📢 Staff Notice and Circulars';
  put(g1,'myAttendanceBtn','My Attendance')||placeholder(g1,'myAttendanceBtn','📍 My Attendance');
  put(g1,'myStatusBtn','My Leave & Duty Leave')||placeholder(g1,'myStatusBtn','🗂 My Leave & Duty Leave');
  put(g1,'vkvCard_todaySummary',"Today's Leave / Duty / Assignment Summary")||placeholder(g1,'vkvCard_todaySummary',"📁 Today's Leave / Duty / Assignment Summary");
@@ -32,21 +29,16 @@ function build(){css();const anchor=$('#activeScheduleBanner')||$('.activeSchedu
  put(g1,null,'Where Now?')||placeholder(g1,'vkvWhereNowCard','📍 Where Now?');
  put(g1,'vkvCard_periodTimings','Period Timings')||placeholder(g1,'vkvCard_periodTimings','🕐 Period Timings');
  put(g1,'annualCalendarBtn','Annual Calendar')||placeholder(g1,'annualCalendarBtn','🗓 Annual Calendar');
- const cat=category(),s2=section('vkvSection2',cat==='nonTeaching'?'Section 2 · Non-Teaching Staff':'Section 2 · Teaching Staff',cat==='nonTeaching'?'Functions specifically relevant to office, support and non-teaching staff.':'Teaching-specific functions and academic tools.'),g2=s2.querySelector('.vkv3grid');
- if(cat==='nonTeaching'){
-   put(g2,'vkvCard_officeDuty','Office Duty Schedule')||placeholder(g2,'vkvCard_officeDuty','🗂 Office Duty Schedule');
- }else{
+ const cat=category(),s2=section('vkvSection2',cat==='nonTeaching'?'Non Teaching Staff':'Teaching Staff',cat==='nonTeaching'?'Functions specifically relevant to office, support and non-teaching staff.':'Teaching-specific functions and academic tools.'),g2=s2.querySelector('.vkv3grid');
+ if(cat==='nonTeaching'){put(g2,'vkvCard_officeDuty','Office Duty Schedule')||placeholder(g2,'vkvCard_officeDuty','🗂 Office Duty Schedule')}else{
    put(g2,'myTimetableBtn','My Timetable')||placeholder(g2,'myTimetableBtn','📘 My Timetable');
    put(g2,'myProxyTodayBtn','My Proxy Today')||placeholder(g2,'myProxyTodayBtn','👥 My Proxy Today');
    put(g2,'myProxyHistoryBtn','My Past Proxy History')||placeholder(g2,'myProxyHistoryBtn','🕘 My Past Proxy History');
    put(g2,'vkvCard_periodReminder','Period Reminder')||placeholder(g2,'vkvCard_periodReminder','🔔 Period Reminder');
    put(g2,'vkvCard_teacherSpecialDuty','Teacher Special Duty')||placeholder(g2,'vkvCard_teacherSpecialDuty','🗓 Teacher Special Duty');
-   link(g2,'vkvQuestionBankTile','🧠 Question Bank & Paper Builder','https://ritwik17c.github.io/vkvtt-preview/qb-module.html?v=preview2-qb-3','vkvQbTile');
- }
+   link(g2,'vkvQuestionBankTile','🧠 Question Bank & Paper Builder','https://ritwik17c.github.io/vkvtt-preview/qb-module.html?v=preview2-qb-3','vkvQbTile')}
  const s3=section('vkvSection3','Section 3 · Delegated Responsibilities','Additional tools appear only when responsibility has been assigned.'),g3=s3.querySelector('.vkv3grid');const dc=delegatedCandidates();dc.forEach(e=>g3.appendChild(e));if(!dc.length&&!g3.children.length)g3.innerHTML='<div class="vkv3empty">No delegated responsibility is assigned to this account.</div>';
- const parent=anchor.parentNode;parent.insertBefore(s3,anchor.nextSibling);parent.insertBefore(s2,s3);parent.insertBefore(s1,s2);
- ['#myAreaGrid','#myAreaTitle'].forEach(q=>{const e=$(q);if(e)e.style.display='none'});
- hideLegacyShell();
- return true}
+ const parent=anchor.parentNode;const notice=$('#vkvTopStaffNotice');parent.insertBefore(s3,anchor.nextSibling);parent.insertBefore(s2,s3);parent.insertBefore(s1,s2);if(notice)parent.insertBefore(notice,s1);
+ ['#myAreaGrid','#myAreaTitle'].forEach(q=>{const e=$(q);if(e)e.style.display='none'});hideLegacyShell();return true}
 let tries=0;const t=setInterval(()=>{tries++;if(build()||tries>=20)clearInterval(t)},350);
 })();
