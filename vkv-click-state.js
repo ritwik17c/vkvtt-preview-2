@@ -1,0 +1,6 @@
+/* Preview2: consistent golden active state for homepage cards. */
+(()=>{'use strict';
+const style=document.createElement('style');style.textContent=`#vkvSection1 .vkv3grid>button.vkvActive,#vkvSection1 .vkv3grid>a.vkvActive,#vkvSection2 .vkv3grid>button.vkvActive,#vkvSection2 .vkv3grid>a.vkvActive,#vkvSection3 .vkv3grid>button.vkvActive,#vkvSection3 .vkv3grid>a.vkvActive{outline:3px solid #d5a229!important;outline-offset:2px!important;box-shadow:0 0 0 4px rgba(213,162,41,.18),0 7px 18px rgba(20,50,70,.08)!important}`;document.head.appendChild(style);
+function bind(){document.querySelectorAll('#vkvSection1 .vkv3grid>button,#vkvSection1 .vkv3grid>a,#vkvSection2 .vkv3grid>button,#vkvSection2 .vkv3grid>a,#vkvSection3 .vkv3grid>button,#vkvSection3 .vkv3grid>a').forEach(b=>{if(b.dataset.vkvActiveBound)return;b.dataset.vkvActiveBound='1';b.addEventListener('click',()=>{document.querySelectorAll('.vkv3grid>.vkvActive').forEach(x=>x.classList.remove('vkvActive'));b.classList.add('vkvActive')},true)})}
+let n=0,t=setInterval(()=>{bind();if(++n>30)clearInterval(t)},250);
+})();
