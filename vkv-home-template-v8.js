@@ -11,7 +11,7 @@ function classify({p,m,email}){const r=String(p.role||window.__vkvRole||'teacher
 function notices(m){return(Array.isArray(m.staffNotices)?m.staffNotices:[]).filter(n=>n&&n.active!==false&&n.visible!==false).sort((a,b)=>Number(b.priority==='important')-Number(a.priority==='important')||Number(b.updatedAtMs||b.createdAtMs||0)-Number(a.updatedAtMs||a.createdAtMs||0))}
 function common(g,m){
  link(g,'vkvMyAttendanceV9','🕘 My Attendance',P2+'attendance.html?v=66.0');
- action(g,'vkvMyLeaveV9','🗂 My Regular Leave & Duty',b=>{if(typeof window.openMyStatus==='function')window.openMyStatus(b);else location.href=P2+'my-leave.html?v=66.0'});
+ link(g,'vkvMyLeaveV9','🗂 My Regular Leave & Duty',P2+'my-leave.html?v=66.0');
  action(g,'vkvTodaySummaryV9','📋 Today’s Leave / Duty / Assignment Summary',()=>window.__vkvRenderTodaySummary?.());
  action(g,'vkvPublishedProxyV9','✅ Today’s Proxy Allotment (All Teachers)',b=>{if(typeof window.openPublishedProxy==='function')window.openPublishedProxy(b);else alert('No final proxy view is available yet.')});
  link(g,'vkvAnnualCalendarV9','🗓 Annual Calendar',P2+'annual-calendar-2026-27.html?v=66.0');
