@@ -1,31 +1,3 @@
-/* VKVTT Preview 2 · single navigation policy.
-   One owner for user-facing navigation. Inherited Preview1 <base> is never allowed to pull users out of the current app.
-   ROOT is derived from the current deployment path, so this policy can move to production unchanged. */
-(()=>{'use strict';
-const seg=location.pathname.split('/').filter(Boolean)[0]||'vkvtt-preview-2';
-const ROOT='/' + seg + '/';
-const HOME=ROOT+'?v=66.0';
-const ADMIN=ROOT+'admin-dashboard.html?v=66.0';
-const norm=s=>String(s||'').replace(/[^A-Za-z0-9]+/g,' ').replace(/\s+/g,' ').trim().toLowerCase();
-const ROUTES=new Map([
- ['my attendance',ROOT+'attendance.html?v=66.0'],
- ['annual calendar',ROOT+'annual-calendar-2026-27.html?v=66.0'],
- ['question bank paper builder',ROOT+'qb-module.html?v=66.0'],
- ['leave manager',ROOT+'leave-manager.html?v=66.0'],
- ['staff management',ROOT+'admin-staff-management.html?v=66.0'],
- ['office duty schedule',ROOT+'office-duty-schedule.html?v=66.0'],
- ['office duty scheduler',ROOT+'admin-office-duty-scheduler.html?v=66.0'],
- ['teacher s special duty scheduler',ROOT+'admin-teacher-special-duty-scheduler.html?v=66.0'],
- ['printable timetables',ROOT+'admin-print-master.html?v=66.0'],
- ['current master overview',ROOT+'admin-master-overview.html?v=66.0']
-]);
-function targetFor(el){
- const t=norm(el.textContent);
- if(/(^| )admin dashboard($| )/.test(t)||t==='return to admin dashboard')return ADMIN;
- if(t==='home'||t==='timetable home'||t==='return home'||t==='home reset view'||t==='back to home')return HOME;
- return ROUTES.get(t)||'';
-}
-function fix(){document.querySelectorAll('a,button,[role="button"]').forEach(el=>{const target=targetFor(el);if(!target)return;if(el.tagName==='A')el.setAttribute('href',target);el.dataset.vkvRouteTarget=target})}
-document.addEventListener('click',e=>{const el=e.target.closest('a,button,[role="button"]');if(!el)return;const target=el.dataset.vkvRouteTarget||targetFor(el);if(!target)return;e.preventDefault();e.stopImmediatePropagation();location.href=target},true);
-fix();new MutationObserver(fix).observe(document.documentElement,{childList:true,subtree:true});window.__vkvRoutePolicy={root:ROOT,home:HOME,admin:ADMIN,fix};
-})();
+/* VKVTT Preview 2 · single navigation policy. */
+(()=>{'use strict';const seg=location.pathname.split('/').filter(Boolean)[0]||'vkvtt-preview-2',ROOT='/'+seg+'/',HOME=ROOT+'?v=66.0',ADMIN=ROOT+'admin-dashboard.html?v=66.0',norm=s=>String(s||'').replace(/[^A-Za-z0-9]+/g,' ').replace(/\s+/g,' ').trim().toLowerCase(),ROUTES=new Map([
+['my attendance',ROOT+'attendance.html?v=66.0'],['my regular leave duty',ROOT+'my-leave.html?v=66.0'],['my leave duty leave',ROOT+'my-leave.html?v=66.0'],['annual calendar',ROOT+'annual-calendar-2026-27.html?v=66.0'],['question bank paper builder',ROOT+'qb-module.html?v=66.0'],['leave manager',ROOT+'leave-manager.html?v=66.0'],['open live master',ROOT+'admin-leave-editor.html?v=66.0'],['edit in leave master',ROOT+'admin-leave-editor.html?v=66.0'],['open leave master editor',ROOT+'admin-leave-editor.html?v=66.0'],['approved leave',ROOT+'admin-leave.html?v=66.0'],['approved leave duty register',ROOT+'admin-leave.html?v=66.0'],['staff management',ROOT+'admin-staff-management.html?v=66.0'],['office duty schedule',ROOT+'office-duty-schedule.html?v=66.0'],['office duty scheduler',ROOT+'admin-office-duty-scheduler.html?v=66.0'],['teacher s special duty scheduler',ROOT+'admin-teacher-special-duty-scheduler.html?v=66.0'],['printable timetables',ROOT+'admin-print-master.html?v=66.0'],['current master overview',ROOT+'admin-master-overview.html?v=66.0']]);function targetFor(el){const t=norm(el.textContent);if(/(^| )admin dashboard($| )/.test(t)||t==='return to admin dashboard')return ADMIN;if(t==='home'||t==='timetable home'||t==='return home'||t==='home reset view'||t==='back to home')return HOME;return ROUTES.get(t)||''}function fix(){document.querySelectorAll('a,button,[role="button"]').forEach(el=>{const target=targetFor(el);if(!target)return;if(el.tagName==='A')el.setAttribute('href',target);el.dataset.vkvRouteTarget=target})}document.addEventListener('click',e=>{const el=e.target.closest('a,button,[role="button"]');if(!el)return;const target=el.dataset.vkvRouteTarget||targetFor(el);if(!target)return;e.preventDefault();e.stopImmediatePropagation();location.href=target},true);fix();new MutationObserver(fix).observe(document.documentElement,{childList:true,subtree:true});window.__vkvRoutePolicy={root:ROOT,home:HOME,admin:ADMIN,fix};})();
