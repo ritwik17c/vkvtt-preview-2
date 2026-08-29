@@ -4,19 +4,20 @@
 (()=>{'use strict';
 const seg=location.pathname.split('/').filter(Boolean)[0]||'vkvtt-preview-2';
 const ROOT='/' + seg + '/';
-const HOME=ROOT;
-const ADMIN=ROOT+'admin-dashboard.html';
+const HOME=ROOT+'?v=66.0';
+const ADMIN=ROOT+'admin-dashboard.html?v=66.0';
 const norm=s=>String(s||'').replace(/[^A-Za-z0-9]+/g,' ').replace(/\s+/g,' ').trim().toLowerCase();
 const ROUTES=new Map([
- ['my attendance',ROOT+'attendance.html'],
- ['annual calendar',ROOT+'annual-calendar-2026-27.html'],
- ['question bank paper builder',ROOT+'qb-module.html'],
- ['leave manager',ROOT+'leave-manager.html'],
- ['staff management',ROOT+'admin-staff-management.html'],
- ['office duty scheduler',ROOT+'admin-office-duty-scheduler.html'],
- ['teacher s special duty scheduler',ROOT+'admin-teacher-special-duty-scheduler.html'],
- ['printable timetables',ROOT+'admin-print-master.html'],
- ['current master overview',ROOT+'admin-master-overview.html']
+ ['my attendance',ROOT+'attendance.html?v=66.0'],
+ ['annual calendar',ROOT+'annual-calendar-2026-27.html?v=66.0'],
+ ['question bank paper builder',ROOT+'qb-module.html?v=66.0'],
+ ['leave manager',ROOT+'leave-manager.html?v=66.0'],
+ ['staff management',ROOT+'admin-staff-management.html?v=66.0'],
+ ['office duty schedule',ROOT+'office-duty-schedule.html?v=66.0'],
+ ['office duty scheduler',ROOT+'admin-office-duty-scheduler.html?v=66.0'],
+ ['teacher s special duty scheduler',ROOT+'admin-teacher-special-duty-scheduler.html?v=66.0'],
+ ['printable timetables',ROOT+'admin-print-master.html?v=66.0'],
+ ['current master overview',ROOT+'admin-master-overview.html?v=66.0']
 ]);
 function targetFor(el){
  const t=norm(el.textContent);
@@ -24,19 +25,7 @@ function targetFor(el){
  if(t==='home'||t==='timetable home'||t==='return home'||t==='home reset view'||t==='back to home')return HOME;
  return ROUTES.get(t)||'';
 }
-function fix(){
- document.querySelectorAll('a,button,[role="button"]').forEach(el=>{
-   const target=targetFor(el);if(!target)return;
-   if(el.tagName==='A')el.setAttribute('href',target);
-   el.dataset.vkvRouteTarget=target;
- });
-}
-document.addEventListener('click',e=>{
- const el=e.target.closest('a,button,[role="button"]');if(!el)return;
- const target=el.dataset.vkvRouteTarget||targetFor(el);if(!target)return;
- e.preventDefault();e.stopImmediatePropagation();location.href=target;
-},true);
-fix();
-new MutationObserver(fix).observe(document.documentElement,{childList:true,subtree:true});
-window.__vkvRoutePolicy={root:ROOT,home:HOME,admin:ADMIN,fix};
+function fix(){document.querySelectorAll('a,button,[role="button"]').forEach(el=>{const target=targetFor(el);if(!target)return;if(el.tagName==='A')el.setAttribute('href',target);el.dataset.vkvRouteTarget=target})}
+document.addEventListener('click',e=>{const el=e.target.closest('a,button,[role="button"]');if(!el)return;const target=el.dataset.vkvRouteTarget||targetFor(el);if(!target)return;e.preventDefault();e.stopImmediatePropagation();location.href=target},true);
+fix();new MutationObserver(fix).observe(document.documentElement,{childList:true,subtree:true});window.__vkvRoutePolicy={root:ROOT,home:HOME,admin:ADMIN,fix};
 })();
