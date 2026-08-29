@@ -1,17 +1,28 @@
 /* VKVTT Preview 2 · single navigation policy.
-   Purpose: inherited Preview1 pages may keep Preview1 <base>. This policy owns user-facing Home/Admin return routes.
-   It is environment-derived so the same file can move to production later without hard-coding Preview2. */
+   One owner for user-facing navigation. Inherited Preview1 <base> is never allowed to pull users out of the current app.
+   ROOT is derived from the current deployment path, so this policy can move to production unchanged. */
 (()=>{'use strict';
 const seg=location.pathname.split('/').filter(Boolean)[0]||'vkvtt-preview-2';
 const ROOT='/' + seg + '/';
 const HOME=ROOT;
 const ADMIN=ROOT+'admin-dashboard.html';
 const norm=s=>String(s||'').replace(/[^A-Za-z0-9]+/g,' ').replace(/\s+/g,' ').trim().toLowerCase();
+const ROUTES=new Map([
+ ['my attendance',ROOT+'attendance.html'],
+ ['annual calendar',ROOT+'annual-calendar-2026-27.html'],
+ ['question bank paper builder',ROOT+'qb-module.html'],
+ ['leave manager',ROOT+'leave-manager.html'],
+ ['staff management',ROOT+'admin-staff-management.html'],
+ ['office duty scheduler',ROOT+'admin-office-duty-scheduler.html'],
+ ['teacher s special duty scheduler',ROOT+'admin-teacher-special-duty-scheduler.html'],
+ ['printable timetables',ROOT+'admin-print-master.html'],
+ ['current master overview',ROOT+'admin-master-overview.html']
+]);
 function targetFor(el){
  const t=norm(el.textContent);
  if(/(^| )admin dashboard($| )/.test(t)||t==='return to admin dashboard')return ADMIN;
  if(t==='home'||t==='timetable home'||t==='return home'||t==='home reset view'||t==='back to home')return HOME;
- return '';
+ return ROUTES.get(t)||'';
 }
 function fix(){
  document.querySelectorAll('a,button,[role="button"]').forEach(el=>{
