@@ -1,0 +1,9 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>VKVTT Preview 2 · Export Master Timetable</title></head><body><div style="font:16px system-ui;padding:24px">Loading Export Master Timetable…</div><script>(async()=>{try{let h=await (await fetch('https://raw.githubusercontent.com/ritwik17c/vkvtt-preview/main/admin-export.html?p2-export=1',{cache:'no-store'})).text();
+// The Preview1 export source contains a literal </script> inside the print-view template.
+// HTML parsers terminate the surrounding module script at that token, exposing the remaining JS as page text.
+// The print helper script is non-essential, so remove it before rendering the Preview2 page.
+h=h.replace(/\s*<script src="v66-final-sixpoint\.js\?v=66\.2-final-1" defer><\/script>/g,'');
+h=h.replace('<head>','<head><base href="https://ritwik17c.github.io/vkvtt-preview/">');
+h=h.replace('<button id="backAdmin">← Admin Dashboard</button>','<div class="actions"><a class="btn" href="https://ritwik17c.github.io/vkvtt-preview-2/?v=export-fix-1">🏠 Timetable Home</a><button id="backAdmin">← Admin Dashboard</button></div>');
+h=h.replace("$('backAdmin').onclick=()=>location.href='admin-dashboard.html?v=66.0';","$('backAdmin').onclick=()=>location.href='https://ritwik17c.github.io/vkvtt-preview-2/admin-dashboard.html?v=export-fix-1';");
+document.open();document.write(h);document.close()}catch(e){document.body.innerHTML='<div style="font:16px system-ui;padding:24px"><b>Export Master Timetable could not open.</b><br>Please return to the Preview 2 Admin Dashboard and try again.<br><br><a href="https://ritwik17c.github.io/vkvtt-preview-2/admin-dashboard.html?v=export-fix-1">← Admin Dashboard</a> · <a href="https://ritwik17c.github.io/vkvtt-preview-2/?v=export-fix-1">🏠 Timetable Home</a></div>'}})();</script></body></html>
