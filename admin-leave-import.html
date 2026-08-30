@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>VKV Nalbari · Approved Leave History Import</title>
+<style>
+:root{--ink:#18364e;--deep:#1d638e;--bg:#edf6f1;--line:#cbdce5;--muted:#667b89;--green:#246a35;--greenbg:#e7f6ea;--amber:#785515;--amberbg:#fff6dc;--red:#8b2d2d;--redbg:#fdecec;--bluebg:#eef7fb}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#263d4e;font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif}header{background:var(--deep);color:#fff;padding:18px 16px}.wrap{max-width:1100px;margin:auto}.headline{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}h1{font-size:1.45rem;margin:0}.subtitle{opacity:.92;margin-top:4px}.btn,button,input{font:inherit}.btn,button{font-weight:750;border:1px solid #b9ced9;border-radius:11px;padding:10px 13px;background:#e7f2f7;color:var(--ink);cursor:pointer;text-decoration:none}.btn:hover,button:hover{filter:brightness(.98)}button:disabled{opacity:.55;cursor:not-allowed}.primary{background:var(--deep);color:#fff;border-color:var(--deep)}.green{background:var(--greenbg);color:var(--green);border-color:#a9d4b2}main{padding:18px 14px 60px}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;margin:14px 0;box-shadow:0 4px 16px #17324d0e}h2{margin:0 0 7px;color:var(--ink);font-size:1.18rem}h3{margin:15px 0 7px;color:var(--ink)}.help{font-size:.9rem;line-height:1.55;color:var(--muted)}.box{margin:12px 0;padding:12px 13px;background:var(--bluebg);border-radius:12px;line-height:1.5}.ok{background:var(--greenbg);border:1px solid #a9d4b2;color:var(--green)}.warn{background:var(--amberbg);border:1px solid #e4c873;color:var(--amber)}.error{background:var(--redbg);border:1px solid #e5b7b7;color:var(--red)}.actions{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-top:12px}input[type=file]{padding:10px;border:1px solid #c7d5de;border-radius:10px;background:#fbfefd;max-width:100%}.tablewrap{overflow:auto;margin-top:12px;border:1px solid #dce7ec;border-radius:12px}table{border-collapse:collapse;width:100%;min-width:850px}th,td{border-bottom:1px solid #e4ecef;padding:8px 9px;text-align:left;font-size:.84rem;vertical-align:top}th{background:#edf5f9;color:var(--ink);position:sticky;top:0}tr:last-child td{border-bottom:0}.badge{display:inline-block;padding:3px 8px;border-radius:999px;font-size:.75rem;font-weight:800}.ready{background:#e7f6ea;color:#246a35}.warning{background:#fff6dc;color:#785515}.duplicate{background:#eef1f3;color:#5d6870}.invalid{background:#fdecec;color:#8b2d2d}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}.metric{background:#f6fafc;border:1px solid #dde8ed;border-radius:12px;padding:11px}.metric b{display:block;font-size:1.3rem;color:var(--deep)}.metric span{font-size:.78rem;color:var(--muted)}.uid{font-family:ui-monospace,Consolas,monospace;word-break:break-all}.divider{height:1px;background:#e3ecef;margin:20px 0}.small{font-size:.8rem;color:var(--muted)}.importTop{position:sticky;top:8px;z-index:20;background:#fff;border:1px solid #bcd5e1;border-radius:13px;padding:10px 12px;box-shadow:0 5px 16px #17324d18;margin:10px 0}
+.reviewGroup{border:1px solid #d5e2e8;background:#fbfdfe;border-radius:16px;padding:14px;margin:12px 0}
+.reviewGroupHead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}.reviewGroupHead h3{margin:0;font-size:1rem}
+.sourceCompare{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.sourcePane{border:1px solid #dfe9ee;background:#fff;border-radius:11px;padding:10px}.sourcePane b{display:block;margin-bottom:5px;color:var(--ink)}.sourceLine{font-size:.8rem;line-height:1.45;color:#526a78}
+.reviewCard{border:1px solid #e4c873;background:#fffdf5;border-radius:12px;padding:12px;margin:10px 0}.reviewGrid{display:grid;grid-template-columns:repeat(4,minmax(130px,1fr));gap:8px;margin-top:10px}.reviewGrid label{font-size:.76rem;font-weight:750;color:var(--muted)}.reviewGrid input,.reviewGrid select{width:100%;margin-top:4px;padding:8px;border:1px solid #c7d5de;border-radius:8px;background:#fff}.reviewActions,.groupActions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.reviewActions button,.groupActions button{padding:7px 9px;font-size:.82rem}.resolved{background:#e7f6ea;border-color:#a9d4b2}.excluded{background:#f3f5f6;border-color:#d4dde1}
+.reconcile{border:1px solid #bcd5e1;background:#f5fbfe;border-radius:14px;padding:12px;margin:12px 0}.reconcileGrid{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-top:8px}.reconcileGrid div{background:#fff;border:1px solid #dce7ec;border-radius:10px;padding:8px}.reconcileGrid b{display:block;font-size:1.05rem;color:var(--deep)}.reconcileGrid span{font-size:.72rem;color:var(--muted)}
+.assistToolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:12px 0;padding:10px;border:1px solid #d7e5eb;border-radius:12px;background:#f9fcfd}
+.assistToolbar input{min-width:220px;padding:8px 10px;border:1px solid #c7d5de;border-radius:9px;background:#fff}.filterBtn.active{background:var(--deep);color:#fff;border-color:var(--deep)}
+details.reviewGroup>summary{list-style:none;cursor:pointer}.reviewGroup>summary::-webkit-details-marker{display:none}.reviewGroupSummary{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}.reviewGroupSummary:after{content:'▸';font-size:1.05rem;color:var(--deep);font-weight:900}.reviewGroup[open]>.reviewGroupSummary:after{content:'▾'}.reviewGroupBody{padding-top:8px}
+.assistBox{border:1px solid #b8d8e8;background:#eef8fd;border-radius:11px;padding:10px;margin:10px 0}.assistBox strong{color:var(--deep)}.confidence{font-size:.72rem;font-weight:800;border-radius:999px;padding:2px 7px;margin-left:5px}.confHigh{background:#e7f6ea;color:#246a35}.confMed{background:#fff6dc;color:#785515}
+.dateAlloc{margin-top:9px;border-top:1px dashed #cbdce5;padding-top:9px}.dateAllocRow{display:grid;grid-template-columns:130px minmax(180px,1fr);gap:8px;align-items:center;margin:6px 0}.dateAllocRow select{padding:7px;border:1px solid #c7d5de;border-radius:8px;background:#fff}.halfChips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.halfChip{padding:6px 9px;font-size:.78rem}.halfChip.selected{background:var(--deep);color:#fff;border-color:var(--deep)}
+.problemTag{display:inline-block;padding:3px 7px;border:1px solid #d6e3e9;border-radius:999px;background:#fff;margin:2px 3px 2px 0;font-size:.72rem;color:#526a78}
+.auditBox{border:1px solid #9dcbb0;background:#f0fbf3;border-radius:12px;padding:11px;margin:10px 0}.auditHead{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}.auditHead strong{color:var(--green)}.auditRows{margin-top:8px;border-top:1px solid #cfe6d6}.auditRow{display:grid;grid-template-columns:120px 1fr 100px 90px;gap:8px;padding:7px 0;border-bottom:1px solid #dcefe2;font-size:.8rem;align-items:center}.auditRow:last-child{border-bottom:0}.auditMeta{font-size:.76rem;color:#557064;line-height:1.45;margin-top:7px}.auditSummary{margin-top:10px;border:1px solid #cfe2d5;background:#fff;border-radius:10px;padding:8px 10px}.auditSummary summary{cursor:pointer;font-weight:800;color:var(--green)}.auditList{margin:7px 0 0;padding-left:18px;font-size:.8rem;color:#4d6658;line-height:1.5}.progressNote{margin-top:8px;font-size:.76rem;color:#557064}
+
+@media(max-width:760px){.auditRow{grid-template-columns:1fr 1fr}.reviewGrid{grid-template-columns:1fr 1fr}.sourceCompare{grid-template-columns:1fr}.reconcileGrid{grid-template-columns:repeat(2,1fr)}.dateAllocRow{grid-template-columns:1fr}.assistToolbar input{min-width:100%;width:100%}}.importTop .actions{margin-top:0}
+@media(max-width:700px){.metrics{grid-template-columns:1fr 1fr}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+(function(){
+  const CURRENT_APP_VERSION = '66.0';
+  try{
+    const u=new URL(window.location.href);
+    if(u.searchParams.get('v')!==CURRENT_APP_VERSION){
+      u.searchParams.set('v',CURRENT_APP_VERSION);
+      history.replaceState(null,'',u.pathname+u.search+u.hash);
+    }
+  }catch(_){}
+})();
+</script>
+
+<link rel="stylesheet" href="v66-design-system.css?v=66.0-school-identity-1"><script src="v66-ui.js?v=66.0-school-identity-1" defer></script>
+<link rel="stylesheet" href="v66-final-sixpoint.css?v=66.2-final-1">
+<link rel="stylesheet" href="v66-premium-unified.css?v=66.2-premium-1">
+</head>
+<body>
+<header><div class="wrap headline"><div><h1>VKV Nalbari Timetable</h1><div class="subtitle">Admin Dashboard → Approved Leave History Import · Cloud v66.0</div></div><a class="btn" href="admin-dashboard.html?v=66.0">← Admin Dashboard</a></div></header>
+<main class="wrap">
+<div id="status" class="box">Checking sign-in…</div>
+<div id="tools" hidden>
+<section class="card" id="leaveImport">
+    <div class="box ok"><b>Leave history only.</b> This page accepts Excel leave records only and cannot replace or modify the Master Timetable.</div>
+    <h2>🗓 Import Approved Leave / OD / Special from Excel</h2>
+    <p class="help"><b>For approved school records.</b> You may upload either the app’s clean import template or the existing VKV leave-statement workbook (for example <b>Leave_record_2026-27.xlsx</b>). Past, present and future approved records within Session 2026–27 can be imported. The app first previews and validates every record; nothing is saved until you confirm.</p>
+    <div class="actions">
+      <button id="downloadTemplate" class="green">⬇ Download Excel Template</button>
+      <input id="leaveFile" type="file" accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel">
+      <button id="clearLeaveFile">Clear</button>
+      <button id="downloadErrors" hidden>⬇ Error Report</button>
+    </div>
+    <div class="small" style="margin-top:8px">Template format: preferred sheet name <b>Past_Leave_History</b>. Existing VKV leave-statement format: month blocks with FROM / TO / VL / EL / CL / SEL / EOL / Maternity Leave are detected automatically. Teacher Code is matched first; legacy teacher names are matched carefully against the master roster.</div>
+    <div id="leaveSummary" class="box">Select a completed Excel file to preview it. Nothing is saved until you confirm the import.</div>
+    <div id="legacyNotes" class="box" hidden></div>
+    <div id="topImportBar" class="importTop" hidden><div class="actions"><button id="importHistory" class="primary" disabled>✅ Confirm Import</button><span id="importSafetyText" class="small">Preview the file first.</span></div></div>
+    <div id="metrics" class="metrics" hidden>
+      <div class="metric"><b id="mRows">0</b><span>Rows read</span></div>
+      <div class="metric"><b id="mReady">0</b><span>Ready to import</span></div>
+      <div class="metric"><b id="mDup">0</b><span>Duplicates skipped</span></div>
+      <div class="metric"><b id="mErr">0</b><span>Need correction</span></div><div class="metric"><b id="mAccounting">0</b><span>Accounting only</span></div>
+    </div>
+    <div id="previewWrap" class="tablewrap" hidden><table><thead><tr><th>Row</th><th>Teacher</th><th>Status</th><th>Leave Category</th><th>Leave Days</th><th>Date(s)</th><th>Duration</th><th>Remarks / Ref.</th><th>Check</th></tr></thead><tbody id="previewBody"></tbody></table></div>
+    <section id="reviewSection" class="card" hidden style="margin-top:18px">
+      <h2>🧭 Assisted Legacy Leave Resolution Workspace</h2>
+      <p class="help">Related legacy errors are grouped by <b>teacher + month + source row</b>. Compare the stored workbook information with the app’s interpretation, then resolve each category without editing the original Excel file.</p>
+      <div class="box warn"><b>No guessing.</b> The app revalidates every correction. You may correct a record, retain it as non-dated legacy accounting, or explicitly exclude it. Final import remains blocked while any unresolved item remains.</div>
+      <div id="reconcileBox" class="reconcile"></div>
+      <div class="assistToolbar" id="assistToolbar">
+        <b>Show:</b>
+        <button class="filterBtn active" data-filter="all">All</button>
+        <button class="filterBtn" data-filter="date-mismatch">Date mismatch</button>
+        <button class="filterBtn" data-filter="multi-category">Multiple categories</button>
+        <button class="filterBtn" data-filter="half-day">Half-day ambiguity</button>
+        <button class="filterBtn" data-filter="invalid-year">Invalid / suspicious year</button>
+        <button class="filterBtn" data-filter="outside-session">Outside session</button>
+        <input id="reviewSearch" type="search" placeholder="Search teacher, month or row…">
+      </div>
+      <div id="reviewList"></div>
+    </section>
+    <div id="accountingWrap" class="tablewrap" hidden>
+      <table><thead><tr><th>Teacher</th><th>Month</th><th>Category</th><th>Units</th><th>Why it is separate</th><th>Source Row</th></tr></thead><tbody id="accountingBody"></tbody></table>
+    </div>
+    <div id="importResult"></div>
+  </section>
+</div>
+</main>
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+import{getAuth,GoogleAuthProvider,signInWithPopup,onAuthStateChanged,setPersistence,browserLocalPersistence}from"https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+import{getFirestore,doc,getDoc,getDocs,collection,setDoc,serverTimestamp,writeBatch}from"https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore-lite.js";
+
+const cfg={apiKey:"AIzaSyDheZpyXghd1aQ9_RLhwpacVriG__wNZW4",authDomain:"vkv-nalbari-timetable.firebaseapp.com",projectId:"vkv-nalbari-timetable",storageBucket:"vkv-nalbari-timetable.firebasestorage.app",messagingSenderId:"791432856951",appId:"1:791432856951:web:61324065a54bef30f98d72"};
+const app=initializeApp(cfg),auth=getAuth(app),db=getFirestore(app);
+await setPersistence(auth,browserLocalPersistence).catch(()=>{});
+if(typeof auth.authStateReady==='function')await auth.authStateReady().catch(()=>{});
+const $=id=>document.getElementById(id),status=$('status'),tools=$('tools');
+let user=null,master=null,masterWrapped=false,leavePreview=[],existingPlans={},legacyImportNotes=[],legacyAccountingPreview=[],existingLegacyAccounting=[],linkedEmailsByCode={},reviewResolutions={},activeReviewFilter='all',reviewSearchTerm='',halfSelections={},reviewStorageKey='';
+const SESSION_START='2026-04-01',SESSION_END='2027-03-31';
+const LEAVE_PLAN_DOC='__leavePlans';
+const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm=x=>String(x??'').trim().toLowerCase().replace(/\s+/g,' ');
+const todayKey=()=>{const d=new Date(),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`};
+
+async function verifyAdmin(u){
+ user=u;status.className='box';status.textContent='Checking Admin access…';
+ try{
+  const p=await getDoc(doc(db,'authorizedUsers',u.uid));
+  if(!p.exists()||p.data().active!==true||p.data().role!=='admin'){
+    status.className='box warn';status.innerHTML='<b>Admin access required.</b><br>Email: '+esc(u.email)+'<br>UID: <span class="uid">'+esc(u.uid)+'</span>';return;
+  }
+  const ms=await getDoc(doc(db,'master','current'));
+  if(!ms.exists())throw new Error('Master timetable is not available.');
+  const raw=ms.data();masterWrapped=!!raw.data;master=raw.data||raw;master.teacherEmailMap=master.teacherEmailMap||{};
+  linkedEmailsByCode={};for(const [code,email] of Object.entries(master.teacherEmailMap||{}))if(email)linkedEmailsByCode[String(code)]=norm(email);
+  try{const viewers=await getDocs(collection(db,'viewerEmails'));viewers.forEach(d=>{const x=d.data()||{};if(x.active!==false&&x.teacherCode)linkedEmailsByCode[String(x.teacherCode)]=norm(d.id)})}catch(e){console.warn('Viewer email mapping:',e)}
+  const lp=await getDoc(doc(db,'dailyRecords',LEAVE_PLAN_DOC));existingPlans=lp.exists()?(lp.data().plans||{}):{};
+  try{const la=await getDocs(collection(db,'legacyLeaveAccounting'));existingLegacyAccounting=[];la.forEach(d=>existingLegacyAccounting.push({id:d.id,...(d.data()||{})}));}catch(e){console.warn('Legacy accounting mapping:',e);existingLegacyAccounting=[]}
+  status.className='box ok';status.textContent='Admin verified: '+(u.displayName||u.email);tools.hidden=false;
+ }catch(e){status.className='box error';status.innerHTML='<b>Could not open Approved Leave History Import.</b><br>'+esc(e.message||e);}
+}
+onAuthStateChanged(auth,async u=>{user=u;if(!u){status.innerHTML='You are not signed in. <button id="signin">Sign in with Google</button>';$('signin').onclick=()=>signInWithPopup(auth,new GoogleAuthProvider());return}await verifyAdmin(u)});
+
+// ----- Excel history template -----
+function downloadHistoryTemplate(){
+ if(!window.XLSX){alert('Excel library is still loading. Please try again in a moment.');return}
+ const rows=[['Teacher Code','Teacher Name','Status Type','Leave Category','Leave Days','From Date','To Date','Specific Dates','Duration','From Period','To Period','Remarks','Reference No.'],
+ ['ML','Minu Limboo','Full Leave','CL',2,'15/07/2026','16/07/2026','','','','','Casual leave',''],
+ ['AD1','Anuradha Das','OD','','','05/08/2026','05/08/2026','','Full Day','','','CBSE duty','Order 12/2026'],
+ ['YJS','Yuva Jyoti Sarma','Special Assignment','','','','','10/06/2026, 17/06/2026, 24/06/2026','Custom',2,4,'External programme','']];
+ const wb=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet(rows);XLSX.utils.book_append_sheet(wb,ws,'Past_Leave_History');
+ const ins=XLSX.utils.aoa_to_sheet([
+ ['VKV Nalbari Timetable – Approved Leave / OD / Special Import'],
+ ['Approved records within Session 2026–27 (01/04/2026 to 31/03/2027) are accepted, including approved future leave.'],[],
+ ['Status Type','Full Leave | Half Leave | OD | Special Assignment'],
+ ['Leave Category','Required for leave: VL | EL | CL | SEL | EOL | Maternity Leave'],
+ ['Leave Days','Optional override. If blank, Full Leave = selected date count; Half Leave = 0.5 × selected date count.'],
+ ['Continuous dates','Fill From Date and optional To Date.'],
+ ['Staggered dates','Use Specific Dates instead of From/To; separate dates with commas, semicolons or line breaks.'],
+ ['OD / Special Duration','Full Day | Half Day | Custom. Custom requires From Period and To Period.'],
+ ['Approval','Rows imported by Admin are treated as approved historical school records.'],
+ ['Existing VKV workbook','The old month-wise leave statement can be uploaded directly; the importer reads its FROM / TO and category columns.'],
+ ['Duplicates','Exact dated duplicates are skipped automatically. Legacy accounting items are stored separately and never become dated leave events.'],
+ ['Legacy accounting','Non-dated historical balances are shown separately and are never assigned an invented date.']
+ ]);XLSX.utils.book_append_sheet(wb,ins,'Instructions');
+ const teachers=[['Teacher Code','Teacher Name'],...((master&&master.teachers)||[]).map(t=>[t.code,t.name])];XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(teachers),'Teachers');
+ XLSX.writeFile(wb,'VKV_Approved_Leave_Import_Template.xlsx');
+}
+$('downloadTemplate').onclick=downloadHistoryTemplate;
+
+function dateKeyFromDate(d){if(!(d instanceof Date)||isNaN(d))return'';const p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`}
+function displayDate(k){const m=String(k||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?`${m[3]}/${m[2]}/${m[1]}`:String(k||'')}
+function validDateKey(s){return /^\d{4}-\d{2}-\d{2}$/.test(s)&&!isNaN(new Date(s+'T00:00:00'))}
+function parseDate(v){
+ if(v===null||v===undefined||v==='')return'';
+ if(v instanceof Date)return dateKeyFromDate(v);
+ if(typeof v==='number'&&isFinite(v)){const p=XLSX.SSF.parse_date_code(v);if(p)return `${p.y}-${String(p.m).padStart(2,'0')}-${String(p.d).padStart(2,'0')}`}
+ let s=String(v).trim();if(!s)return'';
+ if(/^\d{4}-\d{1,2}-\d{1,2}$/.test(s)){const [y,m,d]=s.split('-').map(Number);s=`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;return validDateKey(s)?s:''}
+ let m=s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})$/);if(m){s=`${m[3]}-${String(m[2]).padStart(2,'0')}-${String(m[1]).padStart(2,'0')}`;return validDateKey(s)?s:''}
+ const d=new Date(s);return isNaN(d)?'':dateKeyFromDate(d);
+}
+function parseSpecificDates(v){if(v===null||v===undefined||v==='')return[];return [...new Set(String(v).split(/[,;\n]+/).map(x=>parseDate(x.trim())).filter(Boolean))].sort()}
+function statusCode(v){const s=norm(v).replace(/[_-]+/g,' ');if(['full','leave','full leave','full day leave'].includes(s))return'full';if(['half','half leave','half day leave'].includes(s))return'half';if(['od','on duty','on-duty'].includes(s))return'od';if(['special','special assignment','special duty'].includes(s))return'special';return''}
+function statusLabel(t){return t==='full'?'Full Leave':t==='half'?'Half Leave':t==='od'?'OD':t==='special'?'Special Assignment':t}
+const LEAVE_CATEGORY_LABELS={VL:'VL',EL:'EL',CL:'CL',SEL:'SEL',EOL:'EOL',MATERNITY:'Maternity Leave'};
+function leaveCategoryCode(v){let s=norm(v).replace(/[^a-z0-9]+/g,'');if(!s)return'';if(s==='vl'||s.includes('vacation'))return'VL';if(s==='el'||s.includes('earnedleave'))return'EL';if(s==='cl'||s.includes('casual'))return'CL';if(s==='sel'||s.includes('specialearned')||s.includes('sickearned'))return'SEL';if(s==='eol'||s.includes('extraordinary'))return'EOL';if(s.includes('maternity'))return'MATERNITY';return''}
+function leaveCategoryLabel(v){return LEAVE_CATEGORY_LABELS[String(v||'').toUpperCase()]||String(v||'')}
+function numericValue(v){if(v===null||v===undefined||v==='')return 0;if(typeof v==='number'&&isFinite(v))return v;const n=Number(String(v).replace(/[^0-9.\-]/g,''));return isFinite(n)?n:0}
+function durationCode(v){const s=norm(v);if(!s||['full','full day','whole day'].includes(s))return'full';if(['half','half day'].includes(s))return'half';if(['custom','period','periods','custom period'].includes(s))return'custom';return''}
+function dateRangeKeys(start,end){const out=[],a=new Date(start+'T00:00:00'),b=new Date(end+'T00:00:00');for(let d=new Date(a);d<=b;d.setDate(d.getDate()+1))out.push(dateKeyFromDate(d));return out}
+function planDateKeys(p){if(p.mode==='multiple')return [...new Set((p.dates||[]).filter(Boolean))].sort();const s=p.startDate||p.date||'',e=p.endDate||s;return s&&e?dateRangeKeys(s,e):[]}
+function canonicalPlan(p){const ds=planDateKeys(p);return [String(p.code||''),String(p.type||''),String(p.leaveCategory||''),String(Number(p.leaveUnits||0)),ds.join(','),String(p.duration||''),String(p.from??''),String(p.to??'')].join('|')}
+function hashString(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(36)}
+function plansOverlap(a,b){const ad=planDateKeys(a),bd=new Set(planDateKeys(b));return ad.some(d=>bd.has(d))}
+function teacherMatch(code,name){
+ const ts=(master&&master.teachers)||[],c=String(code||'').trim(),n=norm(name);
+ if(c){const t=ts.find(x=>String(x.code)===c);return t?{teacher:t,warning:n&&norm(t.name)!==n?'Teacher Code matched, but Teacher Name differs from the master roster.':''}:{error:'Unknown Teacher Code: '+c}}
+ if(n){const found=ts.filter(x=>norm(x.name)===n);if(found.length===1)return{teacher:found[0]};if(found.length>1)return{error:'Teacher Name is not unique; provide Teacher Code.'};return{error:'Teacher Name not found in master roster.'}}
+ return{error:'Teacher Code or Teacher Name is required.'};
+}
+function linkedEmail(code){return norm(linkedEmailsByCode[String(code)]||'')}
+function rowValue(row,names){for(const n of names){if(Object.prototype.hasOwnProperty.call(row,n))return row[n]}const keys=Object.keys(row);for(const k of keys){if(names.map(norm).includes(norm(k)))return row[k]}return''}
+function dateText(p){const ds=planDateKeys(p);if(p.mode==='multiple')return `${ds.length} selected date${ds.length===1?'':'s'} · ${ds.slice(0,4).map(displayDate).join(', ')}${ds.length>4?' …':''}`;return p.startDate===p.endDate?displayDate(p.startDate):`${displayDate(p.startDate)} → ${displayDate(p.endDate)}`}
+function durationText(p){if(!(p.type==='od'||p.type==='special'))return p.type==='half'?'P5–P8':'—';if(p.duration==='custom')return `P${p.from}–P${p.to}`;if(p.duration==='half')return'Half Day · P5–P8';return'Full Day'}
+
+function canonicalLegacyAccounting(x){return [String(x.teacherCode||x.code||''),String(x.month||''),String(x.category||''),String(Number(x.units||0))].join('|')}
+function legacyAccountingId(x){return `legacy_${String(x.teacherCode||x.code||'')}_${String(x.month||'')}_${String(x.category||'')}_${hashString(canonicalLegacyAccounting(x))}`.replace(/[^A-Za-z0-9_-]/g,'_')}
+function validateHistoryRows(rows){
+ const bySig=new Map(Object.values(existingPlans).filter(Boolean).map(p=>[canonicalPlan(p),p])),seen=new Set(),out=[];const today=todayKey();
+ rows.forEach((r,i)=>{
+  const rowNo=Number(r.__rowNum||i+2);const issues=[],warnings=[];const tm=teacherMatch(rowValue(r,['Teacher Code']),rowValue(r,['Teacher Name']));
+  if(tm.error){issues.push(tm.error);out.push({row:rowNo,state:'error',issues,warnings,raw:r});return}if(tm.warning)warnings.push(tm.warning);const t=tm.teacher;
+  if(r.__legacyAmbiguous)issues.push(String(r.__legacyAmbiguous));
+  const type=statusCode(rowValue(r,['Status Type','Operational Status','Status','Type']));if(!type)issues.push('Status Type must be Full Leave, Half Leave, OD or Special Assignment.');
+  const specific=parseSpecificDates(rowValue(r,['Specific Dates','Selected Dates','Dates'])),from=parseDate(rowValue(r,['From Date','Start Date','Date'])),to=parseDate(rowValue(r,['To Date','End Date']))||from;
+  let mode='',start='',end='',dates=[];
+  if(specific.length){mode='multiple';dates=specific;start=specific[0];end=specific[specific.length-1];if(from)warnings.push('Specific Dates supplied; From/To dates were ignored.');}
+  else if(from){start=from;end=to||from;if(end<start)issues.push('To Date cannot be earlier than From Date.');mode=start===end?'single':'range';dates=start&&end&&end>=start?dateRangeKeys(start,end):[]}
+  else issues.push('Enter From Date or Specific Dates.');
+  if(dates.some(d=>d<SESSION_START||d>SESSION_END))issues.push(`Date is outside Session 2026–27 (${displayDate(SESSION_START)} to ${displayDate(SESSION_END)}).`);
+  if(dates.some(d=>d>=today))warnings.push('Approved current/future record: importing it will also make it available to the operational leave/proxy workflow on the applicable date(s).');
+  let leaveCategory='',leaveUnits=0;
+  if(type==='full'||type==='half'){
+    leaveCategory=leaveCategoryCode(rowValue(r,['Leave Category','Category','Leave Account','Leave Type']));
+    if(!leaveCategory)issues.push('Leave Category is required: VL, EL, CL, SEL, EOL or Maternity Leave.');
+    leaveUnits=numericValue(rowValue(r,['Leave Days','Leave Units','Days']));
+    if(!leaveUnits)leaveUnits=(type==='half'?dates.length*0.5:dates.length);
+    if(!leaveUnits||leaveUnits<=0)issues.push('Leave Days could not be calculated; enter a positive Leave Days value.');
+    leaveUnits=Math.round(leaveUnits*2)/2;
+  }
+  let duration='',fp=0,tp=0;
+  if(type==='od'||type==='special'){
+    duration=durationCode(rowValue(r,['Duration','Duty Duration']));if(!duration)issues.push('Duration must be Full Day, Half Day or Custom for OD / Special Assignment.');
+    if(duration==='half'){fp=5;tp=8}else if(duration==='custom'){fp=Number(rowValue(r,['From Period']));tp=Number(rowValue(r,['To Period']));if(!Number.isInteger(fp)||!Number.isInteger(tp)||fp<1||tp<1||fp>8||tp>8||fp>tp)issues.push('Custom duration needs valid From/To Period numbers (1–8).')}
+  }
+  const note=String(rowValue(r,['Remarks','Remark','Note'])||'').trim(),refNo=String(rowValue(r,['Reference No.','Reference No','Reference','Order No.','Order No'])||'').trim();
+  const plan={code:String(t.code),type,mode,startDate:start,endDate:end,active:true,approved:true,source:'excel-history',createdAtMs:Date.now()};if(mode==='multiple')plan.dates=dates;if(type==='full'||type==='half'){plan.leaveCategory=leaveCategory;plan.leaveUnits=leaveUnits;}if(type==='od'||type==='special'){plan.duration=duration;plan.from=duration==='full'?0:fp;plan.to=duration==='full'?0:tp}if(note)plan.note=note;if(refNo)plan.referenceNo=refNo;
+  if(issues.length){out.push({row:rowNo,state:'error',issues,warnings,teacher:t,plan,raw:r});return}
+  const sig=canonicalPlan(plan);plan.id=`hist_${t.code}_${start}_${hashString(sig)}`;
+  if(bySig.has(sig)||seen.has(sig)){out.push({row:rowNo,state:'duplicate',issues:['Exact duplicate — will be skipped.'],warnings,teacher:t,plan,raw:r});return}
+  seen.add(sig);
+  const overlap=Object.values(existingPlans).find(p=>p&&String(p.code)===String(t.code)&&plansOverlap(p,plan));if(overlap)warnings.push('Overlaps an existing saved status for this teacher.');
+  if(!linkedEmail(t.code))warnings.push('No linked teacher email yet: school history will import; My Area can be synced after linking the email.');
+  out.push({row:rowNo,state:warnings.length?'warning':'ready',issues,warnings,teacher:t,plan,raw:r});
+ });return out;
+}
+
+function reviewKey(x){return `${x.row}|${hashString(JSON.stringify(x.raw||{}))}`}
+function monthFromNote(p){const m=String(p?.note||'').match(/·\s*([A-Z]+)\s*$/i);return m?m[1].toUpperCase():'LEGACY'}
+function resolutionFor(x){return reviewResolutions[reviewKey(x)]||null}
+function reviewStorageId(file){return `vkv_leave_review_v60_1|${file?.name||'leave'}|${Number(file?.size||0)}|${Number(file?.lastModified||0)}`}
+function saveReviewProgress(){if(!reviewStorageKey)return;try{localStorage.setItem(reviewStorageKey,JSON.stringify({version:'60.1',savedAt:Date.now(),reviewResolutions}))}catch(e){console.warn('Could not autosave leave review progress:',e)}}
+function loadReviewProgress(){if(!reviewStorageKey)return 0;try{const saved=JSON.parse(localStorage.getItem(reviewStorageKey)||'null');if(saved&&saved.reviewResolutions&&typeof saved.reviewResolutions==='object'){reviewResolutions=saved.reviewResolutions;return Object.keys(reviewResolutions).length}}catch(e){console.warn('Could not restore leave review progress:',e)}return 0}
+function stampResolution(r){return{...r,acceptedAtMs:Date.now(),acceptedByEmail:user?.email||'',acceptedByName:user?.displayName||''}}
+function saveAndRender(){saveReviewProgress();renderPreview()}
+function auditRowsForResolution(r){if(!r||!resolutionValid(r)||!['correct','split'].includes(r.action))return[];const vals=r.action==='split'?(r.validatedRows||[]):[r.validated];const out=[];for(const v of vals){const p=v?.plan||{};for(const d of planDateKeys(p)){out.push({date:d,status:statusLabel(p.type||''),category:p.leaveCategory?leaveCategoryLabel(p.leaveCategory):'—',units:p.type==='half'?0.5:(p.type==='full'?1:'—'),duration:durationText(p)})}}return out}
+function correctionAuditPayload(x,r){if(!r||!resolutionValid(r)||!['correct','split'].includes(r.action))return null;const p=x.plan||{},rows=auditRowsForResolution(r);return{type:r.assistType||'manual-correction',sourceRow:x.row,sourceMonth:monthFromNote(p),acceptedAtMs:Number(r.acceptedAtMs||0)||Date.now(),acceptedByEmail:r.acceptedByEmail||user?.email||'',acceptedByName:r.acceptedByName||user?.displayName||'',original:{status:statusLabel(p.type||''),category:p.leaveCategory?leaveCategoryLabel(p.leaveCategory):'',leaveUnits:Number(p.leaveUnits||0),dates:planDateKeys(p)},correctedRows:rows}}
+function correctionAuditLine(x,r){const a=correctionAuditPayload(x,r);if(!a)return'';const who=x.teacher?.name||x.plan?.code||'Teacher',rows=a.correctedRows.map(q=>`${displayDate(q.date)} — ${q.status}${q.category&&q.category!=='—'?` — ${q.category}`:''}${q.units!=='—'?` — ${q.units} day${Number(q.units)===1?'':'s'}`:''}${q.status==='Half Leave'?` — ${q.duration}`:''}`).join('; ');return`${who} · ${a.sourceMonth} · row ${a.sourceRow}: ${rows}`}
+function correctionAuditHtml(x,r){const a=correctionAuditPayload(x,r);if(!a)return'';const actor=esc(a.acceptedByName||a.acceptedByEmail||'Admin'),rows=a.correctedRows.map(q=>`<div class="auditRow"><b>${esc(displayDate(q.date))}</b><span>${esc(q.status)}${q.status==='Half Leave'?` · ${esc(q.duration)}`:''}</span><span>${esc(q.category||'—')}</span><span>${q.units==='—'?'—':`${esc(q.units)} day${Number(q.units)===1?'':'s'}`}</span></div>`).join('');const op=a.original||{},origDates=(op.dates||[]).map(displayDate).join(', ')||'—';return`<div class="auditBox"><div class="auditHead"><strong>✓ Corrected interpretation</strong><span class="badge ready">Correction accepted by Admin</span></div><div class="auditRows">${rows}</div><div class="auditMeta"><b>Original source:</b> ${esc(op.status||'—')}${op.category?` · ${esc(op.category)}`:''}${op.leaveUnits?` · ${esc(op.leaveUnits)} day${Number(op.leaveUnits)===1?'':'s'}`:''} · ${esc(origDates)} · Source row ${esc(a.sourceRow)}<br><b>Accepted by:</b> ${actor}</div></div>`}
+function finalCorrectionAuditLines(){return leavePreview.map(x=>({x,r:resolutionFor(x)})).filter(z=>z.r&&resolutionValid(z.r)&&['correct','split'].includes(z.r.action)).map(z=>correctionAuditLine(z.x,z.r)).filter(Boolean)}
+function effectivePreview(){
+ const out=[];
+ for(const x of leavePreview){
+   const r=resolutionFor(x);
+   if(!r){out.push(x);continue}
+   if(r.action==='exclude'){out.push({...x,state:'excluded',issues:['Explicitly excluded by Admin during import review.'],warnings:[]});continue}
+   if(r.action==='legacy'){out.push({...x,state:'accounting',issues:['Retained as non-dated legacy accounting by Admin during import review.'],warnings:[]});continue}
+   if(r.action==='split'&&Array.isArray(r.validatedRows)){const audit=correctionAuditPayload(x,r);for(const v of r.validatedRows){out.push({...v,plan:{...(v.plan||{}),correctionAudit:audit},resolutionApplied:true,sourceReviewKey:reviewKey(x),correctionAudit:audit})}continue}
+   if(r.action==='correct'&&r.validated){const audit=correctionAuditPayload(x,r);out.push({...r.validated,plan:{...(r.validated.plan||{}),correctionAudit:audit},resolutionApplied:true,sourceReviewKey:reviewKey(x),correctionAudit:audit});continue}
+   out.push(x);
+ }
+ return out;
+}
+function correctedRawFromCard(x,card){
+ const raw={...(x.raw||{})};
+ const q=sel=>card.querySelector(sel)?.value??'';
+ raw['Status Type']=q('[data-f=status]');
+ raw['Leave Category']=q('[data-f=category]');
+ raw['Leave Days']=q('[data-f=days]');
+ raw['From Date']=parseDate(q('[data-f=from]'));
+ raw['To Date']=parseDate(q('[data-f=to]'));
+ raw['Specific Dates']=q('[data-f=dates]');
+ raw['Remarks']=q('[data-f=remarks]');
+ delete raw.__legacyAmbiguous;
+ return raw;
+}
+
+function daysBetween(a,b){if(!a||!b)return 0;const x=new Date(a+'T00:00:00'),y=new Date(b+'T00:00:00');return Math.round((y-x)/86400000)+1}
+function rawDateTokenToParts(v){const s=String(v||'').trim(),m=s.match(/^(\d{1,2})[\/\.\-](\d{1,2})[\/\.\-](\d{2}|\d{4})$/);if(!m)return null;return{raw:s,a:Number(m[1]),b:Number(m[2]),y:Number(m[3]),yearText:m[3]}}
+function correctedLegacyToken(v,monthName,targetYear=2026){const x=rawDateTokenToParts(v);if(!x)return'';const expected=LEGACY_MONTHS[monthName]||0;let day=0,mon=0;if(x.b===expected){day=x.a;mon=x.b}else if(x.a===expected){day=x.b;mon=x.a}else return'';const k=`${targetYear}-${String(mon).padStart(2,'0')}-${String(day).padStart(2,'0')}`;return validDateKey(k)?k:''}
+function groupIssueTypes(group){const issues=group.items.flatMap(x=>x.issues||[]).join(' | ').toLowerCase(),types=new Set();if(issues.includes('do not match the reliably identified date count'))types.add('date-mismatch');if(issues.includes('multiple leave categories'))types.add('multi-category');if(issues.includes('outside session'))types.add('outside-session');const meta=sourceMeta(group.items[0]),raw=(meta.rawDatePairs||[]).flatMap(x=>[x.from,x.to]).join(' ');if(/(?:^|\D)0\d{3}(?:\D|$)/.test(raw)||/\b(?:2025|2027)\b/.test(raw))types.add('invalid-year');if(group.items.some(x=>{const p=x.plan||{},ds=planDateKeys(p);return Number(p.leaveUnits||0)%1===.5&&ds.length===Math.ceil(Number(p.leaveUnits||0))}))types.add('half-day');return[...types]}
+function suspiciousRangesFromMeta(meta){const out=[];for(const pair of meta.rawDatePairs||[]){const f=legacyDateInMonth(pair.from,meta.month),t=legacyDateInMonth(pair.to,meta.month);if(f&&t&&t>=f){const n=daysBetween(f,t);if(n>62)out.push({from:f,to:t,days:n})}}return out}
+function suggestedYearRepair(group){const meta=sourceMeta(group.items[0]),pairs=meta.rawDatePairs||[],fixed=[];let confidence='';let reason='';for(const pair of pairs){for(const key of ['from','to']){const tok=rawDateTokenToParts(pair[key]);if(!tok)continue;let target=null;if(tok.yearText.length===4&&tok.y<1000){target=2026;confidence='high';reason='Malformed four-digit year detected.'}else if([2025,2027].includes(tok.y)){target=2026;if(confidence!=='high')confidence='medium';reason=reason||'Date year falls immediately outside the 2026–27 session; verify whether the intended year was 2026.'}if(target){const k=correctedLegacyToken(pair[key],meta.month,target);if(k)fixed.push(k)}else{const k=legacyDateInMonth(pair[key],meta.month);if(k)fixed.push(k)}}}const dates=[...new Set(fixed)].sort();if(!dates.length)return null;const original=[...new Set(group.items.flatMap(x=>planDateKeys(x.plan||{})))].sort();if(dates.join(',')===original.join(','))return null;return{dates,confidence:confidence||'medium',reason}}
+function halfDayAssist(x){const p=x.plan||{},ds=planDateKeys(p),u=Number(p.leaveUnits||0);if(!ds.length||u%1!==.5||ds.length!==Math.ceil(u)||Math.abs(u-(ds.length-.5))>.001)return null;return{dates:ds,fullCount:ds.length-1,halfCount:1}}
+function multiCategoryAssist(group){const meta=sourceMeta(group.items[0]),dates=[...new Set(group.items.flatMap(x=>sourceMeta(x).interpretedDates||planDateKeys(x.plan||{})))].sort(),cats=group.items.map(x=>({x,cat:x.plan?.leaveCategory||'',units:Number(x.plan?.leaveUnits||0)}));if(cats.length<2||!dates.length||cats.some(c=>!Number.isInteger(c.units)||c.units<=0))return null;const sum=cats.reduce((a,c)=>a+c.units,0);if(sum!==dates.length)return null;return{dates,cats}}
+function resolutionValid(r){if(!r)return false;if(r.action==='correct')return !!(r.validated&&r.validated.state!=='error');if(r.action==='split')return !!(Array.isArray(r.validatedRows)&&r.validatedRows.length&&r.validatedRows.every(v=>v.state!=='error'));return r.action==='legacy'||r.action==='exclude'}
+function applyCorrectedDatesToItem(x,dates){const raw={...(x.raw||{})};raw['Specific Dates']=dates.map(displayDate).join(', ');raw['From Date']='';raw['To Date']='';delete raw.__legacyAmbiguous;return validateHistoryRows([raw])[0]}
+function applyYearSuggestion(group,suggestion){if(!suggestion)return;const items=group.items;if(items.length!==1){alert('This suggested year repair is available only for a single-category group. Resolve the category allocation first.');return}const x=items[0],v=applyCorrectedDatesToItem(x,suggestion.dates);reviewResolutions[reviewKey(x)]=stampResolution({action:'correct',validated:v,assisted:true,assistType:'year-repair'});saveAndRender()}
+function applyHalfSplit(x,halfDate){const a=halfDayAssist(x);if(!a||!a.dates.includes(halfDate))return;const fullDates=a.dates.filter(d=>d!==halfDate),base={...(x.raw||{})},rows=[];if(fullDates.length){const r={...base,'Status Type':'Full Leave','Leave Days':fullDates.length,'Specific Dates':fullDates.map(displayDate).join(', '),'From Date':'','To Date':''};delete r.__legacyAmbiguous;rows.push(validateHistoryRows([r])[0])}const h={...base,'Status Type':'Half Leave','Leave Days':0.5,'Specific Dates':displayDate(halfDate),'From Date':'','To Date':''};delete h.__legacyAmbiguous;rows.push(validateHistoryRows([h])[0]);reviewResolutions[reviewKey(x)]=stampResolution({action:'split',validatedRows:rows,assisted:true,assistType:'half-day',halfDate});saveAndRender()}
+function applyCategoryAllocation(group,groupEl){const assist=multiCategoryAssist(group);if(!assist)return;const assignments={};for(const sel of groupEl.querySelectorAll('[data-alloc-date]')){if(!sel.value){alert('Assign every displayed date to a leave category before applying the allocation.');return}assignments[sel.dataset.allocDate]=sel.value}for(const c of assist.cats){const ds=assist.dates.filter(d=>assignments[d]===c.cat);if(ds.length!==c.units){alert(`${leaveCategoryLabel(c.cat)} needs ${c.units} date${c.units===1?'':'s'}, but ${ds.length} ${ds.length===1?'is':'are'} assigned.`);return}}for(const c of assist.cats){const ds=assist.dates.filter(d=>assignments[d]===c.cat),v=applyCorrectedDatesToItem(c.x,ds);reviewResolutions[reviewKey(c.x)]=stampResolution({action:'correct',validated:v,assisted:true,assistType:'category-allocation'})}saveAndRender()}
+
+function sourceMeta(x){
+ const raw=x.raw||{},p=x.plan||{},month=monthFromNote(p);let meta={month,sourceRow:x.row,categories:[],rawDatePairs:[],interpretedDates:[]};
+ try{if(raw.__legacySourceJSON)meta={...meta,...JSON.parse(raw.__legacySourceJSON)}}catch(e){}
+ if(!meta.categories?.length&&p.leaveCategory)meta.categories=[{category:p.leaveCategory,units:p.leaveUnits||''}];
+ if(!meta.interpretedDates?.length&&p.startDate)meta.interpretedDates=planDateKeys(p);return meta;
+}
+function reviewGroupKey(x){const m=sourceMeta(x);return `${x.teacher?.code||'UNKNOWN'}|${m.month||'LEGACY'}|${x.row}`}
+function groupedErrors(){const groups=new Map();for(const x of leavePreview.filter(x=>x.state==='error')){const k=reviewGroupKey(x);if(!groups.has(k))groups.set(k,{key:k,teacher:x.teacher,row:x.row,month:sourceMeta(x).month,items:[]});groups.get(k).items.push(x)}return[...groups.values()]}
+function groupResolutionStats(group){let unresolved=0,corrected=0,accounting=0,excluded=0;for(const x of group.items){const r=resolutionFor(x);if(!r)unresolved++;else if((r.action==='correct'||r.action==='split')&&resolutionValid(r))corrected++;else if(r.action==='legacy')accounting++;else if(r.action==='exclude')excluded++;else unresolved++}return{unresolved,corrected,accounting,excluded}}
+function resolutionSummary(){const e=effectivePreview();return{ready:e.filter(x=>x.state==='ready'||x.state==='warning').length,duplicate:e.filter(x=>x.state==='duplicate').length,unresolved:leavePreview.filter(x=>x.state==='error'&&!resolutionValid(resolutionFor(x))).length,accounting:legacyAccountingPreview.length+leavePreview.filter(x=>resolutionFor(x)?.action==='legacy').length,excluded:leavePreview.filter(x=>resolutionFor(x)?.action==='exclude').length,corrected:leavePreview.filter(x=>['correct','split'].includes(resolutionFor(x)?.action)&&resolutionValid(resolutionFor(x))).length}}
+function renderReconciliation(){const r=resolutionSummary(),auditLines=finalCorrectionAuditLines(),auditUi=auditLines.length?`<details class="auditSummary"><summary>✓ Review ${auditLines.length} accepted correction${auditLines.length===1?'':'s'} with exact date allocation</summary><ol class="auditList">${auditLines.map(x=>`<li>${esc(x)}</li>`).join('')}</ol></details>`:'';$('reconcileBox').innerHTML=`<b>Import Reconciliation Summary</b><div class="reconcileGrid"><div><b>${r.ready}</b><span>Dated ready</span></div><div><b>${r.corrected}</b><span>Corrected</span></div><div><b>${r.accounting}</b><span>Accounting only</span></div><div><b>${r.excluded}</b><span>Excluded</span></div><div><b>${r.duplicate}</b><span>Duplicates</span></div><div><b>${r.unresolved}</b><span>Unresolved</span></div></div><div class="${r.unresolved?'small':'box ok'}" style="margin-top:8px">${r.unresolved?`Final import remains blocked until ${r.unresolved} unresolved item${r.unresolved===1?' is':'s are'} resolved.`:'All error items have an explicit resolution. Review the final totals and correction audit before confirming the import.'}</div>${auditUi}<div class="progressNote">Review decisions made in v61.0 are autosaved in this browser for this workbook, so an accidental refresh will not normally lose your correction work.</div>`}
+function childReviewCard(x){const p=x.plan||{},r=resolutionFor(x),cls=r?.action==='exclude'?' excluded':r?.action?' resolved':'',stateText=(r?.action==='correct'||r?.action==='split')?(resolutionValid(r)?'Corrected & revalidated':'Correction still has errors'):r?.action==='legacy'?'Legacy accounting':r?.action==='exclude'?'Excluded':'Unresolved';const cats=['VL','EL','CL','SEL','EOL','Maternity Leave'].map(c=>`<option ${leaveCategoryLabel(p.leaveCategory||'')===c||String(p.leaveCategory||'').toUpperCase()===c.toUpperCase()?'selected':''}>${c}</option>`).join(''),half=halfDayAssist(x),halfUi=half&&!r?`<div class="assistBox"><strong>Half-day assistance</strong><span class="confidence confMed">Review required</span><div class="small">${p.leaveUnits} days across ${half.dates.length} dates normally means ${half.fullCount} full day${half.fullCount===1?'':'s'} + 1 half-day. Select which date was the half-day; the app will split this source item into separate full-day and half-day records.</div><div class="halfChips">${half.dates.map(d=>`<button type="button" class="halfChip" data-half-date="${d}">${displayDate(d)}</button>`).join('')}</div></div>`:'';return `<div class="reviewCard${cls}" data-review="${esc(reviewKey(x))}"><div><b>${esc(leaveCategoryLabel(p.leaveCategory||'Uncategorised'))} · ${esc(p.leaveUnits||'—')} day${Number(p.leaveUnits)===1?'':'s'}</b> <span class="badge ${r?.action?'ready':'invalid'}">${esc(stateText)}</span></div><div class="small" style="margin-top:5px">${(x.issues||[]).map(esc).join('<br>')}</div>${halfUi}${correctionAuditHtml(x,r)}<div class="reviewGrid"><label>Status<select data-f="status"><option ${p.type==='full'?'selected':''}>Full Leave</option><option ${p.type==='half'?'selected':''}>Half Leave</option><option ${p.type==='od'?'selected':''}>OD</option><option ${p.type==='special'?'selected':''}>Special Assignment</option></select></label><label>Leave Category<select data-f="category">${cats}</select></label><label>Leave Days<input data-f="days" type="number" min="0" step="0.5" value="${esc(p.leaveUnits||'')}"></label><label>From Date (dd/mm/yyyy)<input data-f="from" type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/yyyy" value="${esc(displayDate(p.startDate||''))}"></label><label>To Date (dd/mm/yyyy)<input data-f="to" type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/yyyy" value="${esc(displayDate(p.endDate||p.startDate||''))}"></label><label style="grid-column:span 2">Specific Dates (dd/mm/yyyy, comma separated)<input data-f="dates" value="${esc(p.mode==='multiple'?(p.dates||[]).map(displayDate).join(', '):'')}"></label><label style="grid-column:span 2">Remarks<input data-f="remarks" value="${esc(p.note||'')}"></label></div><div class="reviewActions"><button data-act="apply" class="green">✓ Apply correction & revalidate</button><button data-act="legacy">📚 Accounting only</button><button data-act="exclude">⊘ Exclude</button>${r?'<button data-act="reset">↺ Reset</button>':''}</div></div>`}
+function renderReview(){const groups=groupedErrors();$('reviewSection').hidden=!groups.length;if(!groups.length){$('reviewList').innerHTML='';return}renderReconciliation();document.querySelectorAll('.filterBtn').forEach(b=>b.classList.toggle('active',b.dataset.filter===activeReviewFilter));if($('reviewSearch')&&document.activeElement!==$('reviewSearch'))$('reviewSearch').value=reviewSearchTerm;const visible=groups.filter(g=>{const types=groupIssueTypes(g),text=`${g.teacher?.name||''} ${g.month} ${g.row}`.toLowerCase();return(activeReviewFilter==='all'||types.includes(activeReviewFilter))&&(!reviewSearchTerm||text.includes(reviewSearchTerm.toLowerCase()))});$('reviewList').innerHTML=visible.length?visible.map(group=>{const meta=sourceMeta(group.items[0]),gs=groupResolutionStats(group),categories=(meta.categories||[]).map(x=>`${leaveCategoryLabel(x.category||'')||x.category}: ${x.units}`).join(' · ')||'—',rawDates=(meta.rawDatePairs||[]).map(x=>`FROM ${x.from||'—'} → TO ${x.to||'—'}`).join(' · ')||'—',interp=[...new Set(group.items.flatMap(x=>sourceMeta(x).interpretedDates||planDateKeys(x.plan||{})))].map(displayDate).join(', ')||'—',types=groupIssueTypes(group),yearSug=suggestedYearRepair(group),multi=multiCategoryAssist(group),susp=suspiciousRangesFromMeta(meta),open=gs.unresolved&&visible.length<=4;const yearUi=yearSug?`<div class="assistBox"><strong>Suggested date-year review</strong><span class="confidence ${yearSug.confidence==='high'?'confHigh':'confMed'}">${yearSug.confidence==='high'?'High-confidence typo':'Review required'}</span><div class="small">${esc(yearSug.reason)} Suggested dates: <b>${yearSug.dates.map(displayDate).join(', ')}</b>. Nothing changes unless you accept it.</div>${group.items.length===1?`<button data-gact="yearfix" class="green" style="margin-top:7px">✓ Accept suggested date correction</button>`:''}</div>`:'';const spanUi=susp.length?`<div class="assistBox"><strong>Impossible / suspicious range protected</strong><div class="small">${susp.map(x=>`${displayDate(x.from)} → ${displayDate(x.to)} spans ${x.days} days`).join(' · ')}. v60 does not expand such a range into hundreds of leave dates.</div></div>`:'';const allocUi=multi?`<div class="assistBox"><strong>Multi-category date allocation</strong><span class="confidence confMed">Manual allocation</span><div class="small">The category totals exactly equal the ${multi.dates.length} interpreted dates. Assign every date to one category; the app will validate the counts before applying anything.</div><div class="dateAlloc">${multi.dates.map(d=>`<div class="dateAllocRow"><b>${displayDate(d)}</b><select data-alloc-date="${d}"><option value="">— Choose category —</option>${multi.cats.map(c=>`<option value="${esc(c.cat)}">${esc(leaveCategoryLabel(c.cat))} (${c.units})</option>`).join('')}</select></div>`).join('')}<button data-gact="allocate" class="green" style="margin-top:7px">✓ Apply category allocation</button></div></div>`:'';return `<details class="reviewGroup" data-group="${esc(group.key)}" ${open?'open':''}><summary class="reviewGroupSummary"><div><h3>${esc(group.teacher?.name||'Unknown teacher')} · ${esc(group.month)} · Source row ${group.row}</h3><div class="small">${group.items.length} item${group.items.length===1?'':'s'} · ${gs.unresolved} unresolved · ${gs.corrected} corrected · ${gs.accounting} accounting · ${gs.excluded} excluded</div><div>${types.map(t=>`<span class="problemTag">${esc(t.replace(/-/g,' '))}</span>`).join('')}</div></div><span class="badge ${gs.unresolved?'invalid':'ready'}">${gs.unresolved?'Needs resolution':'Group resolved'}</span></summary><div class="reviewGroupBody"><div class="sourceCompare"><div class="sourcePane"><b>Original workbook values</b><div class="sourceLine"><strong>Category totals:</strong> ${esc(categories)}</div><div class="sourceLine"><strong>Stored FROM/TO:</strong> ${esc(rawDates)}</div></div><div class="sourcePane"><b>App interpretation</b><div class="sourceLine"><strong>Interpreted dates:</strong> ${esc(interp)}</div><div class="sourceLine"><strong>Problems:</strong> ${group.items.flatMap(x=>x.issues||[]).map(esc).join(' · ')}</div></div></div>${spanUi}${yearUi}${allocUi}<div class="groupActions"><button data-gact="accounting">📚 Mark all unresolved as accounting only</button><button data-gact="exclude">⊘ Exclude all unresolved in this group</button>${(gs.accounting||gs.excluded||gs.corrected)?'<button data-gact="reset">↺ Reset whole group</button>':''}</div>${group.items.map(childReviewCard).join('')}</div></details>`}).join(''):'<div class="box">No unresolved groups match the current filter/search.</div>';
+ $('reviewList').querySelectorAll('.reviewGroup').forEach(groupEl=>{const group=groups.find(g=>g.key===groupEl.dataset.group);groupEl.querySelectorAll('button[data-gact]').forEach(btn=>btn.onclick=e=>{e.preventDefault();const act=btn.dataset.gact;if(act==='reset'){for(const x of group.items)delete reviewResolutions[reviewKey(x)];saveAndRender();return}if(act==='yearfix'){const sug=suggestedYearRepair(group);if(!sug)return;if(confirm(`Apply the suggested dates ${sug.dates.map(displayDate).join(', ')} to this source item and revalidate?\n\nThe original Excel file will not be changed.`))applyYearSuggestion(group,sug);return}if(act==='allocate'){applyCategoryAllocation(group,groupEl);return}const unresolved=group.items.filter(x=>!resolutionValid(resolutionFor(x)));if(!unresolved.length){alert('This group has no unresolved items.');return}if(act==='accounting'){if(!confirm(`Retain all ${unresolved.length} unresolved item${unresolved.length===1?'':'s'} in this ${group.month} group as NON-DATED legacy accounting?\n\nNo leave dates or proxies will be created for them.`))return;for(const x of unresolved){const p=x.plan||{};if(p.leaveCategory&&p.leaveUnits)reviewResolutions[reviewKey(x)]=stampResolution({action:'legacy'})}saveAndRender();return}if(act==='exclude'){if(!confirm(`Exclude all ${unresolved.length} unresolved item${unresolved.length===1?'':'s'} in this group from the import?\n\nThe original Excel file will remain unchanged.`))return;for(const x of unresolved)reviewResolutions[reviewKey(x)]=stampResolution({action:'exclude'});saveAndRender();return}});groupEl.querySelectorAll('.reviewCard').forEach(card=>{const key=card.dataset.review,x=group.items.find(e=>reviewKey(e)===key);card.querySelectorAll('[data-half-date]').forEach(btn=>btn.onclick=()=>{const d=btn.dataset.halfDate;if(confirm(`Treat ${displayDate(d)} as the half-day and the other date(s) as full-day leave?\n\nThe app will create separate validated records; the Excel source remains unchanged.`))applyHalfSplit(x,d)});card.querySelectorAll('button[data-act]').forEach(btn=>btn.onclick=()=>{const act=btn.dataset.act;if(act==='reset'){delete reviewResolutions[key];saveAndRender();return}if(act==='exclude'){if(confirm(`Exclude ${x.teacher?.name||'this teacher'} · ${monthFromNote(x.plan)} · ${leaveCategoryLabel(x.plan?.leaveCategory||'')} from this import?`)){reviewResolutions[key]=stampResolution({action:'exclude'});saveAndRender()}return}if(act==='legacy'){const pp=x.plan||{};if(!pp.leaveCategory||!pp.leaveUnits){alert('A leave category and positive Leave Days/Units are required before this can be retained as legacy accounting.');return}if(confirm(`Retain ${x.teacher?.name||'this teacher'} · ${leaveCategoryLabel(pp.leaveCategory)} ${pp.leaveUnits} as NON-DATED legacy accounting?\n\nIt will not create leave dates or proxies.`)){reviewResolutions[key]=stampResolution({action:'legacy'});saveAndRender()}return}if(act==='apply'){const raw=correctedRawFromCard(x,card),v=validateHistoryRows([raw])[0];reviewResolutions[key]=stampResolution({action:'correct',raw,validated:v,assistType:'manual-correction'});if(v.state==='error')alert('This correction still has validation errors. Please review the problem and correct it again.');saveAndRender();return}})})})}
+
+$('assistToolbar')?.querySelectorAll('.filterBtn').forEach(btn=>btn.onclick=()=>{activeReviewFilter=btn.dataset.filter||'all';renderReview()});
+if($('reviewSearch'))$('reviewSearch').oninput=e=>{reviewSearchTerm=e.target.value||'';renderReview()};
+
+
+function renderPreview(){
+ const effective=effectivePreview(),total=leavePreview.length,ready=effective.filter(x=>x.state==='ready'||x.state==='warning').length,dup=effective.filter(x=>x.state==='duplicate').length,err=effective.filter(x=>x.state==='error').length,excluded=effective.filter(x=>x.state==='excluded').length,reviewAccounting=effective.filter(x=>x.state==='accounting').length,acct=legacyAccountingPreview.length+reviewAccounting;
+ $('mRows').textContent=total;$('mReady').textContent=ready;$('mDup').textContent=dup;$('mErr').textContent=err;$('mAccounting').textContent=acct;$('metrics').hidden=false;$('previewWrap').hidden=!total;$('topImportBar').hidden=!(total||acct);
+ const blocked=err>0||(!ready&&!acct);$('importHistory').disabled=blocked;$('importHistory').textContent=err?`⚠ Correct ${err} error row${err===1?'':'s'} before import`:(ready&&acct?`✅ Confirm Final Import · ${ready} dated + ${acct} accounting`:ready?`✅ Confirm Final Import · ${ready} record${ready===1?'':'s'}`:`✅ Confirm Final Import · ${acct} accounting item${acct===1?'':'s'}`);
+ $('importSafetyText').innerHTML=err?`<b>Import blocked for safety.</b> ${err} error row${err===1?' needs':'s need'} correction before anything is saved. Accounting-only items are also held until the workbook passes validation.`:(acct?`<b>Separated historical accounting:</b> ${acct} non-dated item${acct===1?' is':'s are'} kept outside dated leave events. No date will be invented.`:`Validation passed. Duplicates are skipped automatically; warning rows are importable after review.`);
+ $('downloadErrors').hidden=err===0;
+ $('previewBody').innerHTML=effective.map(x=>{const p=x.plan||{},badge=x.state==='ready'?'<span class="badge ready">Ready</span>':x.state==='warning'?'<span class="badge warning">Ready · warning</span>':x.state==='duplicate'?'<span class="badge duplicate">Duplicate</span>':x.state==='excluded'?'<span class="badge duplicate">Excluded</span>':x.state==='accounting'?'<span class="badge warning">Accounting only</span>':'<span class="badge invalid">Error</span>';const msg=[...(x.issues||[]),...(x.warnings||[])].map(esc).join('<br>');return `<tr><td>${x.row}</td><td>${x.teacher?`<b>${esc(x.teacher.name)}</b><br><span class="small">${esc(x.teacher.code)}</span>`:'—'}</td><td>${esc(statusLabel(p.type||''))}</td><td>${esc(p.leaveCategory?leaveCategoryLabel(p.leaveCategory):'—')}</td><td>${esc((p.type==='full'||p.type==='half')?(p.leaveUnits||'—'):'—')}</td><td>${p.startDate?esc(dateText(p)):'—'}</td><td>${esc(durationText(p))}</td><td>${esc(p.note||'')}${p.referenceNo?`<br><span class="small">Ref: ${esc(p.referenceNo)}</span>`:''}</td><td>${badge}${msg?`<div class="small" style="margin-top:4px">${msg}</div>`:''}</td></tr>`}).join('');
+ const reviewedAccounting=effective.filter(x=>x.state==='accounting').map(x=>({teacherCode:x.teacher?.code||'',teacherName:x.teacher?.name||'',month:monthFromNote(x.plan),category:x.plan?.leaveCategory||'',units:x.plan?.leaveUnits||'',reason:'Admin-reviewed item retained as non-dated legacy accounting.',rowNum:x.row}));const accountingRows=[...legacyAccountingPreview,...reviewedAccounting];$('accountingWrap').hidden=!acct;$('accountingBody').innerHTML=accountingRows.map(x=>`<tr><td><b>${esc(x.teacherName)}</b><br><span class="small">${esc(x.teacherCode)}</span></td><td>${esc(x.month)}</td><td>${esc(leaveCategoryLabel(x.category))}</td><td>${esc(x.units)}</td><td>${esc(x.reason)}</td><td>${esc(x.rowNum||'—')}</td></tr>`).join('');
+ $('leaveSummary').className='box '+(err?'warn':'ok');$('leaveSummary').innerHTML=err?`<b>Import blocked.</b> <b>${ready}</b> dated record${ready===1?' is':'s are'} ready after review; <b>${dup}</b> duplicate${dup===1?'':'s'} will be skipped; <b>${err}</b> unresolved error${err===1?' remains':'s remain'}; <b>${acct}</b> legacy accounting item${acct===1?' is':'s are'} separated.${excluded?` <b>${excluded}</b> item${excluded===1?' is':'s are'} explicitly excluded.`:''}`:`Validation/review passed: <b>${ready}</b> dated record${ready===1?'':'s'} ready; <b>${dup}</b> duplicate${dup===1?'':'s'} skipped; <b>${acct}</b> non-dated legacy accounting item${acct===1?' is':'s are'} separated.${excluded?` <b>${excluded}</b> explicitly excluded.`:''}`;
+ renderReview();
+}
+
+const LEGACY_MONTHS={JANUARY:1,FEBRUARY:2,MARCH:3,APRIL:4,MAY:5,JUNE:6,JULY:7,AUGUST:8,SEPTEMBER:9,OCTOBER:10,NOVEMBER:11,DECEMBER:12};
+function legacyNorm(v){return String(v??'').replace(/\s+/g,' ').trim().toUpperCase()}
+function legacyHeader(v){return legacyNorm(v).replace(/[^A-Z]/g,'')}
+function legacyNameKey(v){return norm(v).replace(/\b(sri|smt|mr|mrs|ms|dr)\b/g,'').replace(/[^a-z0-9]+/g,' ').trim().replace(/y/g,'i')}
+function legacyTeacherByName(v){const key=legacyNameKey(v);if(!key||key==='xyz')return null;const ts=(master&&master.teachers)||[],compact=key.replace(/\s+/g,'');let exact=ts.find(t=>legacyNameKey(t.name).replace(/\s+/g,'')===compact);if(exact)return exact;const a=key.split(' ').filter(Boolean);let scored=ts.map(t=>{const b=legacyNameKey(t.name).split(' ').filter(Boolean),common=a.filter(x=>b.includes(x)).length;let score=common/Math.max(a.length,b.length);if(a.length>=2&&b.length>=2&&a[a.length-1]===b[b.length-1]&&a[0].slice(0,3)===b[0].slice(0,3))score=Math.max(score,0.9);return{t,score}}).sort((x,y)=>y.score-x.score);return scored[0]&&scored[0].score>=0.66&&(scored.length<2||scored[0].score-scored[1].score>=0.15)?scored[0].t:null}
+function legacyDateInMonth(v,monthName){
+ if(v===null||v===undefined||v===''||v===0||v==='0')return'';
+ const expected=LEGACY_MONTHS[monthName]||0,s=String(v).trim();if(!s||legacyHeader(s)==='FROM'||legacyHeader(s)==='TO')return'';
+ let m=s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2}|\d{4})$/);
+ if(m){let a=Number(m[1]),b=Number(m[2]),y=Number(m[3]);if(y<100)y+=2000;let day=0,mon=0;if(b===expected){day=a;mon=b}else if(a===expected){day=b;mon=a}else return'';const k=`${y}-${String(mon).padStart(2,'0')}-${String(day).padStart(2,'0')}`;return validDateKey(k)?k:''}
+ const d=parseDate(v);if(d&&Number(d.slice(5,7))===expected)return d;return'';
+}
+function detectLegacyBlocks(matrix){
+ let best={row:-1,months:[]};
+ for(let r=0;r<Math.min(matrix.length,120);r++){
+   const ms=[];(matrix[r]||[]).forEach((v,c)=>{const k=legacyHeader(v);if(LEGACY_MONTHS[k])ms.push({name:k,col:c})});
+   if(ms.length>best.months.length)best={row:r,months:ms};
+ }
+ if(best.months.length<3)return null;
+ let sub=-1;
+ for(let r=best.row+1;r<=Math.min(best.row+3,matrix.length-1);r++){
+   const count=(matrix[r]||[]).filter(v=>legacyHeader(v)==='FROM').length;
+   if(count>=3){sub=r;break}
+ }
+ if(sub<0)return null;
+ const fromCols=[];(matrix[sub]||[]).forEach((v,c)=>{if(legacyHeader(v)==='FROM')fromCols.push(c)});
+ const blocks=[];
+ for(let i=0;i<fromCols.length;i++){
+   const start=fromCols[i],end=(fromCols[i+1]??(start+8))-1,map={from:start};
+   for(let c=start;c<=end;c++){
+     const h=legacyHeader((matrix[sub]||[])[c]);
+     if(h==='TO')map.to=c;else if(['VL','EL','CL','SEL','EOL'].includes(h))map[h]=c;else if(h.includes('MATERNITY'))map.MATERNITY=c;
+   }
+   let month='';for(let c=start;c<=end;c++){const k=legacyHeader((matrix[best.row]||[])[c]);if(LEGACY_MONTHS[k]){month=k;break}}
+   if(month&&map.to!==undefined)blocks.push({name:month,col:start,end,map});
+ }
+ return blocks.length>=3?{monthRow:best.row,subRow:sub,blocks}:null;
+}
+function datesFromLegacyRows(rows,b){
+ const all=[];
+ for(const row of rows){
+   const f=legacyDateInMonth(row[b.map.from],b.name),t=legacyDateInMonth(row[b.map.to],b.name);
+   if(f&&t&&t>=f){const span=daysBetween(f,t);if(span<=62){for(const d of dateRangeKeys(f,t))all.push(d)}else{all.push(f);if(t!==f)all.push(t)}}else if(f)all.push(f);else if(t)all.push(t);
+ }
+ return[...new Set(all)].sort();
+}
+function legacySourceMeta(g,b,positive){const rawDatePairs=g.rows.map(row=>({from:String(row[b.map.from]??'').trim()||'—',to:String(row[b.map.to]??'').trim()||'—'})).filter(x=>x.from!=='—'||x.to!=='—'),meta={month:b.name,sourceRow:g.rowNum,categories:positive.map(x=>({category:x.cat,units:x.units})),rawDatePairs,interpretedDates:datesFromLegacyRows(g.rows,b)};meta.suspiciousRanges=suspiciousRangesFromMeta(meta);return meta}
+function legacyRowsFromWorkbook(wb){
+ const out=[];legacyImportNotes=[];
+ for(const sheetName of wb.SheetNames){
+   const ws=wb.Sheets[sheetName],matrix=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:false,dateNF:'dd/mm/yyyy'}),det=detectLegacyBlocks(matrix);if(!det)continue;
+   const groups=[];let current=null;
+   for(let r=det.subRow+1;r<matrix.length;r++){
+     const row=matrix[r]||[];let t=null;
+     for(let c=0;c<(det.blocks[0]?.col||20);c++){t=legacyTeacherByName(row[c]);if(t)break}
+     if(t){current={teacher:t,rowNum:r+1,rows:[row]};groups.push(current);continue}
+     // Continuation rows in the legacy VKV sheet have no serial/name.
+     // Any new serial/name/section/XYZ row terminates the previous teacher group so
+     // dates belonging to another or placeholder row can never leak into it.
+     const identityA=String(row[0]??'').trim(),identityC=String(row[2]??'').trim();
+     if(identityA||identityC){current=null;continue}
+     if(current){const hasRelevant=det.blocks.some(b=>legacyDateInMonth(row[b.map.from],b.name)||legacyDateInMonth(row[b.map.to],b.name));if(hasRelevant)current.rows.push(row)}
+   }
+   for(const g of groups){
+     for(const b of det.blocks){
+       const dates=datesFromLegacyRows(g.rows,b),positive=[];
+       for(const cat of ['VL','EL','CL','SEL','EOL','MATERNITY']){const c=b.map[cat];if(c===undefined)continue;let units=0;for(const row of g.rows)units+=numericValue(row[c]);if(units>0)positive.push({cat,units})}
+       if(!positive.length)continue;
+       if(!dates.length){for(const x of positive){legacyAccountingPreview.push({teacherCode:g.teacher.code,teacherName:g.teacher.name,month:b.name,category:x.cat,units:x.units,reason:'No reliable From/To date; retained as legacy accounting only.',rowNum:g.rowNum});legacyImportNotes.push(`${g.teacher.name} · ${b.name}: ${x.cat} ${x.units} retained as non-dated legacy accounting.`)}continue}
+       if(positive.length>1){
+         // In the VKV legacy statement, April/July VL is frequently a vacation/session-break
+         // accounting figure while the shared FROM/TO cells describe another leave category.
+         // Never force those dates onto VL. If there is exactly one non-VL category, import only
+         // that dated category and report VL separately as a non-dated legacy item.
+         const nonVl=positive.filter(x=>x.cat!=='VL'),vl=positive.find(x=>x.cat==='VL');
+         if(vl&&['APRIL','JULY'].includes(b.name)&&nonVl.length===1){
+           legacyAccountingPreview.push({teacherCode:g.teacher.code,teacherName:g.teacher.name,month:b.name,category:'VL',units:vl.units,reason:'Vacation/session-break balance; shared From/To dates belong to another category and were not assigned to VL.',rowNum:g.rowNum});legacyImportNotes.push(`${g.teacher.name} · ${b.name}: VL ${vl.units} retained as non-dated legacy accounting; shared dates were not assigned to VL.`);
+           const x=nonVl[0],obj={'Teacher Code':g.teacher.code,'Teacher Name':g.teacher.name,'Status Type':x.units===0.5&&dates.length===1?'Half Leave':'Full Leave','Leave Category':x.cat,'Leave Days':x.units,'Remarks':'Imported from existing VKV leave statement · '+b.name,'__rowNum':g.rowNum,'__legacySourceJSON':JSON.stringify(legacySourceMeta(g,b,positive))};
+           if(dates.length===1){obj['From Date']=dates[0];obj['To Date']=dates[0]}else obj['Specific Dates']=dates.join(', ');
+           const expected=(obj['Status Type']==='Half Leave'?dates.length*0.5:dates.length),sr=legacySourceMeta(g,b,positive).suspiciousRanges||[];if(sr.length)obj['__legacyAmbiguous']=`Suspicious legacy date range spans ${sr[0].days} days and was not expanded automatically.`;if(Math.abs(Number(x.units)-Number(expected))>0.001)obj['__legacyAmbiguous']=(obj['__legacyAmbiguous']?obj['__legacyAmbiguous']+' ':'')+`Leave Days (${x.units}) do not match the reliably identified date count (${dates.length}).`;out.push(obj);continue;
+         }
+         for(const x of positive){out.push({'Teacher Code':g.teacher.code,'Teacher Name':g.teacher.name,'Status Type':'Full Leave','Leave Category':x.cat,'Leave Days':x.units,'Specific Dates':dates.join(', '),'Remarks':'Needs review: existing VKV sheet has more than one leave category against the same month date set · '+b.name,'__rowNum':g.rowNum,'__legacyAmbiguous':'Multiple leave categories share one month date set.','__legacySourceJSON':JSON.stringify(legacySourceMeta(g,b,positive))})}
+         continue;
+       }
+       const {cat,units}=positive[0],obj={'Teacher Code':g.teacher.code,'Teacher Name':g.teacher.name,'Status Type':units===0.5&&dates.length===1?'Half Leave':'Full Leave','Leave Category':cat,'Leave Days':units,'Remarks':'Imported from existing VKV leave statement · '+b.name,'__rowNum':g.rowNum,'__legacySourceJSON':JSON.stringify(legacySourceMeta(g,b,positive))};
+       if(dates.length===1){obj['From Date']=dates[0];obj['To Date']=dates[0]}else obj['Specific Dates']=dates.join(', ');
+       const expectedUnits=(obj['Status Type']==='Half Leave'?dates.length*0.5:dates.length),sr=legacySourceMeta(g,b,positive).suspiciousRanges||[];
+       if(sr.length)obj['__legacyAmbiguous']=`Suspicious legacy date range spans ${sr[0].days} days and was not expanded automatically.`;
+       if(Math.abs(Number(units)-Number(expectedUnits))>0.001)obj['__legacyAmbiguous']=(obj['__legacyAmbiguous']?obj['__legacyAmbiguous']+' ':'')+`Leave Days (${units}) do not match the reliably identified date count (${dates.length}).`;
+       out.push(obj);
+     }
+   }
+   if(out.length||legacyImportNotes.length)return out;
+ }
+ return out;
+}
+function isTemplateMatrix(matrix){for(let r=0;r<Math.min(matrix.length,8);r++){const hs=(matrix[r]||[]).map(legacyHeader);if(hs.includes('TEACHERCODE')&&hs.some(x=>x==='STATUSTYPE'||x==='OPERATIONALSTATUS'))return true}return false}
+$('leaveFile').onchange=async()=>{
+ reviewResolutions={};halfSelections={};activeReviewFilter='all';reviewSearchTerm='';leavePreview=[];legacyAccountingPreview=[];$('importResult').innerHTML='';const f=$('leaveFile').files[0];reviewStorageKey=f?reviewStorageId(f):'';if(!f){$('leaveSummary').className='box';$('leaveSummary').textContent='Select a completed Excel file to preview it.';return}
+ try{
+  if(!window.XLSX)throw new Error('Excel library has not loaded yet.');
+  const wb=XLSX.read(await f.arrayBuffer(),{type:'array',cellDates:true});let rows=[],format='';
+  if(wb.SheetNames.includes('Past_Leave_History')){const ws=wb.Sheets['Past_Leave_History'];rows=XLSX.utils.sheet_to_json(ws,{defval:'',raw:true});format='App import template';}
+  else{const first=wb.Sheets[wb.SheetNames[0]],matrix=XLSX.utils.sheet_to_json(first,{header:1,defval:'',raw:false,dateNF:'dd/mm/yyyy'});if(isTemplateMatrix(matrix)){rows=XLSX.utils.sheet_to_json(first,{defval:'',raw:true});format='Tabular leave history';legacyImportNotes=[];}else{rows=legacyRowsFromWorkbook(wb);format='Existing VKV month-wise leave statement';}}
+  if(!rows.length&&!legacyAccountingPreview.length)throw new Error('No recognisable leave-history rows were found. Use the app template or the existing VKV month-wise leave statement.');
+  if(legacyAccountingPreview.length){const seenLegacy=new Set();legacyAccountingPreview=legacyAccountingPreview.filter(x=>{const k=canonicalLegacyAccounting(x);if(seenLegacy.has(k))return false;seenLegacy.add(k);return true})}
+  const lp=await getDoc(doc(db,'dailyRecords',LEAVE_PLAN_DOC));existingPlans=lp.exists()?(lp.data().plans||{}):{};try{const la=await getDocs(collection(db,'legacyLeaveAccounting'));existingLegacyAccounting=[];la.forEach(d=>existingLegacyAccounting.push({id:d.id,...(d.data()||{})}));}catch(e){existingLegacyAccounting=[]}leavePreview=validateHistoryRows(rows);const restored=loadReviewProgress();renderPreview();$('leaveSummary').innerHTML='<b>'+esc(format)+'</b> detected.<br>'+(restored?`<span class="small"><b>${restored}</b> saved review decision${restored===1?'':'s'} restored from this browser.</span><br>`:'')+$('leaveSummary').innerHTML;const note=$('legacyNotes');if(legacyImportNotes.length){note.hidden=false;note.className='box warn';note.innerHTML='<b>'+legacyImportNotes.length+' non-dated / non-convertible legacy item'+(legacyImportNotes.length===1?'':'s')+' separated for review/import.</b><br><span class="small">These are not silently imported. First examples:<br>'+legacyImportNotes.slice(0,8).map(esc).join('<br>')+(legacyImportNotes.length>8?'<br>…and '+(legacyImportNotes.length-8)+' more.':'')+'</span>'}else note.hidden=true;
+ }catch(e){$('leaveSummary').className='box error';$('leaveSummary').textContent='Could not read this Excel file: '+(e.message||e);$('previewWrap').hidden=true;$('metrics').hidden=true;$('importHistory').disabled=true}
+};
+$('clearLeaveFile').onclick=()=>{$('leaveFile').value='';leavePreview=[];legacyImportNotes=[];legacyAccountingPreview=[];reviewResolutions={};halfSelections={};reviewStorageKey='';activeReviewFilter='all';reviewSearchTerm='';$('previewWrap').hidden=true;$('accountingWrap').hidden=true;$('metrics').hidden=true;$('topImportBar').hidden=true;$('legacyNotes').hidden=true;$('downloadErrors').hidden=true;$('importHistory').disabled=true;$('leaveSummary').className='box';$('leaveSummary').textContent='Select a completed Excel file to preview it. Nothing is saved until you confirm the import.';$('importResult').innerHTML=''};
+
+async function writePersonalProjection(plans){
+ const ops=[];let projected=0,unlinked=0;
+ for(const p of plans){const email=linkedEmail(p.code);if(!email){unlinked++;continue}const clean={...p,approved:true,source:'excel-history'};for(const date of planDateKeys(p)){ops.push({email,date,code:p.code,id:p.id,clean});projected++}}
+ for(let i=0;i<ops.length;i+=350){const batch=writeBatch(db);for(const op of ops.slice(i,i+350)){const ref=doc(db,'personalStatus',op.email,'records',op.date);batch.set(ref,{date:op.date,email:op.email,teacherCode:String(op.code),updatedAt:serverTimestamp(),scheduledPlans:{[op.id]:op.clean}},{merge:true})}await batch.commit()}
+ return{projected,unlinked};
+}
+function downloadErrorReport(){
+ const errs=leavePreview.filter(x=>x.state==='error');if(!errs.length||!window.XLSX)return;
+ const rows=[['Original Row','Teacher','Teacher Code','Status','Leave Category','Leave Days','Date(s)','Problem','Remarks']];
+ for(const x of errs){const p=x.plan||{};rows.push([x.row,x.teacher?.name||'',x.teacher?.code||'',statusLabel(p.type||''),p.leaveCategory?leaveCategoryLabel(p.leaveCategory):'',p.leaveUnits||'',p.startDate?dateText(p):'',(x.issues||[]).join(' | '),p.note||''])}
+ const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'Needs Correction');XLSX.writeFile(wb,'VKV_Leave_Import_Error_Report.xlsx');
+}
+$('downloadErrors').onclick=downloadErrorReport;
+
+async function writeApprovedPlanProjection(plans){
+ for(let i=0;i<plans.length;i+=350){
+   const batch=writeBatch(db);
+   for(const p of plans.slice(i,i+350)){
+     const ref=doc(db,'approvedStatusPlans',String(p.id));
+     batch.set(ref,{...p,approved:true,source:'excel-history',updatedAt:serverTimestamp(),updatedBy:user.uid,updatedByEmail:user.email||''},{merge:true});
+   }
+   await batch.commit();
+ }
+ return plans.length;
+}
+$('importHistory').onclick=async()=>{
+ if(!user)return;
+ const effective=effectivePreview(),errors=effective.filter(x=>x.state==='error'),candidates=effective.filter(x=>x.state==='ready'||x.state==='warning').map(x=>x.plan);
+ const reviewAccounting=effective.filter(x=>x.state==='accounting').map(x=>{const p=x.plan||{};return{teacherCode:x.teacher?.code||p.code||'',teacherName:x.teacher?.name||'',month:monthFromNote(p),category:p.leaveCategory||'',units:Number(p.leaveUnits||0),reason:'Admin-reviewed legacy item retained as non-dated accounting; no date was invented.',rowNum:x.row,resolutionStatus:'pending'}});
+ const allAccounting=[...legacyAccountingPreview,...reviewAccounting];
+ if(errors.length){alert(`Import blocked. ${errors.length} unresolved error row${errors.length===1?' remains':'s remain'}. Resolve, retain as legacy accounting, or explicitly exclude each one.`);return}
+ if(!candidates.length&&!allAccounting.length)return;
+ const datedText=candidates.length?`${candidates.length} dated approved record${candidates.length===1?'':'s'}`:'';
+ const acctText=allAccounting.length?`${allAccounting.length} legacy accounting item${allAccounting.length===1?'':'s'}`:'';
+ const rr=resolutionSummary(),auditLines=finalCorrectionAuditLines(),auditText=auditLines.length?`\n\nCORRECTION AUDIT — EXACT ACCEPTED INTERPRETATION\n${auditLines.map((x,i)=>`${i+1}. ${x}`).join('\n')}`:'';
+ if(!confirm(`FINAL IMPORT RECONCILIATION
+
+Dated records ready: ${candidates.length}
+Corrected records: ${rr.corrected}
+Legacy accounting items: ${allAccounting.length}
+Duplicates skipped: ${rr.duplicate}
+Explicitly excluded: ${rr.excluded}
+Unresolved: ${rr.unresolved}${auditText}
+
+Nothing in the Master Timetable will be changed.
+
+Proceed with the final import?`))return;
+ $('importHistory').disabled=true;$('importResult').innerHTML='<div class="box">Importing validated records…</div>';
+ try{
+   const ref=doc(db,'dailyRecords',LEAVE_PLAN_DOC),snap=await getDoc(ref),latest=snap.exists()?(snap.data().plans||{}):{},sigs=new Set(Object.values(latest).filter(Boolean).map(canonicalPlan));
+   const fresh=candidates.filter(p=>!sigs.has(canonicalPlan(p)));
+   const accountingBySig=new Set(existingLegacyAccounting.map(canonicalLegacyAccounting));
+   const freshAccounting=allAccounting.filter(x=>!accountingBySig.has(canonicalLegacyAccounting(x)));
+   const merged={...latest};const importBatchId=`imp_${Date.now()}_${hashString((user.uid||'')+todayKey())}`;
+   fresh.forEach(p=>{merged[p.id]={...p,importBatchId,importedAtMs:Date.now(),importedBy:user.uid,importedByEmail:user.email||''}});
+   if(fresh.length)await setDoc(ref,{date:LEAVE_PLAN_DOC,dayName:'Scheduled Leave / Status Plans',plans:merged,updatedAt:serverTimestamp(),updatedBy:user.uid,updatedByEmail:user.email||''},{merge:true});
+   const projection=fresh.length?await writePersonalProjection(fresh):{projected:0,unlinked:0};const approvedCount=fresh.length?await writeApprovedPlanProjection(fresh):0;
+   if(freshAccounting.length){for(let i=0;i<freshAccounting.length;i+=350){const batch=writeBatch(db);for(const x of freshAccounting.slice(i,i+350)){const id=legacyAccountingId(x),refA=doc(db,'legacyLeaveAccounting',id);batch.set(refA,{...x,id,session:'2026-27',source:'legacy-vkv-statement',type:'legacy-accounting',resolutionStatus:x.resolutionStatus||'final-accounting',importBatchId,approved:true,importedAt:serverTimestamp(),importedBy:user.uid,importedByEmail:user.email||''},{merge:true})}await batch.commit()}}
+   existingPlans=merged;existingLegacyAccounting=[...existingLegacyAccounting,...freshAccounting.map(x=>({...x,id:legacyAccountingId(x)}))];
+   const pendingCount=existingLegacyAccounting.filter(x=>String(x.resolutionStatus||'')==='pending'||(/admin-reviewed/i.test(String(x.reason||''))&&/retained/i.test(String(x.reason||'')))).length;
+   await setDoc(doc(db,'leaveControl','current'),{myAreaLeaveHistoryVisible:pendingCount===0,pendingResolutionCount:pendingCount,updatedAt:serverTimestamp(),updatedBy:user.uid,updatedByEmail:user.email||''},{merge:true});
+   const dates=fresh.reduce((n,p)=>n+planDateKeys(p).length,0);const parts=[];if(fresh.length)parts.push(`${fresh.length} dated record${fresh.length===1?'':'s'} imported, covering ${dates} teacher-date${dates===1?'':'s'}`);if(freshAccounting.length)parts.push(`${freshAccounting.length} legacy accounting item${freshAccounting.length===1?'':'s'} stored separately`);if(!parts.length)parts.push('Nothing new was imported because all validated items already exist');
+   $('importResult').innerHTML=`<div class="box ok"><b>Import completed safely.</b><br>${parts.join('. ')}. ${approvedCount} approved-register record${approvedCount===1?'':'s'} updated. ${projection.projected} My Area projection${projection.projected===1?'':'s'} written.${projection.unlinked?`<br>${projection.unlinked} imported record${projection.unlinked===1?' has':'s have'} no linked teacher email yet; they can be backfilled later with <b>Sync My Area Records</b>.`:''}</div>`;
+   try{if(reviewStorageKey)localStorage.removeItem(reviewStorageKey)}catch(e){}renderPreview();$('importHistory').disabled=true;
+ }catch(e){$('importResult').innerHTML='<div class="box error"><b>Import failed.</b><br>'+esc(e.message||e)+'</div>';$('importHistory').disabled=false}
+};
+</script>
+<script src="v66-final-sixpoint.js?v=66.2-final-1" defer></script>
+</body></html>

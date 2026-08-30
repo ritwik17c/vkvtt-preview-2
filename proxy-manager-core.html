@@ -1,0 +1,254 @@
+<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+
+<meta name="theme-color" content="#0b2f6b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="VKVTT">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>VKV Nalbari Timetable</title><link rel="stylesheet" href="v66-home.css?v=66.2-sync-1"><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script>
+(function(){
+  const CURRENT_APP_VERSION = '66.0';
+  try{
+    const u=new URL(window.location.href);
+    if(u.searchParams.get('v')!==CURRENT_APP_VERSION){
+      u.searchParams.set('v',CURRENT_APP_VERSION);
+      history.replaceState(null,'',u.pathname+u.search+u.hash);
+    }
+  }catch(_){}
+})();
+</script>
+
+<link rel="stylesheet" href="v66-design-system.css?v=66.2-sync-1"><script src="v66-ui.js?v=66.2-sync-1" defer></script><script src="period-notifications.js?v=66.2-sync-1" defer></script>
+<!-- v66.2 visible-fixes -->
+<style id="v66-2-visible-fixes">
+@media (min-width:701px){
+ header .head{min-height:132px!important;gap:18px!important}
+ header .logo{width:92px!important;height:92px!important;padding:4px!important;flex:0 0 92px!important}
+ header .homeTitleBlock h1{font-size:2rem!important;line-height:1.12!important}
+ header .homeTitleBlock small{font-size:1.04rem!important}
+ header .swamijiHomePortrait{width:132px!important;height:132px!important;object-fit:contain!important;margin-left:auto!important}
+}
+@media (max-width:700px){
+ header .head{min-height:94px!important;gap:11px!important}
+ header .logo{width:66px!important;height:66px!important;flex:0 0 66px!important}
+ header .homeTitleBlock h1{font-size:1.4rem!important}
+ header .homeTitleBlock small{font-size:.9rem!important}
+ header .swamijiHomePortrait{width:82px!important;height:82px!important;object-fit:contain!important;margin-left:auto!important}
+}
+</style>
+<link rel="stylesheet" href="v66-visual-alignment-fix.css?v=66.2-align-1">
+<link rel="stylesheet" href="v66-home-shell-v662.css?v=66.2-sync-1">
+<script src="v66-home-shell-v662.js?v=66.2-sync-1" defer></script>
+<link rel="stylesheet" href="v66-final-sixpoint.css?v=66.2-final-1">
+<link rel="stylesheet" href="v66-remaining-polish.css?v=66.2-remain-1">
+<link rel="stylesheet" href="v66-premium-unified.css?v=66.2-premium-1">
+<style id="vkv-swamiji-inline-loader">
+#vkvSlowLoader{position:fixed;inset:0;z-index:99999;display:none;place-items:center;align-content:center;gap:8px;background:rgba(247,250,248,.94);color:#17364f;font-weight:750}.vkvLoaderPortrait{position:relative;width:112px;height:112px}.vkvLoaderPortrait img{width:100%;height:100%;object-fit:contain;border-radius:18px;opacity:.92}.vkvBlink{position:absolute;left:27%;right:27%;top:43%;height:12%;background:rgba(200,138,24,.12);transform:scaleY(0);transform-origin:center;pointer-events:none}@keyframes vkvBlink{0%,92%,100%{transform:scaleY(0)}94%,96%{transform:scaleY(1)}}#vkvSlowLoader.show{display:grid}.vkvLoaderPortrait .vkvBlink{animation:vkvBlink 5.8s infinite}
+</style></head><body><div id="vkvSlowLoader" aria-hidden="true"><div class="vkvLoaderPortrait"><img src="data:image/jpeg;base64,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" alt=""><span class="vkvBlink"></span></div><div>Loading VKVTT…</div></div><div id="authGate"><div class="authCard">
+<h2>VKV Nalbari Timetable</h2><p id="authLead">Authorised staff sign-in · Cloud v66.0</p>
+<div id="authMessage" class="authInfo">Checking sign-in status…</div>
+<div class="authActions"><button id="googleSignIn">Sign in with Google</button><button id="googleSwitchAccount">Use another Google account</button><button id="copySetupUid" style="display:none">Copy UID</button><button id="authSignOut" style="display:none">Sign out</button></div>
+</div></div>
+<div id="cloudBar"><div class="cloudInner"><div class="cloudTechnical" aria-hidden="true"><span class="cloudBadge">Firebase Cloud</span> <span id="cloudUser"></span><span id="cloudSync" class="cloudSync">Connecting…</span></div><div style="display:flex;gap:7px;flex-wrap:wrap"><button id="cloudSwitchAccount" class="cloudBtn">Use another Google account</button><button id="cloudSignOut" class="cloudBtn">Sign out</button></div></div></div>
+<header><div class="wrap head"><img class="logo" src="school-logo.jpg?v=66.0-home-fix-1" alt="Vivekananda Kendra Vidyalaya, Nalbari logo" width="50" height="70"><div class="homeTitleBlock"><h1>VKV Nalbari Timetable</h1><small>Session 2026–27</small></div><img class="swamijiHomePortrait" src="data:image/jpeg;base64,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" alt="Swami Vivekananda line portrait"></div></header>
+<main class="wrap"><div id="activeScheduleBanner" class="activeScheduleBanner">🗓 Active Schedule: loading…</div>
+<div id="myAreaTitle" class="myAreaTitle">My Area</div>
+<div id="myAreaGrid" class="myGrid">
+<button id="myTimetableBtn" onclick="openMyTimetable(this)">📘 My Timetable</button>
+<button id="myProxyTodayBtn" onclick="openMyProxyToday(this)">👥 My Proxy Today <span id="myProxyBadge" class="myBadge" style="display:none"></span></button>
+<button id="myProxyHistoryBtn" onclick="openMyProxyHistory(this)">🕘 My Past Proxy History</button>
+<button id="myStatusBtn" onclick="openMyStatus(this)">🗂 My Leave &amp; Duty Leave</button>
+<button id="myAttendanceBtn" onclick="location.href='attendance.html?v=66.0'">📍 My Attendance</button>
+</div>
+<div class="nav">
+<button onclick="show('teacher',this)">👨‍🏫 Teacher Wise</button><button onclick="show('class',this)">🏫 Class Wise</button><button onclick="show('day',this)">📅 Day Wise</button>
+</div><div class="homebar"><button onclick="resetHome()">🏠 Home / Reset View</button><button id="annualCalendarBtn" style="display:none" onclick="location.href='annual-calendar-2026-27.html?v=66.0'">🗓 Annual Calendar</button><button id="historyBtn" onclick="show('history',this);renderHistory()">📚 History</button><button id="approvedLeaveBtn" class="leaveRegisterLink" onclick="openApprovedLeaveRegister()">🗂 Approved Leave</button><button id="adminUserAccessBtn" class="adminOnlyLink" onclick="openAdminDashboard()">⚙️ Admin Dashboard</button></div>
+<div class="opsTitle">Daily Management</div>
+<div class="opsGrid">
+<button id="leaveOpsBtn" onclick="show('leave',this)">📝 Leave / Duty Leave / Vacant</button>
+<button id="proxyWorkBtn" onclick="openProxyAllotment(this)">👥 Proxy Allotment</button>
+<button id="publishedProxyBtn" onclick="openPublishedProxy(this)">✅ Today’s Proxy Allotment (All Teachers)</button>
+<button onclick="show('free',this)">🕐 Free Teachers</button>
+<button onclick="show('now',this)">📍 Where Now?</button>
+</div>
+
+
+
+<section id="myTimetable" class="view">
+<h2>My Timetable</h2>
+<div id="myTimetableIdentity" class="myIdentity"></div>
+<div class="myModeBtns">
+<button id="myTodayModeBtn" class="active" onclick="renderMyTimetable('today',this)">Today</button>
+<button id="myWeekModeBtn" onclick="renderMyTimetable('week',this)">Full Week</button>
+</div>
+<div id="myTimetableResult" class="result">Opening your timetable…</div>
+</section>
+
+<section id="myProxyToday" class="view">
+<h2>My Proxy Today</h2>
+<div id="myProxyTodayIdentity" class="myIdentity"></div>
+<div id="myProxyTodayResult" class="result">Checking today’s published proxy allotment…</div>
+</section>
+
+<section id="myProxyHistory" class="view">
+<h2>My Past Proxy History</h2>
+<div id="myProxyHistoryIdentity" class="myIdentity"></div>
+<div class="controls">
+<div><label>From Date (dd/mm/yyyy)</label><input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/yyyy" id="myProxyHistoryFrom"></div>
+<div><label>To Date (dd/mm/yyyy)</label><input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/yyyy" id="myProxyHistoryTo"></div>
+</div>
+<div class="actions"><button onclick="loadMyProxyHistory()">🔎 Show History</button><span id="myProxyHistoryMsg" class="copymsg"></span></div>
+<div id="myProxyHistoryResult" class="result">Choose a date range or leave From Date blank to see all available past published proxy records.</div>
+</section>
+
+<section id="myStatus" class="view">
+<h2>My Leave &amp; Duty Leave</h2><div class="small">All approved records linked to your account are shown here — past, current and future.</div>
+<div id="myStatusIdentity" class="myIdentity"></div>
+<div class="small">Only school-saved records linked to your authorised Google account are shown here. Vacant-position records are not included.</div>
+<div class="actions"><button onclick="loadMyStatus()">↻ Refresh</button><span id="myStatusMsg" class="copymsg"></span></div>
+<div id="myStatusResult" class="result">Loading your approved Leave and Duty Leave records…</div>
+</section>
+
+<section id="teacher" class="view"><h2>Teacher Wise</h2><div class="controls"><div><label>Teacher</label><select id="teacherSel" onchange="teacherResult()"><option value="">Select...</option></select></div><div><label>Day</label><select id="teacherDay" onchange="teacherResult()"><option value="">All</option><option value="Monday">Monday</option><option value="Tuesday">Tuesday</option><option value="Wednesday">Wednesday</option><option value="Thursday">Thursday</option><option value="Friday">Friday</option><option value="Saturday">Saturday</option></select></div><div><label>Period</label><select id="teacherPeriod" onchange="teacherResult()"><option value="">All</option><option value="1">1st Period · 8:35–9:25</option><option value="2">2nd Period · 9:25–10:05</option><option value="3">3rd Period · 10:05–10:45</option><option value="4">4th Period · 10:45–11:25</option><option value="5">5th Period · 11:55–12:35</option><option value="6">6th Period · 12:35–1:15</option><option value="7">7th Period · 1:15–1:45 Jr / 1:55 Sr</option><option value="8">8th Period · 1:55–2:35</option></select></div></div><div class="actions"><button onclick="copyView('teacherResult','Teacher-wise timetable')">📋 Copy</button><button onclick="shareView('teacherResult','Teacher-wise timetable')">↗ Share</button><span id="teacherResultMsg" class="copymsg"></span></div><div id="teacherResult" class="result">Select a teacher.</div></section>
+
+<section id="class" class="view"><h2>Class Wise</h2><div class="controls"><div><label>Class</label><select id="classSel" onchange="classResult()"><option value="">Select…</option></select></div><div><label>Day</label><select id="classDay" onchange="classResult()"><option value="">All</option><option value="Monday">Monday</option><option value="Tuesday">Tuesday</option><option value="Wednesday">Wednesday</option><option value="Thursday">Thursday</option><option value="Friday">Friday</option><option value="Saturday">Saturday</option></select></div><div><label>Period</label><select id="classPeriod" onchange="classResult()"><option value="">All</option><option value="1">1st Period · 8:35–9:25</option><option value="2">2nd Period · 9:25–10:05</option><option value="3">3rd Period · 10:05–10:45</option><option value="4">4th Period · 10:45–11:25</option><option value="5">5th Period · 11:55–12:35</option><option value="6">6th Period · 12:35–1:15</option><option value="7">7th Period · 1:15–1:45 Jr / 1:55 Sr</option><option value="8">8th Period · 1:55–2:35</option></select></div></div><div class="actions"><button onclick="copyView('classResult','Class-wise timetable')">📋 Copy</button><button onclick="shareView('classResult','Class-wise timetable')">↗ Share</button><span id="classResultMsg" class="copymsg"></span></div><div id="classResult" class="result">Select a class.</div></section>
+
+<section id="day" class="view"><h2>Day Wise</h2>
+<div class="controls">
+<div><label>Day</label><select id="daySel" onchange="dayResult()"><option value="">Select…</option><option value="Monday">Monday</option><option value="Tuesday">Tuesday</option><option value="Wednesday">Wednesday</option><option value="Thursday">Thursday</option><option value="Friday">Friday</option><option value="Saturday">Saturday</option></select></div>
+<div><label>Period</label><select id="dayPeriod" onchange="dayResult()"><option value="">All</option><option value="1">1st Period</option><option value="2">2nd Period</option><option value="3">3rd Period</option><option value="4">4th Period</option><option value="5">5th Period</option><option value="6">6th Period</option><option value="7">7th Period</option><option value="8">8th Period</option></select></div>
+<div><label>Class</label><select id="dayClass" onchange="dayResult()"><option value="">All</option></select></div>
+</div>
+<div class="actions"><button onclick="copyView('dayResult','Day-wise timetable')">📋 Copy</button><button onclick="shareView('dayResult','Day-wise timetable')">↗ Share</button><span id="dayResultMsg" class="copymsg"></span></div>
+<div id="dayResult" class="result">Select a day. Period and Class are optional filters.</div></section>
+
+<section id="free" class="view"><h2>Free Teachers</h2><div class="controls"><div><label>Day</label><select id="freeDay" onchange="freeResult()"><option value="">Select…</option><option value="Monday">Monday</option><option value="Tuesday">Tuesday</option><option value="Wednesday">Wednesday</option><option value="Thursday">Thursday</option><option value="Friday">Friday</option><option value="Saturday">Saturday</option></select></div><div><label>Period</label><select id="freePeriod" onchange="freeResult()"><option value="">Select…</option><option value="1">1st Period · 8:35–9:25</option><option value="2">2nd Period · 9:25–10:05</option><option value="3">3rd Period · 10:05–10:45</option><option value="4">4th Period · 10:45–11:25</option><option value="5">5th Period · 11:55–12:35</option><option value="6">6th Period · 12:35–1:15</option><option value="7">7th Period · 1:15–1:45 Jr / 1:55 Sr</option><option value="8">8th Period · 1:55–2:35</option></select></div></div><div class="actions"><button onclick="copyView('freeResult','Free teachers')">📋 Copy</button><button onclick="shareView('freeResult','Free teachers')">↗ Share</button><span id="freeResultMsg" class="copymsg"></span></div><div id="freeResult" class="result">Select day and period.</div></section>
+
+<section id="now" class="view"><h2>Where Is a Teacher Now?</h2><div id="clock" class="result"></div><div class="controls" style="margin-top:12px"><div><label>Teacher</label><select id="nowTeacher" onchange="nowResult()"><option value="">Select...</option></select></div><div><label>Day</label><select id="nowDay" onchange="nowResult()"><option value="">Select…</option><option value="Monday">Monday</option><option value="Tuesday">Tuesday</option><option value="Wednesday">Wednesday</option><option value="Thursday">Thursday</option><option value="Friday">Friday</option><option value="Saturday">Saturday</option></select></div><div><label>Period</label><select id="nowPeriod" onchange="nowResult()"><option value="">Select…</option><option value="1">1st Period · 8:35–9:25</option><option value="2">2nd Period · 9:25–10:05</option><option value="3">3rd Period · 10:05–10:45</option><option value="4">4th Period · 10:45–11:25</option><option value="5">5th Period · 11:55–12:35</option><option value="6">6th Period · 12:35–1:15</option><option value="7">7th Period · 1:15–1:45 Jr / 1:55 Sr</option><option value="8">8th Period · 1:55–2:35</option></select></div></div><div class="actions"><button onclick="copyView('nowResult','Teacher location')">📋 Copy</button><button onclick="shareView('nowResult','Teacher location')">↗ Share</button><span id="nowResultMsg" class="copymsg"></span></div><div id="nowResult" class="result">Select a teacher. Day and period are set automatically when possible.</div></section>
+
+<section id="slot" class="view"><h2>Whose Period Is It?</h2><div class="controls"><div><label>Class</label><select id="slotClass" onchange="slotResult()"><option value="">Select…</option></select></div><div><label>Day</label><select id="slotDay" onchange="slotResult()"><option value="">Select…</option><option value="Monday">Monday</option><option value="Tuesday">Tuesday</option><option value="Wednesday">Wednesday</option><option value="Thursday">Thursday</option><option value="Friday">Friday</option><option value="Saturday">Saturday</option></select></div><div><label>Period</label><select id="slotPeriod" onchange="slotResult()"><option value="">Select…</option><option value="1">1st Period · 8:35–9:25</option><option value="2">2nd Period · 9:25–10:05</option><option value="3">3rd Period · 10:05–10:45</option><option value="4">4th Period · 10:45–11:25</option><option value="5">5th Period · 11:55–12:35</option><option value="6">6th Period · 12:35–1:15</option><option value="7">7th Period · 1:15–1:45 Jr / 1:55 Sr</option><option value="8">8th Period · 1:55–2:35</option></select></div></div><div class="actions"><button onclick="copyView('slotResult','Class slot')">📋 Copy</button><button onclick="shareView('slotResult','Class slot')">↗ Share</button><span id="slotResultMsg" class="copymsg"></span></div><div id="slotResult" class="result">Select class, day and period.</div></section>
+
+<section id="allot" class="view"><h2><span id="proxyScopeTitle">Today’s</span> Proxy Allotment (All Teachers) <span class="small" id="proxyDateLabel"></span></h2>
+<div id="proxyTodayStatusSummary" class="result" style="margin-bottom:12px">Loading today’s Leave / Duty Leave / Operational Status summary…</div>
+<div class="controls"><div><label>Proxy Date (dd/mm/yyyy)</label><input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/yyyy" id="proxyWorkDate" onchange="changeProxyWorkDate()"><div class="small">Today and the coming three days are available normally. An earlier date requires Principal authorisation.</div></div></div>
+<div class="proxyTop">
+  <button onclick="prevProxyPeriod()">← Previous</button>
+  <div><b id="proxyPeriodTitle">Period</b><div id="proxyProgress" class="small"></div></div>
+  <button onclick="nextProxyPeriod()">Next →</button>
+</div>
+<div class="controls"><div><label>Jump to Period</label><select id="allotPeriod" onchange="jumpProxyPeriod()"><option value="">Select…</option><option value="1">1st Period · 8:35–9:25</option><option value="2">2nd Period · 9:25–10:05</option><option value="3">3rd Period · 10:05–10:45</option><option value="4">4th Period · 10:45–11:25</option><option value="5">5th Period · 11:55–12:35</option><option value="6">6th Period · 12:35–1:15</option><option value="7">7th Period · 1:15–1:45 Jr / 1:55 Sr</option><option value="8">8th Period · 1:55–2:35</option></select></div></div>
+<div id="allotResult" class="result">Today's proxy requirements will appear period by period.</div>
+<div id="publishedDraftNote" class="draftNote" style="display:none"></div>
+<div class="actions"><button onclick="showAllProxyNeeds()">📋 Show All Required Proxies</button><button id="finaliseProxyBtn" onclick="finaliseProxies()">✓ Review & Finalise</button><button id="enableCorrectionBtn" style="display:none" onclick="enableProxyCorrection()">🔓 Principal: Enable Correction</button><button id="authorisePastProxyBtn" style="display:none" onclick="authoriseHistoricalProxy()">🗓 Principal: Authorise Earlier Record</button><span id="allotMsg" class="copymsg"></span></div><div id="allotReview" class="result" style="display:none"></div>
+</section>
+
+<section id="publishedProxy" class="view"><h2>Today’s Proxy Allotment (All Teachers) <span class="small" id="publishedProxyDate"></span></h2>
+<div id="publishedProxyResult" class="result">The final proxy allotment has not yet been published for today.</div>
+<div class="actions"><button onclick="copyPublishedProxy()">📋 Copy</button><button onclick="sharePublishedProxy()">↗ Share</button><button onclick="printPublishedProxy()">🖨 Print</button><span id="publishedProxyMsg" class="copymsg"></span></div>
+</section>
+
+<section id="leave" class="view"><h2>Leave / Duty Leave / Operational Status</h2>
+<div class="controls"><div><label>Teacher</label><select id="leaveTeacher" onchange="onHomepageLeaveTeacherChange()"><option value="">Select...</option></select></div></div>
+<div id="homepageLeaveSnapshot" class="proxycard" style="display:none" aria-live="polite"></div>
+
+<div class="proxycard leaveCalendarCard">
+<div class="proxyhead">1. Select date(s)</div>
+<div class="small">Past dates, future dates and long periods crossing several months are supported.</div>
+<div class="leaveDateModes">
+<button data-leave-date-mode="single" onclick="chooseLeaveDateMode('single',this)">Single Date</button>
+<button data-leave-date-mode="range" onclick="chooseLeaveDateMode('range',this)">Date Range</button>
+<button data-leave-date-mode="multiple" onclick="chooseLeaveDateMode('multiple',this)">Selected Dates</button>
+</div>
+<div class="calendarShell">
+<div class="calendarHead">
+<button id="leaveCalPrev" onclick="changeLeaveCalendarMonth(-1)" aria-label="Previous month">←</button>
+<strong id="leaveCalMonth">Calendar</strong>
+<button id="leaveCalNext" onclick="changeLeaveCalendarMonth(1)" aria-label="Next month">→</button>
+</div>
+<div class="calendarWeek"><div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div></div>
+<div id="leaveCalendarGrid" class="calendarGrid"></div>
+<div id="leaveRangeInputs" class="dateRangeInputs" style="display:none">
+<div><label>From Date (dd/mm/yyyy)</label><input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/yyyy" id="leaveRangeFrom" onchange="syncLeaveRangeInputs()"></div>
+<div><label>To Date (dd/mm/yyyy)</label><input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/yyyy" id="leaveRangeTo" onchange="syncLeaveRangeInputs()"></div>
+</div>
+<div id="leaveSelectionSummary" class="leaveSelectionSummary"></div>
+</div>
+</div>
+
+<div class="small" style="margin:12px 0 7px"><b>2. Select status:</b></div>
+<div class="leaveBtns">
+<button data-leave-type="full" onclick="chooseStatus('full',this)">Full Leave</button>
+<button data-leave-type="half" onclick="chooseStatus('half',this)">Half Leave · P5–P8</button>
+<button data-leave-type="od" onclick="chooseStatus('od',this)">Duty Leave · On Duty</button>
+<button data-leave-type="special" onclick="chooseStatus('special',this)">Duty Leave · Special Assignment</button>
+<button data-leave-type="vacant" onclick="chooseStatus('vacant',this)">Operational Status · Vacant Position</button>
+</div>
+<div id="leaveCategoryBox" class="proxycard disabledBox">
+<div class="proxyhead">3. Leave Category &amp; Leave Account</div>
+<div class="small">Required for Full Leave / Half Leave. This lets the timetable app become the leave register too, so the same leave need not be entered again in a separate Excel sheet.</div>
+<div id="leaveCategoryQuickBtns" class="leaveBtns categoryQuickBtns" style="margin-top:10px">
+<button data-leave-category="VL" onclick="chooseLeaveCategory('VL',this)">VL</button>
+<button data-leave-category="EL" onclick="chooseLeaveCategory('EL',this)">EL</button>
+<button data-leave-category="CL" onclick="chooseLeaveCategory('CL',this)">CL</button>
+<button data-leave-category="SEL" onclick="chooseLeaveCategory('SEL',this)">SEL</button>
+<button data-leave-category="EOL" onclick="chooseLeaveCategory('EOL',this)">EOL</button>
+<button data-leave-category="MATERNITY" onclick="chooseLeaveCategory('MATERNITY',this)">Maternity Leave</button>
+</div>
+<div class="controls">
+<div><label>Leave Category</label><select id="leaveCategory" onchange="refreshLeaveCategoryUi(false)"><option value="">Select…</option></select></div>
+<div><label>Leave Days</label><input id="leaveUnits" type="number" min="0" step="0.5" placeholder="Auto calculated" oninput="renderHomepageLeaveRuleWarning()"><div class="small">Auto-calculated from the selected dates; you may correct it when school leave-counting rules require a different figure.</div></div>
+</div>
+<div class="actions" style="margin-top:8px"><button type="button" onclick="autoFillLeaveUnits()">↻ Auto Calculate Leave Days</button><span id="leaveAccountHint" class="small"></span></div>
+<div id="homepageLeaveRuleWarning" class="small" style="margin-top:9px" aria-live="polite"></div>
+</div>
+<div id="dutyDurationBox" class="proxycard disabledBox">
+<div class="proxyhead">4. Duty Leave Duration · On Duty / Special Assignment</div>
+<div class="leaveBtns durationBtns">
+<button data-duration="full" onclick="chooseDutyDuration('full',this)">Full Day</button>
+<button data-duration="half" onclick="chooseDutyDuration('half',this)">Half Day · P5–P8</button>
+<button data-duration="custom" onclick="chooseDutyDuration('custom',this)">Custom Period Range</button>
+</div>
+<div class="controls">
+<div><label>From Period</label><select id="dutyFrom"><option value="">Select…</option><option value="1">1st Period · 8:35–9:25</option><option value="2">2nd Period · 9:25–10:05</option><option value="3">3rd Period · 10:05–10:45</option><option value="4">4th Period · 10:45–11:25</option><option value="5">5th Period · 11:55–12:35</option><option value="6">6th Period · 12:35–1:15</option><option value="7">7th Period · 1:15–1:45 Jr / 1:55 Sr</option><option value="8">8th Period · 1:55–2:35</option></select></div>
+<div><label>To Period</label><select id="dutyTo"><option value="">Select…</option><option value="1">1st Period · 8:35–9:25</option><option value="2">2nd Period · 9:25–10:05</option><option value="3">3rd Period · 10:05–10:45</option><option value="4">4th Period · 10:45–11:25</option><option value="5">5th Period · 11:55–12:35</option><option value="6">6th Period · 12:35–1:15</option><option value="7">7th Period · 1:15–1:45 Jr / 1:55 Sr</option><option value="8">8th Period · 1:55–2:35</option></select></div>
+<div><label>Details / Assignment</label><input id="dutyNote" placeholder="Optional details"></div>
+</div>
+<div id="durationHelp" class="small">Choose On Duty or Special Assignment first.</div>
+</div>
+<div class="actions recordActions">
+<button id="saveStatusBtn" onclick="saveStatusRecord()">💾 Save</button>
+<button id="cancelEditStatusBtn" style="display:none" onclick="cancelLeavePlanEdit()">✕ Cancel Edit</button>
+<button onclick="clearStatusForm()">↺ Clear Form</button>
+<button class="dangerBtn" onclick="deleteSelectedStatus()">🗑 Delete Selected Record</button>
+<button class="dangerBtn" onclick="deleteTodayStatuses()">🗑 Delete Today’s Manual Statuses</button>
+<span id="statusMsg" class="copymsg"></span>
+</div>
+
+<div class="proxycard">
+<div class="proxyhead">Scheduled / Date-based Entries</div>
+<div class="small">A continuous leave covering months is stored as one entry. Selected Dates can hold non-continuous leave such as 24th, 27th and 29th.</div>
+<div id="leavePlansList" style="margin-top:8px">Loading scheduled entries…</div>
+</div>
+
+<div class="actions"><button id="exportLeaveExcelBtn" onclick="exportLeaveExcel()">⬇ Export Leave Register (Excel)</button><button onclick="copyProxy()">📋 Copy Proxy List</button><button onclick="shareProxy()">↗ Share Proxy List</button><span id="copyMsg" class="copymsg"></span></div>
+<div id="leaveResult" class="result"></div></section>
+<section id="history" class="view"><h2>Daily History</h2>
+<div class="controls"><div><label>Date (dd/mm/yyyy)</label><input type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/yyyy" id="historyDate" onchange="renderHistory()"></div></div>
+<div class="actions"><button onclick="copyHistory()">📋 Copy</button><button onclick="shareHistory()">↗ Share</button><button class="dangerBtn" onclick="deleteAllHistory()">🗑 Delete All History</button><span id="historyResultMsg" class="copymsg"></span></div>
+<div id="historyResult" class="result">Select a date.</div></section>
+</main>
+<script src="v66-home.js?v=66.2-sync-1"></script><script type="module" src="v66-home-cloud.js?v=66.2-sync-1"></script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    void 0
+  });
+}
+</script>
+<script src="v66-final-sixpoint.js?v=66.2-final-1" defer></script>
+<script>(function(){let done=false;const el=document.getElementById('vkvSlowLoader'),t=setTimeout(()=>{if(!done&&el)el.classList.add('show')},1800);window.addEventListener('load',()=>{done=true;clearTimeout(t);if(el)el.classList.remove('show')},{once:true});setTimeout(()=>{if(el)el.classList.remove('show')},12000)})();</script></body></html>

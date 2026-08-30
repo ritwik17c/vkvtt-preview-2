@@ -1,1 +1,571 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>VKVTT Preview 2 · Annual Calendar</title></head><body><div style="font:16px system-ui;padding:24px">Loading Annual Calendar…</div><script>(async()=>{try{let h=await(await fetch('https://raw.githubusercontent.com/ritwik17c/vkvtt-preview/main/annual-calendar-2026-27.html?preview2=1',{cache:'no-store'})).text();if(!h)throw new Error('Annual Calendar source could not be loaded.');h=h.replace('<head>','<head><base href="https://ritwik17c.github.io/vkvtt-preview/">');h=h.replace('</body>','<script src="https://ritwik17c.github.io/vkvtt-preview-2/vkv-route-policy.js?v=871c1ce"><\/script></body>');document.open();document.write(h);document.close()}catch(e){document.body.innerHTML='<p style="padding:24px;font:16px system-ui">Annual Calendar could not open. <a href="https://ritwik17c.github.io/vkvtt-preview-2/">Return Home</a></p>'}})();</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#12233f" />
+  <title>Annual Calendar 2026-27 | VKV Nalbari</title>
+  <script>const CURRENT_APP_VERSION='66.0';{const u=new URL(location.href);if(u.searchParams.get('v')!==CURRENT_APP_VERSION){u.searchParams.set('v',CURRENT_APP_VERSION);location.replace(u.href)}}</script>
+  <style>
+    :root{
+      --navy:#12233f;
+      --navy-2:#1c355a;
+      --saffron:#e98b21;
+      --saffron-soft:#fff3e3;
+      --paper:#f7f8fb;
+      --card:#ffffff;
+      --ink:#192435;
+      --muted:#687486;
+      --line:#e4e9f0;
+      --shadow:0 14px 38px rgba(20,36,60,.10);
+      --radius:18px;
+      --programme:#3559a8;
+      --exam:#7b4bb7;
+      --holiday:#bd3d4a;
+      --celebration:#d87813;
+      --observance:#237a62;
+      --restricted:#8b6e3f;
+      --session:#306d9a;
+      --today:#f4b740;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(circle at 8% 0%, rgba(233,139,33,.10), transparent 22rem),
+        linear-gradient(180deg,#f9fafc 0%,#f4f6f9 100%);
+      min-height:100vh;
+    }
+    button,input{font:inherit}
+    button{cursor:pointer}
+    .shell{max-width:1480px;margin:0 auto;padding:24px}
+    .hero{
+      position:relative;
+      overflow:hidden;
+      border-radius:26px;
+      background:linear-gradient(120deg,var(--navy) 0%,#193b66 72%,#214b78 100%);
+      color:#fff;
+      padding:30px 32px 26px;
+      box-shadow:var(--shadow);
+    }
+    .hero:before,.hero:after{
+      content:"";position:absolute;border-radius:50%;pointer-events:none
+    }
+    .hero:before{width:310px;height:310px;right:-100px;top:-150px;background:rgba(255,255,255,.06)}
+    .hero:after{width:220px;height:220px;right:80px;bottom:-170px;background:rgba(233,139,33,.20)}
+    .brand-row{display:flex;gap:18px;align-items:center;position:relative;z-index:1}
+    .brand-mark{
+      width:68px;height:90px;flex:0 0 68px;border-radius:999px;background:#fff;padding:2px;overflow:hidden;
+      color:var(--navy);display:grid;place-items:center;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.55),0 8px 24px rgba(0,0,0,.18)
+    }
+    .brand-mark img{display:block;width:100%;height:100%;object-fit:contain;border-radius:999px}
+    .eyebrow{font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:800;color:#f4c783;margin-bottom:5px}
+    h1{margin:0;font-size:clamp(27px,3vw,44px);line-height:1.05;letter-spacing:-.02em}
+    .subtitle{margin:9px 0 0;color:#dbe7f4;font-size:15px;max-width:860px;line-height:1.55}
+    .hero-meta{display:flex;flex-wrap:wrap;gap:9px;margin-top:18px;position:relative;z-index:1}
+    .hero-chip{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.14);color:#eef5ff;padding:7px 10px;border-radius:999px;font-size:12px;font-weight:700}
+
+    .toolbar{
+      position:sticky;top:0;z-index:30;margin-top:18px;padding:12px;
+      background:rgba(247,248,251,.91);backdrop-filter:blur(12px);
+      border:1px solid rgba(214,221,232,.78);border-radius:18px;
+      display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;
+      box-shadow:0 8px 28px rgba(31,49,78,.07)
+    }
+    .view-tabs,.toolbar-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .tab-btn,.soft-btn,.primary-btn{
+      border:0;border-radius:12px;padding:10px 13px;font-weight:800;transition:.2s ease
+    }
+    .tab-btn{background:#fff;color:var(--navy);border:1px solid var(--line)}
+    .tab-btn:hover,.soft-btn:hover{transform:translateY(-1px);border-color:#cdd6e2}
+    .tab-btn.active{background:var(--navy);color:#fff;border-color:var(--navy);box-shadow:0 7px 18px rgba(18,35,63,.20)}
+    .primary-btn{background:var(--saffron);color:#17233a;box-shadow:0 7px 18px rgba(233,139,33,.23)}
+    .soft-btn{background:#fff;color:var(--navy);border:1px solid var(--line)}
+    .search{min-width:250px;display:flex;align-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:0 11px}
+    .search input{width:100%;border:0;outline:0;padding:10px 4px;background:transparent;color:var(--ink)}
+
+    .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0}
+    .stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:15px 16px;box-shadow:0 6px 20px rgba(31,49,78,.04)}
+    .stat b{display:block;font-size:23px;color:var(--navy);letter-spacing:-.02em}
+    .stat span{font-size:12px;color:var(--muted);font-weight:700}
+
+    .notice-strip{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+    .notice-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 17px;line-height:1.55;font-size:13px;color:#425066}
+    .notice-card strong{color:var(--navy)}
+
+    .filters{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 18px}
+    .filter-chip{border:1px solid var(--line);background:#fff;color:#45536a;border-radius:999px;padding:8px 11px;font-size:12px;font-weight:800}
+    .filter-chip.active{color:#fff;border-color:transparent}
+    .filter-chip[data-cat="all"].active{background:var(--navy)}
+    .filter-chip[data-cat="programme"].active{background:var(--programme)}
+    .filter-chip[data-cat="exam"].active{background:var(--exam)}
+    .filter-chip[data-cat="holiday"].active{background:var(--holiday)}
+    .filter-chip[data-cat="celebration"].active{background:var(--celebration)}
+    .filter-chip[data-cat="observance"].active{background:var(--observance)}
+    .filter-chip[data-cat="restricted"].active{background:var(--restricted)}
+    .filter-chip[data-cat="session"].active{background:var(--session)}
+
+    .view{display:none}.view.active{display:block}
+    .panel{background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 8px 28px rgba(31,49,78,.05)}
+
+    /* Full view */
+    .month-section{margin:0 0 18px;scroll-margin-top:96px}
+    .month-title{display:flex;align-items:center;gap:12px;margin:0 0 10px;padding:0 4px}
+    .month-title h2{margin:0;color:var(--navy);font-size:20px}
+    .month-title .count{font-size:11px;color:var(--muted);background:#edf1f6;border-radius:999px;padding:5px 8px;font-weight:800}
+    .timeline{padding:8px 12px}
+    .event-row{display:grid;grid-template-columns:118px 6px minmax(0,1fr);gap:14px;position:relative;padding:10px 0}
+    .date-block{text-align:right;padding-top:2px}
+    .date-main{font-weight:900;color:var(--navy);font-size:15px}
+    .date-sub{font-size:11px;color:var(--muted);margin-top:3px}
+    .rail{position:relative}
+    .rail:before{content:"";position:absolute;left:2px;top:-12px;bottom:-12px;width:2px;background:#e8edf3}
+    .rail:after{content:"";position:absolute;left:-2px;top:9px;width:10px;height:10px;border-radius:50%;background:var(--event-color);box-shadow:0 0 0 4px #fff,0 0 0 5px #dfe6ef}
+    .event-card{border:1px solid var(--line);border-left:4px solid var(--event-color);border-radius:15px;padding:13px 14px;background:#fff;transition:.18s ease}
+    .event-card:hover{transform:translateY(-1px);box-shadow:0 9px 24px rgba(31,49,78,.08)}
+    .event-card h3{margin:0 0 7px;font-size:15px;color:#1d2b41;line-height:1.35}
+    .event-meta{display:flex;gap:7px;flex-wrap:wrap;align-items:center;color:var(--muted);font-size:11px;font-weight:700}
+    .meta-pill{background:#f4f6f9;border:1px solid #e8edf3;border-radius:999px;padding:5px 7px}
+    .category-pill{color:#fff;background:var(--event-color);border-radius:999px;padding:5px 8px;text-transform:capitalize}
+    .event-details{font-size:12px;line-height:1.5;color:#556278;margin-top:8px}
+    .source-alert{margin-top:8px;padding:7px 9px;border-radius:10px;background:#fff6db;border:1px solid #f1df9c;color:#6d5718;font-size:11px;font-weight:700}
+
+    /* Month view */
+    .month-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 17px;border-bottom:1px solid var(--line)}
+    .month-controls h2{margin:0;color:var(--navy);font-size:21px}
+    .calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));padding:10px}
+    .dow{padding:9px 6px;text-align:center;color:#7a8698;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em}
+    .day-cell{min-height:126px;border-top:1px solid #edf1f5;border-left:1px solid #edf1f5;padding:7px;position:relative;background:#fff;overflow:hidden}
+    .day-cell:nth-child(7n+1){border-left:0}
+    .day-cell.outside{background:#fafbfc;color:#a7afbb}
+    .day-cell.today{background:#fffaf0;box-shadow:inset 0 0 0 2px #f4c45e}
+    .day-num{font-size:12px;font-weight:900;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
+    .today-dot{width:6px;height:6px;border-radius:50%;background:var(--today)}
+    .cal-event{display:block;width:100%;text-align:left;border:0;border-left:3px solid var(--event-color);background:#f6f8fb;border-radius:7px;margin:3px 0;padding:5px 6px;font-size:10px;line-height:1.2;color:#344258;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .cal-cont{height:5px;margin:4px 0;border-radius:999px;background:color-mix(in srgb,var(--event-color) 34%, white)}
+    .more{font-size:10px;color:#6f7b8c;font-weight:800;padding:3px 2px}
+
+    /* Day view */
+    .day-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:16px 18px;border-bottom:1px solid var(--line)}
+    .day-head h2{margin:0;color:var(--navy);font-size:20px}
+    .date-input{border:1px solid var(--line);border-radius:11px;padding:9px 10px;color:var(--navy);background:#fff;font-weight:800}
+    .day-events{padding:16px}
+    .day-card{border:1px solid var(--line);border-left:5px solid var(--event-color);border-radius:14px;padding:14px 15px;margin-bottom:10px;background:#fff}
+    .day-card h3{margin:0 0 8px;font-size:16px}.day-card p{margin:5px 0;color:#58667a;font-size:12px;line-height:1.5}
+    .empty{padding:34px 16px;text-align:center;color:#6d798a}.empty strong{display:block;color:var(--navy);font-size:17px;margin-bottom:6px}
+
+    /* Modal */
+    .modal{display:none;position:fixed;inset:0;background:rgba(10,22,40,.56);z-index:80;padding:24px;align-items:center;justify-content:center}
+    .modal.open{display:flex}
+    .modal-card{width:min(680px,100%);max-height:82vh;overflow:auto;background:#fff;border-radius:20px;box-shadow:0 24px 80px rgba(0,0,0,.25);padding:22px}
+    .modal-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+    .modal h2{margin:0 0 6px;color:var(--navy);font-size:22px;line-height:1.25}
+    .close-btn{border:0;background:#eef2f6;color:#283750;width:34px;height:34px;border-radius:10px;font-weight:900}
+    .modal-body{color:#536177;line-height:1.6;font-size:13px}.modal-body p{margin:10px 0}
+
+    .footer{text-align:center;color:#7b8797;font-size:11px;padding:26px 8px 10px;line-height:1.6}
+    .hidden{display:none!important}
+    .access-gate{width:min(720px,calc(100% - 28px));margin:12vh auto 0;background:#fff;border:1px solid var(--line);border-radius:22px;padding:28px;box-shadow:var(--shadow);text-align:center}.access-gate h1{font-size:25px}.access-gate p{color:#657287;line-height:1.6}.access-gate a{display:inline-block;margin-top:8px;text-decoration:none}
+
+    @media(max-width:900px){
+      .shell{padding:14px}.hero{padding:24px 20px}.brand-mark{width:58px;height:78px;flex-basis:58px}
+      .stats{grid-template-columns:repeat(2,minmax(0,1fr))}.notice-strip{grid-template-columns:1fr}
+      .search{min-width:180px;flex:1}.toolbar-actions{width:100%}.toolbar-actions .search{order:3;width:100%}
+      .event-row{grid-template-columns:86px 5px minmax(0,1fr);gap:10px}.timeline{padding:6px 9px}
+      .day-cell{min-height:98px;padding:5px}.cal-event{padding:4px;font-size:9px}.calendar-grid{padding:6px}
+    }
+    @media(max-width:620px){
+      .shell{padding:9px}.hero{border-radius:20px}.brand-row{align-items:flex-start;gap:13px}.brand-mark{width:52px;height:70px;flex-basis:52px}
+      h1{font-size:28px}.subtitle{font-size:13px}.toolbar{border-radius:15px;padding:9px}.view-tabs{width:100%;display:grid;grid-template-columns:repeat(3,1fr)}.tab-btn{padding:9px 7px;font-size:12px}
+      .stats{gap:8px;margin:12px 0}.stat{padding:12px}.stat b{font-size:20px}
+      .event-row{grid-template-columns:1fr;gap:4px;padding:7px 0}.date-block{text-align:left;display:flex;gap:7px;align-items:baseline}.rail{display:none}.event-card{border-left-width:4px}
+      .month-controls{padding:12px}.calendar-grid{grid-template-columns:repeat(7,1fr);overflow-x:auto}.day-cell{min-width:70px;min-height:92px}.dow{min-width:70px}
+      .filters{gap:6px}.filter-chip{padding:7px 9px;font-size:11px}.modal{padding:12px}
+    }
+    @media print{
+      body{background:#fff}.shell{max-width:none;padding:0}.hero{box-shadow:none;border-radius:0;padding:18px 20px}.toolbar,.filters,.stats,.notice-strip,.footer{display:none!important}
+      #fullView{display:block!important}.month-section{break-inside:avoid}.event-card{box-shadow:none}.modal{display:none!important}
+    }
+  </style>
+<link rel="stylesheet" href="v66-premium-unified.css?v=66.2-premium-1">
+</head>
+<body>
+  <section id="accessGate" class="access-gate"><div class="brand-mark" style="margin:0 auto 15px" aria-hidden="true"><img src="school-logo.jpg?v=66.0" alt=""></div><h1>Annual Calendar 2026-27</h1><p id="accessMessage">Checking calendar availability…</p><a class="soft-btn" href="index.html?v=66.0">← Timetable Home</a></section>
+  <main class="shell" id="calendarShell" style="display:none">
+    <header class="hero">
+      <div class="brand-row">
+        <div class="brand-mark" aria-hidden="true"><img src="school-logo.jpg?v=66.0" alt=""></div>
+        <div>
+          <div class="eyebrow">Vivekananda Kendra Vidyalaya, Nalbari</div>
+          <h1>Annual Calendar 2026-27</h1>
+          <p class="subtitle">A single, chronological school calendar combining session milestones, examinations, holidays, celebrations, observances, restricted holidays and VKSPV common programmes.</p>
+        </div>
+      </div>
+      <div class="hero-meta">
+        <span class="hero-chip">Academic Session 2026-27</span>
+        <span class="hero-chip">April 2026 - April 2027</span>
+        <span class="hero-chip">Official schedule compilation</span>
+        <span class="hero-chip" id="calendarSource">Loading saved calendar…</span>
+      </div>
+    </header>
+
+    <nav class="toolbar" aria-label="Calendar controls">
+      <div class="view-tabs" role="tablist" aria-label="Calendar views">
+        <button class="tab-btn" data-view="day" type="button">Daily</button>
+        <button class="tab-btn" data-view="month" type="button">Monthly</button>
+        <button class="tab-btn active" data-view="full" type="button">Full View</button>
+      </div>
+      <div class="toolbar-actions">
+        <button class="soft-btn" id="homeBtn" type="button">← Timetable Home</button>
+        <label class="search" aria-label="Search calendar"><span aria-hidden="true">⌕</span><input id="searchInput" type="search" placeholder="Search events, venue, class..." /></label>
+        <button class="soft-btn" id="todayBtn" type="button">Today</button>
+        <button class="soft-btn" id="printBtn" type="button">Print</button>
+        <button class="primary-btn" id="fullBtn" type="button">Full Annual Calendar</button>
+      </div>
+    </nav>
+
+    <section class="stats" id="stats"></section>
+
+    <section class="notice-strip">
+      <div class="notice-card"><strong>Continuous assessment:</strong> Balvatika I-III have continuous assessment in both terms through classroom activities, worksheets, etc. Classes I-II have continuous assessment aligned with the Holistic Progress Card (HPC), with the ladder system in ABL-practising schools. These are scheduled at regular intervals rather than on fixed calendar dates.</div>
+      <div class="notice-card"><strong>Restricted holidays:</strong> These are conditional, not automatic school closures. Selection is governed by VKSPV guidelines and local/community considerations while ensuring that school functioning is not unduly affected.</div>
+    </section>
+
+    <section class="filters" id="filters" aria-label="Event filters"></section>
+
+    <section id="fullView" class="view active" aria-label="Full annual calendar"></section>
+
+    <section id="monthView" class="view panel" aria-label="Monthly calendar">
+      <div class="month-controls">
+        <button class="soft-btn" id="prevMonth" type="button" aria-label="Previous month">←</button>
+        <h2 id="monthHeading"></h2>
+        <button class="soft-btn" id="nextMonth" type="button" aria-label="Next month">→</button>
+      </div>
+      <div class="calendar-grid" id="monthGrid"></div>
+    </section>
+
+    <section id="dayView" class="view panel" aria-label="Daily calendar">
+      <div class="day-head">
+        <h2 id="dayHeading"></h2>
+        <input id="dayPicker" class="date-input" type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/yyyy" aria-label="Date in dd/mm/yyyy format" />
+      </div>
+      <div class="day-events" id="dayEvents"></div>
+    </section>
+
+    <footer class="footer">VKV Nalbari • Annual Calendar 2026-27 • Source documents are intentionally not displayed in the user interface.</footer>
+  </main>
+
+  <div class="modal" id="eventModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-card">
+      <div class="modal-top"><div><span id="modalCategory" class="category-pill"></span><h2 id="modalTitle"></h2></div><button class="close-btn" id="modalClose" aria-label="Close">×</button></div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js';
+import { getAuth, setPersistence, browserLocalPersistence, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js';
+import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore-lite.js';
+
+const firebaseConfig={apiKey:'AIzaSyDheZpyXghd1aQ9_RLhwpacVriG__wNZW4',authDomain:'vkv-nalbari-timetable.firebaseapp.com',projectId:'vkv-nalbari-timetable',storageBucket:'vkv-nalbari-timetable.firebasestorage.app',messagingSenderId:'791432856951',appId:'1:791432856951:web:61324065a54bef30f98d72'};
+const firebaseApp=initializeApp(firebaseConfig),auth=getAuth(firebaseApp),db=getFirestore(firebaseApp);
+setPersistence(auth,browserLocalPersistence).catch(()=>{});
+
+const CATEGORY = {
+  programme:{label:'Programme',color:'var(--programme)'},
+  exam:{label:'Examination',color:'var(--exam)'},
+  holiday:{label:'Holiday',color:'var(--holiday)'},
+  celebration:{label:'Celebration',color:'var(--celebration)'},
+  observance:{label:'Observance',color:'var(--observance)'},
+  restricted:{label:'Restricted Holiday',color:'var(--restricted)'},
+  session:{label:'Session / Vacation',color:'var(--session)'}
+};
+
+let events = [
+  // Session / vacation schedule
+  {id:'s01',cat:'session',start:'2026-04-01',end:'2026-04-04',title:'Session Fee Deposit & Distribution of Books',audience:'School community',details:'Deposition of session fee for 2026-27 and distribution of books.'},
+  {id:'s02',cat:'session',start:'2026-04-07',end:'2026-04-20',title:'Session Break',audience:'School',details:'Session break before the commencement of the new academic session.'},
+  {id:'s03',cat:'session',start:'2026-04-21',title:'Teachers’ Reporting after Session Break',audience:'Teachers'},
+  {id:'s04',cat:'session',start:'2026-04-22',title:'Commencement of Classes - Session 2026-27',audience:'Students & staff'},
+  {id:'s05',cat:'session',start:'2026-04-30',title:'Commencement of Class XI Classes',audience:'Class XI',dateLabel:'Before 01/05/2026',details:'With provisional admission. The source gives the timing as “Before 01/05/2026”; 30/04/2026 is used only for chronological placement in this digital calendar.'},
+  {id:'s06',cat:'session',start:'2026-07-10',end:'2026-07-30',title:'Summer Vacation',audience:'School'},
+  {id:'s07',cat:'session',start:'2026-07-30',title:'Teachers’ Reporting for TOC',audience:'Teachers'},
+  {id:'s08',cat:'session',start:'2026-07-31',title:'Teachers’ Reporting in Vidyalaya',audience:'Teachers'},
+  {id:'s09',cat:'session',start:'2026-08-01',title:'Reopening of School for Students',audience:'Students & staff'},
+  {id:'s10',cat:'session',start:'2027-03-23',end:'2027-03-25',title:'Declaration of Result',audience:'School community',details:'Result declaration scheduled between 23/03/2027 and 25/03/2027.'},
+  {id:'s11',cat:'session',start:'2027-04-01',end:'2027-04-06',title:'Session Fee Deposit & Distribution of Books',audience:'School community',details:'For transition to the next academic session.'},
+  {id:'s12',cat:'session',start:'2027-04-07',end:'2027-04-20',title:'Session Break',audience:'School'},
+  {id:'s13',cat:'session',start:'2027-04-21',title:'Teachers’ Reporting after Session Break',audience:'Teachers'},
+  {id:'s14',cat:'session',start:'2027-04-22',title:'Commencement of Classes - Session 2027-28',audience:'Students & staff',details:'Transition milestone included in the schedule after the 2026-27 annual examination.'},
+
+  // Examination windows
+  {id:'e01',cat:'exam',start:'2026-06-23',end:'2026-07-01',title:'Periodic Test-I / Pre-Mid Test Window',audience:'Classes III-XII',details:'Classes III-V: Periodic Test-I (20 marks). Classes VI-XII: Periodic Test-I / Pre-Mid Test (40 marks).'},
+  {id:'e02',cat:'exam',start:'2026-09-15',end:'2026-09-29',title:'Term-I / Mid-Term Examination Window',audience:'Classes III-XII',details:'Classes III-V: Terminal Examination (Term-I), 60 marks. Classes VI-XII: Terminal (Term-I) / Mid-Term Examination, 60/70 marks.'},
+  {id:'e03',cat:'exam',start:'2026-11-30',end:'2026-12-07',title:'Periodic Test-II / Post-Mid Test Window',audience:'Classes III-XII',details:'Classes III-V: Periodic Test-II (20 marks). Classes VI-XII: Periodic Test-II / Post-Mid Test (40 marks).'},
+  {id:'e04',cat:'exam',start:'2027-02-23',end:'2027-03-10',title:'Term-II / Annual Examination Window',audience:'Classes III-V; VI-IX & XI',details:'Classes III-V: Terminal Examination (Term-II), 60 marks. Classes VI-IX & XI: Terminal (Term-II) / Annual Examination, 60/70 marks. Classes X and XII are excluded from this annual examination entry as printed in the source.'},
+
+  // Holidays
+  {id:'h01',cat:'holiday',start:'2026-05-01',title:'Buddha Purnima'},
+  {id:'h02',cat:'holiday',start:'2026-05-27',title:'Id-Ul-Zuha'},
+  {id:'h03',cat:'holiday',start:'2026-09-17',title:'Vishwakarma Puja'},
+  {id:'h04',cat:'holiday',start:'2026-10-16',end:'2026-10-26',title:'Durga Puja & Lakshmi Puja'},
+  {id:'h05',cat:'holiday',start:'2026-11-08',end:'2026-11-09',title:'Deepawali & Kali Puja'},
+  {id:'h06',cat:'holiday',start:'2026-11-24',title:'Guru Nanak Jayanti'},
+  {id:'h07',cat:'holiday',start:'2026-12-25',title:'Christmas Day'},
+  {id:'h08',cat:'holiday',start:'2027-01-14',end:'2027-01-17',title:'Makar Sankranti & Magh Bihu'},
+  {id:'h09',cat:'holiday',start:'2027-03-06',title:'Maha Shivaratri'},
+  {id:'h10',cat:'holiday',start:'2027-03-23',title:'Holi'},
+
+  // Celebrations
+  {id:'c01',cat:'celebration',start:'2026-08-15',title:'Independence Day'},
+  {id:'c02',cat:'celebration',start:'2026-08-28',title:'Raksha Bandhan'},
+  {id:'c03',cat:'celebration',start:'2026-09-05',title:'Teachers’ Day'},
+  {id:'c04',cat:'celebration',start:'2026-09-11',title:'Universal Brotherhood Day'},
+  {id:'c05',cat:'celebration',start:'2026-09-12',title:'Srimanta Sankardeva Tithi'},
+  {id:'c06',cat:'celebration',start:'2026-10-02',title:'Gandhi & Shastri Jayanti'},
+  {id:'c07',cat:'celebration',start:'2027-01-12',title:'Swami Vivekananda Jayanti (National Youth Day)'},
+  {id:'c08',cat:'celebration',start:'2027-01-26',title:'Republic Day / Rani Gaidinliu Jayanti'},
+  {id:'c09',cat:'celebration',start:'2027-02-11',title:'Saraswati Puja'},
+
+  // Observances
+  {id:'o01',cat:'observance',start:'2026-05-09',title:'Ravindra Jayanti'},
+  {id:'o02',cat:'observance',start:'2026-07-29',title:'Guru Purnima'},
+  {id:'o03',cat:'observance',start:'2026-09-01',title:'Madhavdeva Tithi'},
+  {id:'o04',cat:'observance',start:'2026-09-04',title:'Janmashtami'},
+  {id:'o05',cat:'observance',start:'2026-10-28',title:'Sister Nivedita Jayanti'},
+  {id:'o06',cat:'observance',start:'2026-11-19',title:'Sadhana Diwas'},
+  {id:'o07',cat:'observance',start:'2026-11-24',title:'Lachit Diwas'},
+  {id:'o08',cat:'observance',start:'2026-12-02',title:'Asom Diwas'},
+  {id:'o09',cat:'observance',start:'2026-12-20',title:'Gita Jayanti'},
+  {id:'o10',cat:'observance',start:'2026-12-22',title:'Sarada Maa Jayanti'},
+  {id:'o11',cat:'observance',start:'2026-12-25',end:'2027-01-12',title:'Samartha Bharat Parva'},
+  {id:'o12',cat:'observance',start:'2027-01-23',title:'Netaji Jayanti (Parakram Divas)'},
+
+  // Restricted holidays
+  {id:'r01',cat:'restricted',start:'2026-10-18',title:'Kati Bihu',details:'Restricted holiday. The source notes that this date falls within the Durga Puja holidays.'},
+  {id:'r02',cat:'restricted',start:'2026-11-07',title:'Tokhu Emong',details:'Restricted holiday; subject to selection under VKSPV guidelines.'},
+  {id:'r03',cat:'restricted',start:'2026-11-15',title:'Chhath Puja',details:'Restricted holiday; subject to selection under VKSPV guidelines.'},
+  {id:'r04',cat:'restricted',start:'2026-11-15',title:'Birsa Munda Jayanti (Gaurav Diwas)',details:'Restricted holiday; subject to selection under VKSPV guidelines.'},
+  {id:'r05',cat:'restricted',start:'2027-01-12',title:'Bathow Puja',details:'Restricted holiday; subject to selection under VKSPV guidelines.'},
+  {id:'r06',cat:'restricted',start:'2027-01-27',title:'Busu Dima',details:'Restricted holiday; subject to selection under VKSPV guidelines.'},
+  {id:'r07',cat:'restricted',start:'2027-01-31',title:'Me-Dam-Me-Phi',details:'Restricted holiday; subject to selection under VKSPV guidelines.'},
+  {id:'r08',cat:'restricted',start:'2027-02-03',title:'Ali-Aye-Lingang',details:'Restricted holiday; subject to selection under VKSPV guidelines.'},
+
+  // Common programmes
+  {id:'p01',cat:'programme',start:'2026-04-30',title:'Core Team Meeting / Meeting of All RAOs',venue:'VK Assam Prant - Karyalaya, Guwahati',audience:'VKSPV / RAOs',details:'Core Team Meeting of VKSPV, Guwahati and Meeting of All RAOs, VKSPV, Guwahati; scheduled in the 1st half / 2nd half.'},
+  {id:'p02',cat:'programme',start:'2026-05-03',end:'2026-05-05',title:'Teachers’ Orientation Camp - Social Science',venue:'VKV Tezpur',audience:'Social Science teachers',reporting:'02/05/2026, evening'},
+  {id:'p03',cat:'programme',start:'2026-05-10',end:'2026-05-12',title:'Teachers’ Orientation Camp - Science',venue:'VKV Tinsukia',audience:'Science teachers',reporting:'09/05/2026, evening'},
+  {id:'p04',cat:'programme',start:'2026-05-17',end:'2026-05-19',title:'Teachers’ Orientation Camp - Mathematics',venue:'VKV Ramnagar, Silchar',audience:'Mathematics teachers',reporting:'18/05/2026, evening',sourceAlert:'The reporting date printed in the source falls within the programme dates; it has been retained exactly as printed.'},
+  {id:'p05',cat:'programme',start:'2026-05-24',end:'2026-05-26',title:'Teachers’ Orientation Camp - Sanskrit',venue:'VKV Nalbari',audience:'Sanskrit teachers',reporting:'23/05/2026, evening'},
+  {id:'p06',cat:'programme',start:'2026-05-30',end:'2026-06-01',title:'Teachers’ Orientation Camp - Assamese',venue:'VKV Golaghat',audience:'Assamese teachers',reporting:'29/05/2026, evening'},
+  {id:'p07',cat:'programme',start:'2026-06-08',end:'2026-06-12',title:'Vyaktitwa Vikash Shibir for Class VI (Non-Residential PDC)',venue:'Respective Vidyalaya',audience:'Class VI'},
+  {id:'p08',cat:'programme',start:'2026-06-13',end:'2026-06-14',title:'Workshop for Head of Vidyalayas - Setting of Question Papers',venue:'Anandalaya Bhawan, Dibrugarh',audience:'Heads of Vidyalayas',reporting:'13/06/2026, morning',details:'Workshop on monitoring of “Setting of Question Papers”.'},
+  {id:'p09',cat:'programme',start:'2026-07-04',end:'2026-07-05',title:'Principals’ Meet',venue:'VKV Kajalgaon',audience:'Principals',reporting:'03/07/2026'},
+  {id:'p10',cat:'programme',start:'2026-07-06',title:'Core Team Meeting of VKSPV, Guwahati',venue:'VKV Kajalgaon',audience:'Core Team'},
+  {id:'p11',cat:'programme',start:'2026-07-31',end:'2026-08-02',title:'Teachers’ Orientation Camp - 12 to 16 Years of Service',venue:'Anandalaya Bhawan, Dibrugarh',audience:'Teachers completing 12-16 years of service as on 01/04/2026',reporting:'30/07/2026, evening'},
+  {id:'p12',cat:'programme',start:'2026-10-10',title:'Core Team Meeting / Meeting of All RAOs',venue:'VKV Dibrugarh',audience:'VKSPV / RAOs',details:'Core Team Meeting of VKSPV, Guwahati and Meeting of All RAOs, VKSPV, Guwahati; scheduled in the 1st half / 2nd half.'},
+  {id:'p13',cat:'programme',start:'2026-10-28',title:'Bhagini Nivedita Nibandha Lekhan Spardha',venue:'Respective Vidyalaya',audience:'Students',details:'Essay Writing Competition.'},
+  {id:'p14',cat:'programme',start:'2026-11-22',end:'2026-11-25',title:'Ganit Prajna Samvardhan (GPS for Achievers)',venue:'VKV Golaghat',audience:'Selected achievers'},
+  {id:'p15',cat:'programme',start:'2026-12-10',end:'2026-12-12',title:'Chote Scientist Workshop for Selected Students',venue:'VKV Tinsukia',audience:'Selected students'},
+  {id:'p16',cat:'programme',start:'2026-12-15',title:'Gita Jnana Yajna',venue:'VKV Tingrai',audience:'Participants',details:'Gita Chanting Competition.'},
+  {id:'p17',cat:'programme',start:'2026-12-17',title:'Core Team Meeting of VKSPV, Guwahati',venue:'VK Assam Prant - Karyalaya, Guwahati',audience:'Core Team'},
+  {id:'p18a',cat:'programme',start:'2027-01-20',end:'2027-01-21',title:'Half-Yearly Principals’ Meet - Cluster 1',venue:'VKV (NEEPCO) Bokuloni',audience:'Principals',details:'Cluster: Tinsukia, Dibrugarh, Bokuloni, Baragolai, Dhemaji, Tingrai, Sivasagar, Sadiya, Sissiborgaon.'},
+  {id:'p18b',cat:'programme',start:'2027-01-23',end:'2027-01-24',title:'Half-Yearly Principals’ Meet - Cluster 2',venue:'VKV (NEEPCO) Doyang',audience:'Principals',details:'Cluster: Golaghat, Doyang, Majuli, Nayabazar, Khakthati, Bokakhat.'},
+  {id:'p18c',cat:'programme',start:'2027-01-27',end:'2027-01-28',title:'Half-Yearly Principals’ Meet - Cluster 3',venue:'VKV (NEEPCO) Umrangso',audience:'Principals',details:'Cluster: Umrangso, RN Silchar, Badarpur, Borojalenga, Tumpeng, Jirkending.'},
+  {id:'p18d',cat:'programme',start:'2027-01-29',end:'2027-01-30',title:'Half-Yearly Principals’ Meet - Nalbari Cluster',venue:'VKV Suklai',audience:'Principals',details:'Cluster: Nalbari, Kajalgaon, Suklai, Tezpur, Mangaldoi.'},
+  {id:'p19',cat:'programme',start:'2027-02-01',title:'Core Team Meeting of VKSPV, Guwahati',venue:'VK Assam Prant - Karyalaya, Guwahati',audience:'Core Team'},
+  {id:'p20',cat:'programme',start:'2027-03-07',title:'RAO Meeting of VKSPV, Guwahati',venue:'Anandalaya Bhawan, Dibrugarh',audience:'RAOs'}
+].sort((a,b)=>a.start.localeCompare(b.start) || a.title.localeCompare(b.title));
+
+const sessionStart = new Date('2026-04-01T00:00:00');
+const sessionEnd = new Date('2027-04-22T00:00:00');
+const fmtMonth = new Intl.DateTimeFormat('en-IN',{month:'long',year:'numeric'});
+let activeCategory='all';
+let searchTerm='';
+let currentMonth;
+let selectedDay;
+
+function parseDate(s){return new Date(s+'T00:00:00')}
+function ymd(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function displayDate(s){const m=String(s||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?`${m[3]}/${m[2]}/${m[1]}`:String(s||'')}
+function inputDate(s){const m=String(s||'').trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/);if(!m)return'';const iso=`${m[3]}-${m[2]}-${m[1]}`,d=parseDate(iso);return !isNaN(d)&&ymd(d)===iso?iso:''}
+function daysBetween(a,b){return Math.round((parseDate(b)-parseDate(a))/86400000)+1}
+function dateText(ev){
+  if(ev.dateLabel) return ev.dateLabel;
+  if(!ev.end || ev.end===ev.start) return displayDate(ev.start);
+  return `${displayDate(ev.start)} - ${displayDate(ev.end)}`;
+}
+function matches(ev){
+  const catOk=activeCategory==='all'||ev.cat===activeCategory;
+  const hay=[ev.title,ev.venue,ev.audience,ev.details,ev.reporting,CATEGORY[ev.cat].label].filter(Boolean).join(' ').toLowerCase();
+  return catOk && (!searchTerm || hay.includes(searchTerm));
+}
+function colorStyle(ev){return `--event-color:${CATEGORY[ev.cat].color}`}
+function esc(s=''){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+
+function renderFilters(){
+  const root=document.getElementById('filters');
+  const cats=[['all','All'],...Object.entries(CATEGORY).map(([k,v])=>[k,v.label])];
+  root.innerHTML=cats.map(([k,label])=>`<button type="button" class="filter-chip ${activeCategory===k?'active':''}" data-cat="${k}">${esc(label)}</button>`).join('');
+  root.querySelectorAll('button').forEach(btn=>btn.addEventListener('click',()=>{activeCategory=btn.dataset.cat;renderAll();}));
+}
+function renderStats(){
+  const uniqueDates=new Set(events.flatMap(e=>[e.start,e.end].filter(Boolean))).size;
+  const holidayCount=events.filter(e=>e.cat==='holiday').length;
+  const examCount=events.filter(e=>e.cat==='exam').length;
+  const programmeCount=events.filter(e=>e.cat==='programme').length;
+  document.getElementById('stats').innerHTML=`
+    <div class="stat"><b>${events.length}</b><span>Calendar entries</span></div>
+    <div class="stat"><b>${programmeCount}</b><span>Common programme entries</span></div>
+    <div class="stat"><b>${examCount}</b><span>Assessment windows</span></div>
+    <div class="stat"><b>${holidayCount}</b><span>Official holiday entries</span></div>`;
+}
+function metaHtml(ev){
+  const bits=[];
+  bits.push(`<span class="category-pill">${esc(CATEGORY[ev.cat].label)}</span>`);
+  if(ev.audience) bits.push(`<span class="meta-pill">${esc(ev.audience)}</span>`);
+  if(ev.venue) bits.push(`<span class="meta-pill">📍 ${esc(ev.venue)}</span>`);
+  if(ev.reporting) bits.push(`<span class="meta-pill">Reporting: ${esc(ev.reporting)}</span>`);
+  if(ev.end && ev.end!==ev.start) bits.push(`<span class="meta-pill">${daysBetween(ev.start,ev.end)} days</span>`);
+  return bits.join('');
+}
+function renderFull(){
+  const root=document.getElementById('fullView');
+  const filtered=events.filter(matches);
+  const groups={};
+  filtered.forEach(ev=>{const key=ev.start.slice(0,7);(groups[key]??=[]).push(ev)});
+  if(!filtered.length){root.innerHTML='<div class="panel empty"><strong>No matching events</strong>Try another category or search.</div>';return}
+  root.innerHTML=Object.entries(groups).map(([key,list])=>{
+    const [y,m]=key.split('-').map(Number); const monthName=fmtMonth.format(new Date(y,m-1,1));
+    return `<section class="month-section" id="m-${key}">
+      <div class="month-title"><h2>${monthName}</h2><span class="count">${list.length} ${list.length===1?'entry':'entries'}</span></div>
+      <div class="timeline panel">${list.map(ev=>`<article class="event-row" style="${colorStyle(ev)}">
+        <div class="date-block"><div class="date-main">${esc(ev.dateLabel || displayDate(ev.start))}</div><div class="date-sub">${ev.end&&ev.end!==ev.start?'to '+esc(displayDate(ev.end)):esc(new Intl.DateTimeFormat('en-IN',{weekday:'long'}).format(parseDate(ev.start)))}</div></div>
+        <div class="rail"></div>
+        <div class="event-card" role="button" tabindex="0" data-id="${ev.id}">
+          <h3>${esc(ev.title)}</h3><div class="event-meta">${metaHtml(ev)}</div>
+          ${ev.details?`<div class="event-details">${esc(ev.details)}</div>`:''}
+          ${ev.sourceAlert?`<div class="source-alert">⚠ ${esc(ev.sourceAlert)}</div>`:''}
+        </div></article>`).join('')}</div></section>`
+  }).join('');
+  bindEventCards(root);
+}
+function renderMonth(){
+  const root=document.getElementById('monthGrid');
+  document.getElementById('monthHeading').textContent=fmtMonth.format(currentMonth);
+  const y=currentMonth.getFullYear(),m=currentMonth.getMonth();
+  const first=new Date(y,m,1), last=new Date(y,m+1,0);
+  const mondayIndex=(first.getDay()+6)%7;
+  const gridStart=new Date(y,m,1-mondayIndex);
+  const today=new Date(); today.setHours(0,0,0,0);
+  const dows=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  let html=dows.map(x=>`<div class="dow">${x}</div>`).join('');
+  for(let i=0;i<42;i++){
+    const d=new Date(gridStart);d.setDate(gridStart.getDate()+i);const ds=ymd(d);const inMonth=d.getMonth()===m;
+    const dayEvents=events.filter(ev=>matches(ev)&&ev.start<=ds&&(ev.end||ev.start)>=ds);
+    const starts=dayEvents.filter(ev=>ev.start===ds); const cont=dayEvents.filter(ev=>ev.start!==ds);
+    html+=`<div class="day-cell ${inMonth?'':'outside'} ${d.getTime()===today.getTime()?'today':''}" data-date="${ds}">
+      <div class="day-num"><span>${d.getDate()}</span>${d.getTime()===today.getTime()?'<span class="today-dot"></span>':''}</div>
+      ${starts.slice(0,3).map(ev=>`<button class="cal-event" style="${colorStyle(ev)}" data-id="${ev.id}" title="${esc(ev.title)}">${esc(ev.title)}</button>`).join('')}
+      ${cont.slice(0,2).map(ev=>`<div class="cal-cont" style="${colorStyle(ev)}" title="Continues: ${esc(ev.title)}"></div>`).join('')}
+      ${dayEvents.length>5?`<div class="more">+${dayEvents.length-5} more</div>`:''}
+    </div>`;
+  }
+  root.innerHTML=html;bindEventCards(root);
+  document.querySelectorAll('.day-cell').forEach(cell=>cell.addEventListener('dblclick',()=>{selectedDay=parseDate(cell.dataset.date);document.getElementById('dayPicker').value=cell.dataset.date;showView('day');renderDay();}));
+  document.getElementById('prevMonth').disabled=currentMonth<=new Date(2026,3,1);
+  document.getElementById('nextMonth').disabled=currentMonth>=new Date(2027,3,1);
+}
+function renderDay(){
+  const ds=ymd(selectedDay);document.getElementById('dayPicker').value=displayDate(ds);
+  document.getElementById('dayHeading').textContent=new Intl.DateTimeFormat('en-IN',{weekday:'long'}).format(selectedDay)+' · '+displayDate(ds);
+  const list=events.filter(ev=>matches(ev)&&ev.start<=ds&&(ev.end||ev.start)>=ds);
+  const root=document.getElementById('dayEvents');
+  if(!list.length){
+    const next=events.find(ev=>matches(ev)&&ev.start>ds);
+    root.innerHTML=`<div class="empty"><strong>No scheduled entry for this date.</strong>${next?`Next: ${esc(next.title)} on ${esc(dateText(next))}.`:''}</div>`;return;
+  }
+  root.innerHTML=list.map(ev=>`<article class="day-card" style="${colorStyle(ev)}" data-id="${ev.id}" role="button" tabindex="0">
+    <div class="event-meta">${metaHtml(ev)}</div><h3>${esc(ev.title)}</h3>
+    <p><strong>Date:</strong> ${esc(dateText(ev))}</p>${ev.details?`<p>${esc(ev.details)}</p>`:''}${ev.sourceAlert?`<div class="source-alert">⚠ ${esc(ev.sourceAlert)}</div>`:''}</article>`).join('');
+  bindEventCards(root);
+}
+function bindEventCards(root){
+  root.querySelectorAll('[data-id]').forEach(el=>{
+    const open=()=>openModal(el.dataset.id);
+    el.addEventListener('click',open);el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}})
+  });
+}
+function openModal(id){
+  const ev=events.find(e=>e.id===id);if(!ev)return;
+  const modal=document.getElementById('eventModal');
+  const cat=document.getElementById('modalCategory');cat.textContent=CATEGORY[ev.cat].label;cat.style.background=CATEGORY[ev.cat].color;
+  document.getElementById('modalTitle').textContent=ev.title;
+  document.getElementById('modalBody').innerHTML=`
+    <p><strong>Date:</strong> ${esc(dateText(ev))}</p>
+    ${ev.audience?`<p><strong>Audience / Group:</strong> ${esc(ev.audience)}</p>`:''}
+    ${ev.venue?`<p><strong>Venue:</strong> ${esc(ev.venue)}</p>`:''}
+    ${ev.reporting?`<p><strong>Reporting:</strong> ${esc(ev.reporting)}</p>`:''}
+    ${ev.details?`<p>${esc(ev.details)}</p>`:''}
+    ${ev.sourceAlert?`<div class="source-alert">⚠ ${esc(ev.sourceAlert)}</div>`:''}`;
+  modal.classList.add('open');
+}
+function closeModal(){document.getElementById('eventModal').classList.remove('open')}
+function showView(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(name+'View').classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.view===name));
+  if(name==='full')renderFull();if(name==='month')renderMonth();if(name==='day')renderDay();
+}
+function renderAll(){renderFilters();renderFull();renderMonth();renderDay()}
+
+async function loadSavedCalendar(user){
+  try{
+    const profileSnap=await getDoc(doc(db,'authorizedUsers',user.uid));
+    const admin=profileSnap.exists()&&profileSnap.data().active===true&&profileSnap.data().role==='admin';
+    let snap;
+    try{snap=await getDoc(doc(db,'annualCalendar','current'))}
+    catch(e){
+      if(!admin){document.getElementById('calendarShell').style.display='none';document.getElementById('accessGate').style.display='block';document.getElementById('accessMessage').textContent='The Annual Calendar is currently turned off by the Admin.';return}
+      throw e;
+    }
+    const visible=!snap.exists()||snap.data().visible!==false;
+    if(!visible&&!admin){document.getElementById('calendarShell').style.display='none';document.getElementById('accessGate').style.display='block';document.getElementById('accessMessage').textContent='The Annual Calendar is currently turned off by the Admin.';return}
+    if(snap.exists()&&Array.isArray(snap.data().events)){
+      events=snap.data().events.filter(ev=>ev&&ev.id&&ev.title&&ev.start&&CATEGORY[ev.cat]).sort((a,b)=>a.start.localeCompare(b.start)||a.title.localeCompare(b.title));
+      document.getElementById('calendarSource').textContent=visible?'Saved calendar · '+events.length+' entries':'Admin preview · hidden from staff';
+      renderStats();renderAll();
+    }else document.getElementById('calendarSource').textContent='Official baseline · '+events.length+' entries';
+    document.getElementById('accessGate').style.display='none';document.getElementById('calendarShell').style.display='block';
+  }catch(e){
+    document.getElementById('calendarShell').style.display='none';document.getElementById('accessGate').style.display='block';document.getElementById('accessMessage').textContent='The saved Annual Calendar could not be opened. Please return to the Timetable Home and try again.';
+  }
+}
+
+(function init(){
+  const now=new Date();now.setHours(0,0,0,0);
+  selectedDay=(now>=sessionStart&&now<=sessionEnd)?now:new Date(sessionStart);
+  currentMonth=new Date(selectedDay.getFullYear(),selectedDay.getMonth(),1);
+  renderStats();renderFilters();renderFull();renderMonth();renderDay();
+  document.querySelectorAll('.tab-btn').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
+  document.getElementById('fullBtn').addEventListener('click',()=>{showView('full');window.scrollTo({top:document.getElementById('fullView').offsetTop-100,behavior:'smooth'})});
+  document.getElementById('todayBtn').addEventListener('click',()=>{const t=new Date();t.setHours(0,0,0,0);selectedDay=t;currentMonth=new Date(t.getFullYear(),t.getMonth(),1);showView('day')});
+  document.getElementById('printBtn').addEventListener('click',()=>window.print());
+  document.getElementById('homeBtn').addEventListener('click',()=>location.href='index.html?v=66.0');
+  document.getElementById('searchInput').addEventListener('input',e=>{searchTerm=e.target.value.trim().toLowerCase();renderAll()});
+  document.getElementById('prevMonth').addEventListener('click',()=>{currentMonth=new Date(currentMonth.getFullYear(),currentMonth.getMonth()-1,1);renderMonth()});
+  document.getElementById('nextMonth').addEventListener('click',()=>{currentMonth=new Date(currentMonth.getFullYear(),currentMonth.getMonth()+1,1);renderMonth()});
+  document.getElementById('dayPicker').addEventListener('change',e=>{const iso=inputDate(e.target.value);if(!iso||iso<'2026-04-01'||iso>'2027-04-22'){alert('Enter a valid date between 01/04/2026 and 22/04/2027 in dd/mm/yyyy format.');e.target.value=displayDate(ymd(selectedDay));return}selectedDay=parseDate(iso);currentMonth=new Date(selectedDay.getFullYear(),selectedDay.getMonth(),1);renderDay()});
+  document.getElementById('modalClose').addEventListener('click',closeModal);
+  document.getElementById('eventModal').addEventListener('click',e=>{if(e.target.id==='eventModal')closeModal()});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+  const q=new URLSearchParams(location.search).get('view'); if(['day','month','full'].includes(q))showView(q);
+  let loaded=false;onAuthStateChanged(auth,user=>{if(user&&!loaded){loaded=true;loadSavedCalendar(user)}else if(!user){loaded=false;document.getElementById('calendarShell').style.display='none';document.getElementById('accessGate').style.display='block';document.getElementById('accessMessage').textContent='Please sign in through Timetable Home to view the Annual Calendar.'}});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+/* VKVTT v66.2 final six-point visual corrections */
+/* Keep the school crest's natural tall oval instead of a white rectangle. */
+html.v66-ui header .logo{
+  object-fit:cover!important;
+  border-radius:50%!important;
+  background:#fff!important;
+  padding:2px!important;
+  overflow:hidden!important;
+}
+
+/* Homepage operational tiles: retain the approved v66.0 grid-paper corner motif. */
+html.v66-ui .myGrid>button,
+html.v66-ui .nav>button,
+html.v66-ui .opsGrid>button,
+html.v66-ui .homebar>button{
+  position:relative;
+  overflow:hidden;
+  background:#fff!important;
+  color:#103a56!important;
+}
+html.v66-ui .myGrid>button::after,
+html.v66-ui .nav>button::after,
+html.v66-ui .opsGrid>button::after,
+html.v66-ui .homebar>button::after{
+  content:"";
+  position:absolute;
+  right:-9px;
+  bottom:-19px;
+  width:82px;
+  height:82px;
+  opacity:.72;
+  background-image:linear-gradient(#dbe7ed 1px,transparent 1px),linear-gradient(90deg,#dbe7ed 1px,transparent 1px);
+  background-size:14px 14px;
+  transform:rotate(10deg);
+  pointer-events:none;
+}
+html.v66-ui .myGrid>button.active,
+html.v66-ui .nav>button.active,
+html.v66-ui .opsGrid>button.active,
+html.v66-ui .homebar>button.active,
+html.v66-ui .myGrid>button[aria-pressed="true"],
+html.v66-ui .nav>button[aria-pressed="true"],
+html.v66-ui .opsGrid>button[aria-pressed="true"]{
+  border:2px solid #c88a18!important;
+  border-left:4px solid #c88a18!important;
+  background:#fffaf0!important;
+  color:#103a56!important;
+  box-shadow:0 0 0 2px rgba(200,138,24,.12),0 8px 22px rgba(11,43,66,.07)!important;
+}
+
+/* Admin Dashboard: bring back the more distinctive v66.0 designed-card treatment. */
+html.v66-ui body.adminDashboardPage .tiles{gap:14px!important}
+html.v66-ui body.adminDashboardPage .tile{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  min-height:118px;
+  padding:18px 20px!important;
+  border:1px solid #d3e0e6!important;
+  border-left:4px solid #1f668c!important;
+  border-radius:16px!important;
+  background:linear-gradient(145deg,#ffffff 0%,#fbfdfe 72%,#f2f8fa 100%)!important;
+  box-shadow:0 7px 22px rgba(11,43,66,.065)!important;
+  transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease!important;
+}
+html.v66-ui body.adminDashboardPage .tile:nth-child(3n+2){border-left-color:#247548!important}
+html.v66-ui body.adminDashboardPage .tile:nth-child(3n){border-left-color:#c88a18!important}
+html.v66-ui body.adminDashboardPage .tile::before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  right:-18px;
+  bottom:-25px;
+  width:126px;
+  height:104px;
+  border-radius:22px;
+  opacity:.78;
+  background:
+    linear-gradient(rgba(31,102,140,.11) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(31,102,140,.11) 1px,transparent 1px),
+    linear-gradient(145deg,rgba(233,243,248,.2),rgba(233,243,248,.72));
+  background-size:15px 15px,15px 15px,100% 100%;
+  transform:rotate(9deg);
+  pointer-events:none;
+}
+html.v66-ui body.adminDashboardPage .tile::after{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  right:24px;
+  top:16px;
+  width:38px;
+  height:38px;
+  border:1px solid rgba(31,102,140,.12);
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(200,138,24,.08),transparent 66%);
+  pointer-events:none;
+}
+html.v66-ui body.adminDashboardPage .tile b{position:relative;z-index:1;font-size:1.02rem!important}
+html.v66-ui body.adminDashboardPage .tile span{position:relative;z-index:1;display:block;max-width:88%;line-height:1.45!important}
+html.v66-ui body.adminDashboardPage .tile:hover{
+  transform:translateY(-2px);
+  border-color:#9abac9!important;
+  box-shadow:0 11px 26px rgba(11,43,66,.095)!important;
+}
+
+/* Optional identity ribbon injected by the runtime patch. */
+html.v66-ui body.adminDashboardPage .v662-admin-ribbon{
+  position:relative;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(260px,390px);
+  align-items:center;
+  min-height:120px;
+  overflow:hidden;
+  margin:12px 0 16px;
+  border:1px solid #cbdde6;
+  border-radius:16px;
+  background:linear-gradient(108deg,#fff,#eef7f9);
+}
+html.v66-ui body.adminDashboardPage .v662-admin-ribbon::before{content:"";position:absolute;inset:0 auto 0 0;width:5px;background:linear-gradient(#c88a18,#e0ad45 52%,#1f668c 52%)}
+html.v66-ui body.adminDashboardPage .v662-admin-copy{padding:20px 18px 20px 24px}
+html.v66-ui body.adminDashboardPage .v662-admin-copy small{display:block;color:#a86f0c!important;font-size:.68rem;font-weight:850;letter-spacing:.12em;text-transform:uppercase}
+html.v66-ui body.adminDashboardPage .v662-admin-copy strong{display:block;margin-top:4px;color:#0b2b42;font-size:1.35rem}
+html.v66-ui body.adminDashboardPage .v662-admin-copy p{margin:5px 0 0;color:#607383}
+html.v66-ui body.adminDashboardPage .v662-admin-art{width:100%;height:120px;color:#1f668c;opacity:.7}
+
+/* Wide enough for admin work, but with deliberate breathing room on desktop. */
+@media (min-width:1100px){
+  html.v66-ui body.adminDashboardPage header .wrap,
+  html.v66-ui body.adminDashboardPage main.wrap{
+    width:calc(100% - 72px)!important;
+    max-width:1760px!important;
+    margin-inline:auto!important;
+    padding-left:0!important;
+    padding-right:0!important;
+  }
+  html.v66-ui body.adminDashboardPage main.wrap>.card{margin-left:0!important;margin-right:0!important}
+}
+@media (max-width:1099px){
+  html.v66-ui body.adminDashboardPage header .wrap,
+  html.v66-ui body.adminDashboardPage main.wrap{width:calc(100% - 32px)!important;margin-inline:auto!important}
+}
+@media(max-width:760px){
+  html.v66-ui body.adminDashboardPage .v662-admin-ribbon{grid-template-columns:1fr}
+  html.v66-ui body.adminDashboardPage .v662-admin-art{height:95px}
+  html.v66-ui body.adminDashboardPage .tile span{max-width:100%}
+}

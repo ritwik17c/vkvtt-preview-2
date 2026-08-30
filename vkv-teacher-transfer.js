@@ -1,6 +1,6 @@
 /* Preview 2 · Teacher Timetable Transfer. Single owner. */
 (()=>{'use strict';
-const P2='https://ritwik17c.github.io/vkvtt-preview-2/';
+const P2='./';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const clone=x=>JSON.parse(JSON.stringify(x));
 const norm=v=>String(v||'').trim();

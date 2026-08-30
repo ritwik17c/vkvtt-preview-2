@@ -2,7 +2,7 @@ import{initializeApp,getApps,getApp}from'https://www.gstatic.com/firebasejs/12.1
 import{getAuth,GoogleAuthProvider,signInWithPopup,signOut,setPersistence,browserLocalPersistence}from'https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js';
 import{getFirestore,doc,getDoc,getDocs,collection}from'https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore-lite.js';
 const cfg={apiKey:'AIzaSyDheZpyXghd1aQ9_RLhwpacVriG__wNZW4',authDomain:'vkv-nalbari-timetable.firebaseapp.com',projectId:'vkv-nalbari-timetable',storageBucket:'vkv-nalbari-timetable.firebasestorage.app',messagingSenderId:'791432856951',appId:'1:791432856951:web:61324065a54bef30f98d72'};
-const app=getApps().length?getApp():initializeApp(cfg),auth=getAuth(app),db=getFirestore(app),provider=new GoogleAuthProvider(),P2='https://ritwik17c.github.io/vkvtt-preview-2/',$=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+const app=getApps().length?getApp():initializeApp(cfg),auth=getAuth(app),db=getFirestore(app),provider=new GoogleAuthProvider(),P2='./',$=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
 await setPersistence(auth,browserLocalPersistence).catch(()=>{});if(auth.authStateReady)await auth.authStateReady().catch(()=>{});
 let U=null,P={},M={},STAFF=null,CAT='teaching';
 const norm=v=>String(v??'').trim().toLowerCase().replace(/[\s_-]+/g,''),em=v=>String(v||'').trim().toLowerCase();

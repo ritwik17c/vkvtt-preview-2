@@ -1,0 +1,29 @@
+/* v66.2 precise visual alignment corrections */
+
+/* Homepage school identity: preserve the source logo's own oval geometry.
+   Do not impose a circular white CSS background around it. */
+header .logo{
+  background:transparent!important;
+  border-radius:0!important;
+  padding:0!important;
+  object-fit:contain!important;
+  box-shadow:none!important;
+}
+@media (min-width:701px){
+  header .logo{width:92px!important;height:108px!important;flex:0 0 92px!important}
+}
+@media (max-width:700px){
+  header .logo{width:66px!important;height:78px!important;flex:0 0 66px!important}
+}
+
+/* Admin Dashboard: the top page heading and the heading inside the widened
+   dashboard card share the same left visual axis on wide screens. */
+@media (min-width:1100px){
+  body.adminDashboardPage header .wrap{
+    max-width:none!important;
+    width:100%!important;
+    margin:0!important;
+    padding-left:14px!important;
+    padding-right:14px!important;
+  }
+}

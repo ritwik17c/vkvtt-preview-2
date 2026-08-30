@@ -1,0 +1,280 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VKV Nalbari · Administration · Schedule Profiles</title>
+<style>
+:root{--ink:#17364f;--muted:#617685;--line:#cbdce5;--bg:#edf6f1;--deep:#236d99;--green:#2d7d46;--greenbg:#e7f6ea;--amber:#7a5b18;--amberbg:#fff7df;--red:#8b2d2d;--redbg:#fdecec}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#263d4e;font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif}
+header{background:#1d638e;color:#fff;padding:18px 16px}.wrap{max-width:1200px;margin:auto}.head{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+h1{font-size:1.45rem;margin:0}.sub{opacity:.92;margin-top:4px}main{padding:18px 14px 60px}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;margin:14px 0;box-shadow:0 4px 16px #17324d0e}
+h2{margin:0 0 8px;color:var(--ink);font-size:1.18rem}h3{color:var(--ink);margin-bottom:7px}
+.help{color:var(--muted);font-size:.88rem;line-height:1.5}.status{padding:11px 13px;border-radius:12px;background:#eef7fb;margin:10px 0;line-height:1.45}
+.ok{background:var(--greenbg);color:#245c34;border:1px solid #a9d4b2}.warn{background:var(--amberbg);color:var(--amber);border:1px solid #e4c873}.error{background:var(--redbg);color:var(--red);border:1px solid #e5b7b7}
+button,.btn{font:inherit;font-weight:750;border:1px solid #b9ced9;border-radius:11px;padding:10px 13px;background:#e7f2f7;color:var(--ink);cursor:pointer;text-decoration:none}
+button:disabled{cursor:not-allowed;opacity:.55}.primary{background:var(--deep);color:#fff;border-color:var(--deep)}.green{background:var(--greenbg);color:#245c34;border-color:#a9d4b2}.danger{background:var(--redbg);color:var(--red);border-color:#e5b7b7}.small{padding:6px 8px;font-size:.78rem}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.profiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.profile{border:1px solid #d4e1e8;border-radius:14px;padding:13px;background:#fbfefd;cursor:pointer}.profile:hover{border-color:#92b8cd}.profile.active{background:#e7f6ea;border-color:#8fc59b}.profile.selected{outline:3px solid #b9d8e8}
+.profile b{display:block;color:var(--ink)}.profile span{font-size:.8rem;color:var(--muted)}
+label{display:block;font-size:.82rem;color:var(--muted);margin:7px 0 5px}input,select{width:100%;padding:10px;border:1px solid #c7d5de;border-radius:10px;background:#fbfefd;font:inherit}
+.timeGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.timeItem{border:1px solid #dce7ec;border-radius:11px;padding:9px;background:#fbfefd}
+.matrixWrap{overflow:auto;max-height:62vh;border:1px solid #d9e5eb;border-radius:12px;margin-top:10px}table{border-collapse:separate;border-spacing:0;width:100%;min-width:820px}
+th,td{border-right:1px solid #e0e9ee;border-bottom:1px solid #e0e9ee;padding:7px;text-align:center;font-size:.82rem;background:#fff}th{position:sticky;top:0;background:#edf5f9;z-index:2;color:var(--ink)}
+th:first-child,td:first-child{position:sticky;left:0;background:#f7fbfc;z-index:1;text-align:left;font-weight:750;min-width:150px}th:first-child{z-index:3;background:#edf5f9}
+td input[type=checkbox]{width:18px;height:18px;cursor:pointer}.rowBtns{display:flex;gap:4px;margin-top:4px}.rowBtns button{padding:3px 6px;font-size:.7rem}
+#app{display:none}.historyItem{border:1px solid #dbe6eb;border-radius:11px;padding:9px;margin:7px 0;background:#fbfefd;font-size:.84rem}
+@media(max-width:850px){.profiles{grid-template-columns:1fr 1fr}.timeGrid{grid-template-columns:1fr 1fr}.grid2{grid-template-columns:1fr}}
+@media(max-width:520px){.profiles,.timeGrid{grid-template-columns:1fr}}
+</style>
+<script>
+(function(){
+  const CURRENT_APP_VERSION = '66.0';
+  try{
+    const u=new URL(window.location.href);
+    if(u.searchParams.get('v')!==CURRENT_APP_VERSION){
+      u.searchParams.set('v',CURRENT_APP_VERSION);
+      history.replaceState(null,'',u.pathname+u.search+u.hash);
+    }
+  }catch(_){}
+})();
+</script>
+
+<link rel="stylesheet" href="v66-design-system.css?v=66.0-school-identity-1"><script src="v66-ui.js?v=66.0-school-identity-1" defer></script>
+<link rel="stylesheet" href="v66-final-sixpoint.css?v=66.2-final-1">
+<link rel="stylesheet" href="v66-premium-unified.css?v=66.2-premium-1">
+</head>
+<body>
+<header><div class="wrap head"><div><h1>VKV Nalbari · Administration</h1><div class="sub">🗓 Schedule Profiles</div></div><button id="backAdmin">← Admin Dashboard</button></div></header>
+<main class="wrap">
+<div class="card" id="gate"><h2>Administrator Verification</h2><div id="gateMsg" class="status">Checking Admin access…</div><button id="signInBtn" style="display:none">Sign in with Google</button></div>
+
+<div id="app">
+  <div class="card">
+    <h2>Schedule Profiles</h2>
+    <div class="help">A profile changes operational period timings and which class-period slots are active. It never deletes or rewrites the Master Timetable assignments underneath.</div>
+    <div id="activeBanner" class="status ok"></div>
+    <div class="actions">
+      <button id="newProfile">＋ New Profile from Normal</button>
+      <button id="duplicateProfile">⧉ Duplicate Selected</button>
+    </div>
+    <div id="profiles" class="profiles"></div>
+  </div>
+
+  <div class="card">
+    <h2>Edit Selected Profile</h2>
+    <div class="grid2">
+      <div><label>Profile Name</label><input id="profileName" placeholder="e.g. Heat Wave Timings"></div>
+      <div><label>Profile ID</label><input id="profileId" readonly></div>
+    </div>
+
+    <h3>Period Timings</h3>
+    <div class="help">Use free-text timings such as <b>7:30–8:00</b>. These timings will appear in timetable, proxy, print and “Where Now?” views while the profile is active.</div>
+    <div id="timeGrid" class="timeGrid"></div>
+
+    <h3>Custom Class–Period Schedule</h3>
+    <div class="help">Every cell is independent. Untick an entire class or only selected periods. No Junior/Senior grouping is assumed.</div>
+    <div class="actions">
+      <button id="enableAll">✓ Enable All Cells</button>
+      <button id="disableAll">○ Disable All Cells</button>
+    </div>
+    <div class="matrixWrap"><table id="matrix"></table></div>
+
+    <div class="actions" style="margin-top:14px">
+      <button class="primary" id="saveProfile">💾 Save Profile</button>
+      <button class="green" id="activateProfile">✓ Activate This Profile</button>
+      <button class="danger" id="deleteProfile">🗑 Delete Profile</button>
+    </div>
+    <div id="saveMsg" class="status" style="display:none"></div>
+  </div>
+
+  <div class="card">
+    <h2>Recent Schedule Activity</h2>
+    <div id="scheduleHistory"></div>
+  </div>
+</div>
+</main>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+import{getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged,setPersistence,browserLocalPersistence}from"https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore-lite.js";
+
+const firebaseConfig={apiKey:"AIzaSyDheZpyXghd1aQ9_RLhwpacVriG__wNZW4",authDomain:"vkv-nalbari-timetable.firebaseapp.com",projectId:"vkv-nalbari-timetable",storageBucket:"vkv-nalbari-timetable.firebasestorage.app",messagingSenderId:"791432856951",appId:"1:791432856951:web:61324065a54bef30f98d72"};
+const fb=initializeApp(firebaseConfig),auth=getAuth(fb),db=getFirestore(fb),provider=new GoogleAuthProvider();
+await setPersistence(auth,browserLocalPersistence).catch(()=>{});
+if(typeof auth.authStateReady==='function')await auth.authStateReady().catch(()=>{});
+const $=id=>document.getElementById(id);
+const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const displayDateTime=ms=>{const d=new Date(Number(ms)||0),p=n=>String(n).padStart(2,'0');return `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`};
+
+let user=null,profile=null,masterDoc=null,master=null,selectedId="normal",periods=[];
+
+$('backAdmin').onclick=()=>location.href='admin-dashboard.html?v=66.0';
+$('signInBtn').onclick=()=>signInWithPopup(auth,provider);
+
+onAuthStateChanged(auth,async u=>{
+ user=u;
+ if(!u){$('gateMsg').textContent='Sign in with the Admin Google account.';$('signInBtn').style.display='inline-block';return}
+ $('signInBtn').style.display='none';
+ try{
+   const ps=await getDoc(doc(db,'authorizedUsers',u.uid));
+   if(!ps.exists()||ps.data().active!==true||ps.data().role!=='admin'){
+     $('gateMsg').className='status warn';$('gateMsg').innerHTML='<b>Admin access required.</b><br>'+safe(u.email||'');return;
+   }
+   profile=ps.data();$('gateMsg').className='status ok';$('gateMsg').textContent='Admin verified: '+(u.displayName||profile.name||u.email);
+   await loadMaster();
+   $('app').style.display='block';
+ }catch(e){$('gateMsg').className='status error';$('gateMsg').textContent='Could not load Schedule Profiles: '+(e.message||e)}
+});
+
+function baseClassPeriods(){
+ const out={};
+ for(const c of master.classes||[]){
+   const pat=master.patterns&&Array.isArray(master.patterns[c])?master.patterns[c].map(Number):periods.slice();
+   out[c]=[...new Set(pat)].sort((a,b)=>a-b);
+ }
+ return out;
+}
+function ensureProfiles(){
+ periods=[...new Set([
+   ...Object.keys(master.times||{}).map(Number),
+   ...Object.values(master.patterns||{}).flat().map(Number),
+   ...(master.records||[]).map(r=>Number(r.period))
+ ])].filter(Boolean).sort((a,b)=>a-b);
+
+ if(!master.scheduleProfiles)master.scheduleProfiles={};
+ if(!master.scheduleProfiles.normal){
+   master.scheduleProfiles.normal={
+     id:'normal',name:'Normal Schedule',
+     times:{...(master.times||{})},
+     classPeriods:baseClassPeriods(),
+     createdAtMs:Date.now()
+   };
+ }
+ if(!master.activeScheduleProfileId)master.activeScheduleProfileId='normal';
+ if(!Array.isArray(master.scheduleHistory))master.scheduleHistory=[];
+ if(!master.scheduleProfiles[master.activeScheduleProfileId])master.activeScheduleProfileId='normal';
+ selectedId=master.activeScheduleProfileId||'normal';
+}
+async function loadMaster(){
+ const snap=await getDoc(doc(db,'master','current'));
+ if(!snap.exists())throw new Error('Master timetable not found.');
+ masterDoc=snap.data(); master=structuredClone(masterDoc.data||masterDoc);
+ if(!Array.isArray(master.classes)||!Array.isArray(master.records))throw new Error('Master timetable structure is incomplete.');
+ ensureProfiles();
+ render();
+}
+
+function selectedProfile(){return master.scheduleProfiles[selectedId]}
+function render(){
+ renderProfiles();renderEditor();renderHistory();
+ const active=master.scheduleProfiles[master.activeScheduleProfileId];
+ $('activeBanner').innerHTML='<b>Active Schedule:</b> '+safe(active?.name||'Normal Schedule')+' <span class="help">('+safe(master.activeScheduleProfileId||'normal')+')</span>';
+}
+function renderProfiles(){
+ const wrap=$('profiles'),activeId=master.activeScheduleProfileId;
+ wrap.innerHTML=Object.values(master.scheduleProfiles).sort((a,b)=>{
+   if(a.id==='normal')return -1;if(b.id==='normal')return 1;return String(a.name).localeCompare(String(b.name))
+ }).map(p=>`<div class="profile ${p.id===activeId?'active':''} ${p.id===selectedId?'selected':''}" data-profile="${safe(p.id)}">
+   <b>${safe(p.name||p.id)}</b><span>${p.id===activeId?'✓ Active schedule':'Click to edit'}</span>
+ </div>`).join('');
+ document.querySelectorAll('[data-profile]').forEach(el=>el.onclick=()=>{selectedId=el.dataset.profile;render()});
+}
+function renderEditor(){
+ const p=selectedProfile();if(!p)return;
+ $('profileName').value=p.name||'';
+ $('profileId').value=p.id||selectedId;
+
+ $('timeGrid').innerHTML=periods.map(n=>`<div class="timeItem"><label>P${n}</label><input class="timeInput" data-period="${n}" value="${safe((p.times||{})[String(n)]??(p.times||{})[n]??master.times?.[String(n)]??'')}" placeholder="e.g. 7:30–8:00"></div>`).join('');
+
+ const head='<tr><th>Class / Section</th>'+periods.map(n=>`<th>P${n}<br><button class="small" data-col-enable="${n}">All</button> <button class="small" data-col-disable="${n}">None</button></th>`).join('')+'</tr>';
+ const body=(master.classes||[]).map(c=>{
+   const has=Object.prototype.hasOwnProperty.call(p.classPeriods||{},c);
+   const active=has?(p.classPeriods[c]||[]).map(Number):(master.patterns?.[c]||periods).map(Number);
+   return `<tr><td>${safe(c)}<div class="rowBtns"><button data-row-enable="${safe(c)}">All</button><button data-row-disable="${safe(c)}">None</button></div></td>`+
+     periods.map(n=>`<td><input type="checkbox" class="matrixCheck" data-class="${safe(c)}" data-period="${n}" ${active.includes(n)?'checked':''}></td>`).join('')+'</tr>';
+ }).join('');
+ $('matrix').innerHTML=head+body;
+
+ document.querySelectorAll('[data-row-enable]').forEach(b=>b.onclick=()=>setRow(b.dataset.rowEnable,true));
+ document.querySelectorAll('[data-row-disable]').forEach(b=>b.onclick=()=>setRow(b.dataset.rowDisable,false));
+ document.querySelectorAll('[data-col-enable]').forEach(b=>b.onclick=()=>setCol(Number(b.dataset.colEnable),true));
+ document.querySelectorAll('[data-col-disable]').forEach(b=>b.onclick=()=>setCol(Number(b.dataset.colDisable),false));
+
+ $('deleteProfile').disabled=selectedId==='normal'||selectedId===master.activeScheduleProfileId;
+ $('activateProfile').disabled=selectedId===master.activeScheduleProfileId;
+ $('saveMsg').style.display='none';
+}
+function setRow(cls,on){document.querySelectorAll(`.matrixCheck[data-class="${CSS.escape(cls)}"]`).forEach(x=>x.checked=on)}
+function setCol(period,on){document.querySelectorAll(`.matrixCheck[data-period="${period}"]`).forEach(x=>x.checked=on)}
+$('enableAll').onclick=()=>document.querySelectorAll('.matrixCheck').forEach(x=>x.checked=true);
+$('disableAll').onclick=()=>document.querySelectorAll('.matrixCheck').forEach(x=>x.checked=false);
+
+function readEditor(){
+ const p=structuredClone(selectedProfile());
+ p.name=$('profileName').value.trim()||p.name||'Custom Schedule';
+ p.times={};
+ document.querySelectorAll('.timeInput').forEach(x=>p.times[String(Number(x.dataset.period))]=x.value.trim());
+ p.classPeriods={};
+ for(const c of master.classes||[]){
+   p.classPeriods[c]=[...document.querySelectorAll('.matrixCheck')].filter(x=>x.dataset.class===c&&x.checked).map(x=>Number(x.dataset.period)).sort((a,b)=>a-b);
+ }
+ p.updatedAtMs=Date.now();
+ return p;
+}
+function pushHistory(action,name,id){
+ master.scheduleHistory.unshift({
+   atMs:Date.now(),action,profileId:id,profileName:name,
+   byUid:user.uid,byName:user.displayName||profile.name||user.email||'Admin',byEmail:user.email||''
+ });
+ if(master.scheduleHistory.length>50)master.scheduleHistory.length=50;
+}
+async function saveMaster(message){
+ await setDoc(doc(db,'master','current'),{
+   data:master,
+   updatedAt:serverTimestamp(),
+   updatedBy:user.uid,
+   updatedByEmail:user.email||''
+ },{merge:true});
+ masterDoc={...masterDoc,data:structuredClone(master)};
+ if(message){$('saveMsg').style.display='block';$('saveMsg').className='status ok';$('saveMsg').innerHTML=message}
+ render();
+}
+$('saveProfile').onclick=async()=>{
+ const p=readEditor();master.scheduleProfiles[selectedId]=p;pushHistory('Profile saved',p.name,p.id);
+ try{await saveMaster('<b>Schedule profile saved.</b> Activation has not changed unless this profile was already active.')}
+ catch(e){$('saveMsg').style.display='block';$('saveMsg').className='status error';$('saveMsg').textContent='Save failed: '+(e.message||e)}
+};
+$('activateProfile').onclick=async()=>{
+ const p=readEditor();master.scheduleProfiles[selectedId]=p;master.activeScheduleProfileId=selectedId;pushHistory('Profile activated',p.name,p.id);
+ try{await saveMaster('<b>'+safe(p.name)+' is now the active schedule.</b><br>The Master Timetable assignments are unchanged. Timetable views will use these timings and active class-period cells after they refresh/reopen.')}
+ catch(e){$('saveMsg').style.display='block';$('saveMsg').className='status error';$('saveMsg').textContent='Activation failed: '+(e.message||e)}
+};
+$('newProfile').onclick=()=>{
+ const normal=structuredClone(master.scheduleProfiles.normal);
+ const id='schedule_'+Date.now();
+ normal.id=id;normal.name='New Custom Schedule';normal.createdAtMs=Date.now();normal.updatedAtMs=Date.now();
+ master.scheduleProfiles[id]=normal;selectedId=id;render();
+};
+$('duplicateProfile').onclick=()=>{
+ const src=readEditor(),id='schedule_'+Date.now();
+ src.id=id;src.name=(src.name||'Schedule')+' Copy';src.createdAtMs=Date.now();src.updatedAtMs=Date.now();
+ master.scheduleProfiles[id]=src;selectedId=id;render();
+};
+$('deleteProfile').onclick=async()=>{
+ if(selectedId==='normal'||selectedId===master.activeScheduleProfileId)return;
+ const p=selectedProfile();if(!confirm('Delete schedule profile "'+(p.name||selectedId)+'"?'))return;
+ delete master.scheduleProfiles[selectedId];pushHistory('Profile deleted',p.name||selectedId,selectedId);selectedId=master.activeScheduleProfileId||'normal';
+ try{await saveMaster('<b>Schedule profile deleted.</b>')}
+ catch(e){alert('Delete failed: '+(e.message||e))}
+};
+function renderHistory(){
+ const h=master.scheduleHistory||[];
+ $('scheduleHistory').innerHTML=h.length?h.map(x=>`<div class="historyItem"><b>${safe(x.action)}</b> — ${safe(x.profileName||x.profileId)}<br><span class="help">${safe(displayDateTime(x.atMs||0))} · ${safe(x.byName||x.byEmail||'Admin')}</span></div>`).join(''):'<div class="status">No Schedule Profile activity recorded yet.</div>';
+}
+</script>
+<script src="v66-final-sixpoint.js?v=66.2-final-1" defer></script>
+</body>
+</html>

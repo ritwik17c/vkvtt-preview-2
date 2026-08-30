@@ -1,6 +1,6 @@
 /* Preview 2 · Canonical Admin Dashboard runtime. One owner for grouping, naming and routes. */
 (()=>{'use strict';
-const P2='https://ritwik17c.github.io/vkvtt-preview-2/',$=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const P2='./',$=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const norm=s=>String(s||'').replace(/[^A-Za-z0-9&]+/g,' ').replace(/\s+/g,' ').trim().toLowerCase();
 function tile(id,icon,title,desc,url){let t=$('#'+id);if(!t){t=document.createElement('div');t.className='tile';t.id=id}t.innerHTML=`<b>${icon} ${title}</b><span>${desc}</span>`;if(url)t.onclick=()=>location.href=url;return t}
 function section(id,title,desc){let s=$('#'+id);if(!s){s=document.createElement('section');s.id=id;s.className='card vkvAdminGroup';s.style.marginTop='16px';s.innerHTML=`<div class="sectionTop"><div><h2 style="margin:0">${title}</h2><div class="help">${desc}</div></div></div><div class="tiles"></div>`}return s}

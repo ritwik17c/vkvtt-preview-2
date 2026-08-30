@@ -1,1 +1,251 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>VKVTT Preview 2 · Timetable Studio</title></head><body><div style="font:16px system-ui;padding:24px">Loading Timetable Studio…</div><script>(async()=>{try{let h=await (await fetch('https://raw.githubusercontent.com/ritwik17c/vkvtt-preview/main/admin-timetable-studio.html?preview2=2',{cache:'no-store'})).text();if(!h||!/Timetable Studio/i.test(h))throw new Error('Timetable Studio source could not be loaded.');h=h.replace('<head>','<head><base href="https://ritwik17c.github.io/vkvtt-preview/">');h=h.replaceAll('href="admin-dashboard.html?v=66.0"','href="https://ritwik17c.github.io/vkvtt-preview-2/admin-dashboard.html"');h=h.replace('</body>','<script src="https://ritwik17c.github.io/vkvtt-preview-2/vkv-route-policy.js?v=871c1ce"><\/script></body>');document.open();document.write(h);document.close()}catch(e){document.body.innerHTML='<p style="padding:24px;font:16px system-ui">Could not load Preview 2 Timetable Studio: '+String(e)+'</p>'}})();</script></body></html>
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>VKV Nalbari · Timetable Studio</title>
+<link rel="stylesheet" href="timetable-studio.css?v=66.0-school-identity-1">
+<script>
+(function(){
+  const VERSION='66.0';
+  try{const u=new URL(location.href);if(u.searchParams.get('v')!==VERSION){u.searchParams.set('v',VERSION);history.replaceState(null,'',u.pathname+u.search+u.hash)}}catch(_){}
+})();
+</script>
+<link rel="stylesheet" href="v66-premium-unified.css?v=66.2-premium-1">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbarInner">
+    <div class="brand">
+      <img class="brandMark" src="school-logo.jpg" alt="Vivekananda Kendra Vidyalaya, Nalbari logo">
+      <div><h1>Timetable Studio</h1><p>VKV Nalbari · Version 66.0</p></div>
+    </div>
+    <div class="topActions">
+      <span id="saveState" class="saveState">No workspace loaded</span>
+      <a class="button quiet" href="admin-dashboard.html?v=66.0">← Admin Dashboard</a>
+    </div>
+  </div>
+</header>
+
+<div id="authGate" class="gate shell">
+  <div class="gateCard">
+    <div class="eyebrow">SECURE ADMINISTRATION</div>
+    <h2>Opening Timetable Studio</h2>
+    <p id="gateMessage">Checking your access…</p>
+    <div class="buttonRow"><button id="signInButton" class="button primary" hidden>Sign in with Google</button><a class="button quiet" href="admin-dashboard.html?v=66.0">Return to Admin Dashboard</a></div>
+  </div>
+</div>
+
+<div id="studioApp" class="studio" hidden>
+  <aside class="sidebar" aria-label="Timetable Studio navigation">
+    <div class="workspaceSummary">
+      <div class="eyebrow">CURRENT WORKSPACE</div>
+      <strong id="sidebarVersionName">Current Master Snapshot</strong>
+      <span id="sidebarVersionStatus" class="statusPill draft">Unsaved</span>
+    </div>
+    <nav>
+      <button class="navButton active" data-tab="library"><span>▦</span> Version Library</button>
+      <button class="navButton" data-tab="components"><span>◇</span> Components</button>
+      <button class="navButton" data-tab="allocations"><span>▤</span> Allocation Cards</button>
+      <button class="navButton" data-tab="parameters"><span>⚙</span> Parameters</button>
+      <button class="navButton" data-tab="generate"><span>✦</span> Generate</button>
+      <button class="navButton" data-tab="editor"><span>▦</span> Visual Editor</button>
+      <button class="navButton" data-tab="validation"><span>✓</span> Validate & Publish</button>
+    </nav>
+    <div class="sidebarNote">Generated timetables remain stored independently. Nothing changes the live timetable until the Principal activates a validated version.</div>
+  </aside>
+
+  <main class="workspace">
+    <section class="pane active" data-pane="library">
+      <div class="paneHead">
+        <div><div class="eyebrow">VERSION CONTROL</div><h2>Timetable Version Library</h2><p>Create, retain, compare and reactivate complete timetable versions.</p></div>
+        <button id="newFromMaster" class="button quiet">New Workspace from Active Master</button>
+      </div>
+
+      <div class="heroGrid">
+        <article class="heroCard activeMaster">
+          <div class="cardLabel">ACTIVE OPERATIONAL MASTER</div>
+          <h3 id="activeMasterName">Loading…</h3>
+          <p id="activeMasterMeta">Reading the currently active timetable.</p>
+          <div id="activeMasterStats" class="stats"></div>
+        </article>
+        <article class="heroCard workspaceCard">
+          <div class="cardLabel">OPEN WORKSPACE</div>
+          <label for="versionName">Timetable name</label>
+          <input id="versionName" maxlength="90" placeholder="e.g. Academic Session 2027–28 · Candidate A">
+          <label for="versionDescription">Description / purpose</label>
+          <textarea id="versionDescription" rows="3" maxlength="500" placeholder="Optional notes about this version"></textarea>
+          <div class="buttonRow">
+            <button id="saveVersion" class="button primary">Save Version</button>
+            <button id="duplicateVersion" class="button quiet">Duplicate</button>
+            <button id="exportVersion" class="button quiet">Export JSON</button>
+          </div>
+        </article>
+      </div>
+      <div id="libraryMessage" class="notice" hidden></div>
+
+      <div class="sectionTitle"><div><h3>Stored Timetables</h3><p>Draft, ready, active and earlier versions remain available here.</p></div><button id="refreshLibrary" class="button compact quiet">Refresh</button></div>
+      <div id="versionLibrary" class="versionGrid"><div class="emptyState">Loading stored timetables…</div></div>
+    </section>
+
+    <section class="pane" data-pane="components">
+      <div class="paneHead"><div><div class="eyebrow">EDITABLE BUILDING BLOCKS</div><h2>Timetable Components</h2><p>Classes and venues are separate. All changes apply only to the open workspace.</p></div></div>
+
+      <details class="componentSection" open>
+        <summary><span>Teachers</span><span id="teacherCount" class="countPill">0</span></summary>
+        <div class="componentBody">
+          <form id="teacherForm" class="formGrid formGrid4">
+            <input id="teacherOriginalCode" type="hidden">
+            <div><label for="teacherCode">Teacher code</label><input id="teacherCode" required maxlength="16"></div>
+            <div><label for="teacherName">Teacher name</label><input id="teacherName" required maxlength="80"></div>
+            <div><label for="teacherMaxDay">Maximum periods per day</label><input id="teacherMaxDay" type="number" min="1" max="12" value="6"></div>
+            <div><label for="teacherUnavailable">Unavailable slots</label><input id="teacherUnavailable" placeholder="Monday:1,2; Friday:8"></div>
+            <div class="formActions"><button class="button primary" type="submit">Save Teacher</button><button class="button quiet" type="button" data-clear-form="teacher">Clear</button></div>
+          </form>
+          <div id="teacherCards" class="entityGrid"></div>
+        </div>
+      </details>
+
+      <details class="componentSection" open>
+        <summary><span>Classes & Sections</span><span id="classCount" class="countPill">0</span></summary>
+        <div class="componentBody">
+          <form id="classForm" class="formGrid formGrid4">
+            <input id="classOriginalId" type="hidden">
+            <div><label for="className">Class / section name</label><input id="className" required maxlength="50"></div>
+            <div><label for="classVenue">Default classroom / venue</label><select id="classVenue"></select></div>
+            <div><label for="classPeriods">Available periods</label><input id="classPeriods" required placeholder="1,2,3,4,5,6,7,8"></div>
+            <div><label for="classMaxDay">Maximum lessons per day</label><input id="classMaxDay" type="number" min="1" max="12" value="8"></div>
+            <div class="formActions"><button class="button primary" type="submit">Save Class / Section</button><button class="button quiet" type="button" data-clear-form="class">Clear</button></div>
+          </form>
+          <div id="classCards" class="entityGrid"></div>
+        </div>
+      </details>
+
+      <details class="componentSection" open>
+        <summary><span>Subjects</span><span id="subjectCount" class="countPill">0</span></summary>
+        <div class="componentBody">
+          <form id="subjectForm" class="formGrid formGrid4">
+            <input id="subjectOriginalId" type="hidden">
+            <div><label for="subjectName">Subject name</label><input id="subjectName" required maxlength="70"></div>
+            <div><label for="subjectShort">Short name</label><input id="subjectShort" maxlength="15"></div>
+            <div><label for="subjectColour">Card colour</label><input id="subjectColour" type="color" value="#dbeafe"></div>
+            <div><label for="subjectMaxPerDay">Maximum for one class per day</label><input id="subjectMaxPerDay" type="number" min="1" max="6" value="1"></div>
+            <div class="formActions"><button class="button primary" type="submit">Save Subject</button><button class="button quiet" type="button" data-clear-form="subject">Clear</button></div>
+          </form>
+          <div id="subjectCards" class="entityGrid"></div>
+        </div>
+      </details>
+
+      <details class="componentSection" open>
+        <summary><span>Venues & Rooms</span><span id="venueCount" class="countPill">0</span></summary>
+        <div class="componentBody">
+          <form id="venueForm" class="formGrid formGrid4">
+            <input id="venueOriginalId" type="hidden">
+            <div><label for="venueName">Venue / room name</label><input id="venueName" required maxlength="70"></div>
+            <div><label for="venueType">Type</label><select id="venueType"><option>Classroom</option><option>Laboratory</option><option>Library</option><option>Hall</option><option>Playground</option><option>Outdoor</option><option>Other</option></select></div>
+            <div><label for="venueCapacity">Capacity</label><input id="venueCapacity" type="number" min="0" max="1000" value="40"></div>
+            <div><label for="venueUnavailable">Unavailable slots</label><input id="venueUnavailable" placeholder="Tuesday:3; Saturday:1,2"></div>
+            <div class="formActions"><button class="button primary" type="submit">Save Venue</button><button class="button quiet" type="button" data-clear-form="venue">Clear</button></div>
+          </form>
+          <div id="venueCards" class="entityGrid"></div>
+        </div>
+      </details>
+
+      <details class="componentSection" open>
+        <summary><span>Periods & Bell Times</span><span id="periodCount" class="countPill">0</span></summary>
+        <div class="componentBody">
+          <form id="periodForm" class="formGrid formGrid4">
+            <input id="periodOriginalNumber" type="hidden">
+            <div><label for="periodNumber">Period number</label><input id="periodNumber" type="number" min="1" max="20" required></div>
+            <div><label for="periodTime">Time / bell label</label><input id="periodTime" required maxlength="60" placeholder="e.g. 8:35–9:25"></div>
+            <div class="formActions"><button class="button primary" type="submit">Save Period</button><button class="button quiet" type="button" data-clear-form="period">Clear</button></div>
+          </form>
+          <div id="periodCards" class="entityGrid"></div>
+        </div>
+      </details>
+    </section>
+
+    <section class="pane" data-pane="allocations">
+      <div class="paneHead"><div><div class="eyebrow">TEACHING REQUIREMENTS</div><h2>Teacher Allocation Cards</h2><p>Each reusable card defines who teaches what, to which class or combined classes, where, and how many periods per week.</p></div><button id="deriveAllocations" class="button quiet">Rebuild from Workspace Records</button></div>
+      <form id="allocationForm" class="surface formGrid formGrid4">
+        <input id="allocationId" type="hidden">
+        <div><label for="allocationSubject">Subject</label><select id="allocationSubject" required></select></div>
+        <div><label for="allocationPeriods">Periods per week</label><input id="allocationPeriods" type="number" min="1" max="30" value="1" required></div>
+        <div><label for="allocationDuration">Lesson length</label><select id="allocationDuration"><option value="1">Single period</option><option value="2">Double period</option><option value="3">Triple period</option></select></div>
+        <div><label for="allocationPriority">Scheduling priority</label><select id="allocationPriority"><option value="normal">Normal</option><option value="high">High</option><option value="critical">Critical</option></select></div>
+        <fieldset><legend>Teacher(s)</legend><div id="allocationTeachers" class="checkGrid"></div></fieldset>
+        <fieldset><legend>Class(es) / section(s)</legend><div id="allocationClasses" class="checkGrid"></div></fieldset>
+        <fieldset><legend>Permitted venue(s)</legend><div id="allocationVenues" class="checkGrid"></div></fieldset>
+        <fieldset><legend>Preferred days</legend><div id="allocationDays" class="checkGrid"></div></fieldset>
+        <div class="span2 inlineChecks"><label><input id="allocationCombined" type="checkbox"> Conduct selected classes together as one combined class</label><label><input id="allocationConsecutive" type="checkbox"> Prefer consecutive placement when more than one lesson occurs on a day</label></div>
+        <div class="span2"><label for="allocationRemarks">Remarks</label><input id="allocationRemarks" maxlength="200" placeholder="Optional instruction for this allocation"></div>
+        <div class="formActions span4"><button class="button primary" type="submit">Save Allocation Card</button><button class="button quiet" type="button" data-clear-form="allocation">Clear</button></div>
+      </form>
+      <div class="filterBar"><input id="allocationSearch" type="search" placeholder="Search teacher, class or subject"><select id="allocationClassFilter"><option value="">All classes</option></select><span id="allocationSummary"></span></div>
+      <div id="allocationCards" class="allocationGrid"></div>
+    </section>
+
+    <section class="pane" data-pane="parameters">
+      <div class="paneHead"><div><div class="eyebrow">GENERATION RULES</div><h2>Parameters & Constraints</h2><p>Hard rules must be satisfied. Soft preferences guide scoring and can be adjusted between rounds.</p></div></div>
+      <div class="parameterGrid">
+        <article class="surface"><h3>School Week</h3><div id="workingDays" class="checkGrid vertical"></div><label for="globalPeriods">Default periods per day</label><input id="globalPeriods" type="number" min="1" max="12" value="8"></article>
+        <article class="surface"><h3>Teacher Load</h3><label for="defaultTeacherMax">Default maximum periods per teacher per day</label><input id="defaultTeacherMax" type="number" min="1" max="12" value="6"><label for="teacherGapWeight">Minimise teacher gaps</label><input id="teacherGapWeight" type="range" min="0" max="10" value="5"><output id="teacherGapWeightOut">5</output></article>
+        <article class="surface"><h3>Lesson Distribution</h3><label for="repeatSubjectWeight">Avoid repeating a subject for a class on one day</label><input id="repeatSubjectWeight" type="range" min="0" max="10" value="8"><output id="repeatSubjectWeightOut">8</output><label for="spreadWeight">Spread weekly lessons across different days</label><input id="spreadWeight" type="range" min="0" max="10" value="8"><output id="spreadWeightOut">8</output></article>
+        <article class="surface"><h3>Time Preferences</h3><label for="lastPeriodWeight">Avoid difficult subjects in the final period</label><input id="lastPeriodWeight" type="range" min="0" max="10" value="3"><output id="lastPeriodWeightOut">3</output><label><input id="allowEmptyClassSlots" type="checkbox" checked> Permit unallocated/free class periods</label></article>
+        <article class="surface"><h3>Generator Effort</h3><label for="generationAttempts">Alternative construction attempts per click</label><input id="generationAttempts" type="number" min="10" max="500" value="100"><label for="candidateBreadth">Random choice breadth</label><input id="candidateBreadth" type="number" min="1" max="10" value="4"></article>
+        <article class="surface"><h3>Hard Rules</h3><ul class="ruleList"><li>No teacher in two places simultaneously</li><li>No class in two lessons simultaneously</li><li>No venue double-booking</li><li>Teacher and venue unavailability respected</li><li>Double/triple lessons remain consecutive</li><li>Combined classes stay together</li></ul></article>
+      </div>
+      <div class="buttonRow"><button id="saveParameters" class="button primary">Apply Parameters to Workspace</button><button id="resetParameters" class="button quiet">Restore Recommended Values</button></div>
+      <div id="parameterMessage" class="notice" hidden></div>
+    </section>
+
+    <section class="pane" data-pane="generate">
+      <div class="paneHead"><div><div class="eyebrow">AUTOMATIC SCHEDULING</div><h2>Generate a New Candidate</h2><p>Every run uses the saved allocation cards and parameters, receives a new seed, and is stored as a separate version.</p></div></div>
+      <div class="generateHero">
+        <div>
+          <span class="statusPill ready">NON-DESTRUCTIVE</span>
+          <h3>A new result on every run</h3>
+          <p>The current active timetable remains unchanged. Generation logic, configuration snapshot, seed, score and unplaced cards are retained with each candidate.</p>
+          <label for="generatedName">Candidate name</label><input id="generatedName" maxlength="90" placeholder="Automatically named if left blank">
+          <div class="buttonRow"><button id="generateCandidate" class="button primary large">✦ Generate & Store Candidate</button><button id="cancelGeneration" class="button quiet" hidden>Stop after Current Attempt</button></div>
+        </div>
+        <div class="generatorGauge"><div id="generatorRing" class="ring"><strong id="generatorPercent">0%</strong><span>progress</span></div><p id="generatorStatus">Ready to generate.</p></div>
+      </div>
+      <div id="generationResult" class="resultPanel"><div class="emptyState">No candidate has been generated in this session.</div></div>
+      <div class="sectionTitle"><div><h3>Generation History</h3><p>Recent runs made during this session.</p></div></div><div id="generationHistory" class="runList"></div>
+    </section>
+
+    <section class="pane" data-pane="editor">
+      <div class="paneHead"><div><div class="eyebrow">CARD WORKSPACE</div><h2>Visual Timetable Editor</h2><p>Drag cards on a computer, or tap a card and then its destination on a mobile device.</p></div><div class="buttonRow"><button id="undoEdit" class="button compact quiet" disabled>↶ Undo</button><button id="redoEdit" class="button compact quiet" disabled>↷ Redo</button><button id="saveEdits" class="button compact primary">Save Changes</button></div></div>
+      <div class="editorToolbar"><div><label for="editorClass">Class / section view</label><select id="editorClass"></select></div><div><label for="editorTeacherFilter">Teacher filter</label><select id="editorTeacherFilter"><option value="">All teachers</option></select></div><div><label for="editorDayFilter">Day view</label><select id="editorDayFilter"><option value="">Whole week</option></select></div><div class="editorLegend"><span><i class="dot safe"></i> Available</span><span><i class="dot selected"></i> Selected</span><span><i class="dot conflict"></i> Conflict</span><span>🔒 Locked</span></div></div>
+      <div id="editorMessage" class="notice info">Select a card to inspect or move it.</div>
+      <div id="timetableGrid" class="timetableWrap"></div>
+      <div class="editorBottom">
+        <section class="surface"><div class="sectionTitle"><div><h3>Unplaced Card Tray</h3><p>Tap an unplaced card and then an empty timetable cell to place it.</p></div><span id="unplacedCount" class="countPill">0</span></div><div id="unplacedTray" class="unplacedTray"></div></section>
+        <section class="surface"><h3>Selected Card</h3><div id="selectedCardEditor" class="emptyState">No card selected.</div></section>
+      </div>
+    </section>
+
+    <section class="pane" data-pane="validation">
+      <div class="paneHead"><div><div class="eyebrow">QUALITY CONTROL</div><h2>Validate & Activate</h2><p>A timetable can be marked ready only after hard-conflict checks. Activation is exclusively controlled by the Principal/Admin.</p></div><button id="runValidation" class="button primary">Run Full Validation</button></div>
+      <div id="validationScore" class="scoreBoard"><div><strong>—</strong><span>Quality score</span></div><div><strong>—</strong><span>Hard conflicts</span></div><div><strong>—</strong><span>Unplaced lessons</span></div><div><strong>—</strong><span>Soft warnings</span></div></div>
+      <div id="validationIssues" class="issueList"><div class="emptyState">Run validation to inspect this version.</div></div>
+      <div class="activationPanel">
+        <div><h3>Activation Control</h3><p id="activationHelp">Only a validated version with no hard conflicts or unplaced lessons can be activated.</p></div>
+        <div class="buttonRow"><button id="markReady" class="button quiet" disabled>Mark as Ready</button><button id="activateVersion" class="button success" disabled>Activate This Timetable</button><button id="printVersion" class="button quiet">Print</button><button id="shareVersion" class="button quiet">Share Summary</button><button id="deleteVersion" class="button danger" disabled>Delete Version</button></div>
+      </div>
+      <div id="activationMessage" class="notice" hidden></div>
+    </section>
+  </main>
+</div>
+
+<div id="confirmDialog" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+  <div class="modalCard"><h3 id="confirmTitle">Confirm action</h3><p id="confirmText"></p><div class="buttonRow end"><button id="confirmCancel" class="button quiet">Cancel</button><button id="confirmProceed" class="button danger">Continue</button></div></div>
+</div>
+
+<script type="module" src="timetable-studio.js?v=66.0"></script>
+</body>
+</html>

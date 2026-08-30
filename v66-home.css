@@ -1,0 +1,173 @@
+:root{--ink:#18364e;--line:#cbdce5;--bg:#edf6f1;--deep:#236d99}*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:system-ui,Segoe UI,Arial;color:#24394b}
+header{background:#1d5e89;color:white;padding:16px}.wrap{max-width:1050px;margin:auto}.head{display:flex;gap:12px;align-items:center}.logo{width:62px;height:62px;object-fit:contain;background:white;border-radius:50%;padding:3px}h1{font-size:1.35rem;margin:0}header small{opacity:.9}
+main{padding:16px 12px 45px}.nav{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}button{font:inherit;font-weight:700;border:1px solid #b9ced9;border-radius:12px;padding:12px;background:#e7f2f7;color:var(--ink)}button:not(:disabled),a[href],[role="button"]{cursor:pointer}button:disabled{cursor:not-allowed}button:nth-child(2n){background:#edf6e9}button:nth-child(3n){background:#fff4d9}button.active{background:var(--deep);color:white}.quick{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.opsTitle{font-weight:800;color:var(--ink);margin:16px 0 8px}.opsGrid{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-bottom:12px}.opsGrid button{background:#e7f2f7}.opsGrid button:nth-child(2){background:#edf6e9}.opsGrid button:nth-child(3){background:#fff4d9}.opsGrid button:nth-child(4){background:#f1eafb}@media(max-width:700px){.opsGrid{grid-template-columns:1fr 1fr}}
+.view{display:none;background:white;border:1px solid var(--line);border-radius:18px;padding:16px;margin-top:14px;box-shadow:0 4px 16px #17324d10}.view.active{display:block}h2{margin:0 0 12px;color:var(--ink)}.controls{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}label{font-size:.82rem;color:#687887}select,input{width:100%;padding:12px;border:1px solid #c8d6df;border-radius:10px;background:#fbfefd;font-size:1rem}.result{margin-top:14px;padding:14px;background:#eef7fb;border-radius:12px;min-height:55px}.table{overflow:auto;margin-top:12px}table{border-collapse:collapse;width:100%;min-width:620px}th,td{padding:8px;border:1px solid #e1e9ee;text-align:left}th{background:#edf5f9}.tag{display:inline-block;padding:4px 8px;margin:3px;background:#e9f3f7;border-radius:999px;font-size:.78rem}
+.leaveBtns,.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.proxycard{margin-top:12px;padding:12px;border:1px solid #d6e3e9;border-radius:12px;background:#fff}.proxyhead{font-weight:800;color:var(--ink);margin-bottom:8px}.small{font-size:.8rem;color:#6b7c89}.copymsg{font-size:.8rem;margin-left:6px;color:#456}.teacherpick{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px;margin:7px 0;border:1px solid #d5e2e8;border-radius:11px;background:#fbfefd}.teacherpick button{padding:7px 10px}.load{font-size:.82rem;color:#637785}.assigned{background:#d9ecf7!important;border-color:#75a8c6!important}@media(max-width:700px){.nav{grid-template-columns:1fr 1fr}.controls{grid-template-columns:1fr}}
+
+.homebar{display:flex;gap:9px;flex-wrap:wrap;margin:10px 0 14px}.homebar button{background:#e9eef8}
+.myAreaTitle{font-weight:800;color:var(--ink);margin:2px 0 8px}
+.myGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.myGrid button{background:#e8f3fb}
+.myGrid button:nth-child(2){background:#eaf6ec}
+.myGrid button:nth-child(3){background:#f4edfb}
+.myGrid button:nth-child(4){background:#fff4df}
+.myBadge{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;margin-left:5px;border-radius:999px;background:#236d99;color:#fff;font-size:.72rem;font-weight:800;vertical-align:middle}
+.myIdentity{font-size:.86rem;color:#627885;margin:-4px 0 10px}
+.myModeBtns{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px}
+
+@media(max-width:700px){.myGrid{grid-template-columns:1fr}}
+
+.proxyTop{display:grid;grid-template-columns:auto 1fr auto;align-items:center;text-align:center;gap:10px;margin:8px 0 12px}
+.needcard{border:1px solid #d5e2e8;border-radius:13px;padding:12px;margin:10px 0;background:#fbfefd}
+.needcard.done{background:#edf7ee}.warn{background:#fff1d6;border:1px solid #e4b75c;border-radius:9px;padding:8px;margin-top:7px;font-weight:700;color:#785515}
+.candidate{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:9px;border-bottom:1px solid #e6edef}
+.loadpill{font-size:.82rem;color:#526a79}.proxySummary{font-weight:800;color:var(--ink)}
+@media(min-width:900px){
+ main.wrap{max-width:1250px}.view{padding:22px}.controls{grid-template-columns:repeat(4,1fr)}
+ #allot .result{padding:18px}.candidate{grid-template-columns:minmax(300px,1fr) auto}
+ .needcard{display:grid;grid-template-columns:minmax(260px,.8fr) minmax(420px,1.2fr);gap:18px}
+ .needcard>.needInfo{border-right:1px solid #e1e9ee;padding-right:18px}
+}
+@media print{header,.nav,.myAreaTitle,.myGrid,.opsTitle,.opsGrid,.homebar,.actions,.proxyTop,#allot .controls{display:none!important}.view{display:none!important}#allot.view{display:block!important;border:0;box-shadow:none}.candidate{display:none}}
+
+
+.disabledBox{opacity:.62}.disabledBox select:disabled{background:#e5e8eb!important;color:#8a949b!important;cursor:not-allowed}
+.dangerBtn{background:#fbe8e8!important;color:#8c2525!important;border-color:#e5b7b7!important}.dangerBtn:hover{background:#f5d4d4!important}
+.recordActions{margin-top:12px}
+
+/* v52 Calendar-based scheduled leave */
+.leaveDateModes{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px}
+
+.leaveCalendarCard{background:#f9fcfd}
+.calendarShell{max-width:720px}
+.calendarHead{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;margin:8px 0}
+.calendarHead strong{text-align:center;color:var(--ink);font-size:1.02rem}
+.calendarHead button{padding:8px 11px;background:#edf5f9!important}
+.calendarWeek,.calendarGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.calendarWeek div{text-align:center;font-size:.72rem;color:#718391;font-weight:800;padding:4px 0}
+.calendarGrid{touch-action:none;user-select:none}
+.calendarGrid .calBlank{min-height:42px}
+.calendarGrid .calDay{min-height:44px;padding:6px 2px!important;border-radius:10px!important;background:#fff!important;color:#294b60!important;border:1px solid #d9e5eb!important;font-weight:700!important}
+.calendarGrid .calDay.sun{background:#f7f8f8!important;color:#8a959b!important}
+.calendarGrid .calDay.today{outline:2px solid #76a8c5;outline-offset:1px}
+.calendarGrid .calDay.selected{background:#236d99!important;color:#fff!important;border-color:#236d99!important}
+.calendarGrid .calDay.rangeEdge{box-shadow:inset 0 0 0 2px #fff}
+.calendarGrid .calDay:disabled{opacity:.55;cursor:not-allowed}
+.dateRangeInputs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.leaveSelectionSummary{margin-top:10px;background:#eef7fb;border-radius:10px;padding:10px;line-height:1.45}
+.leavePlanItem{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #e5edf1}
+.leavePlanItem:last-child{border-bottom:0}
+.leavePlanMeta{font-size:.82rem;color:#617685;margin-top:3px}
+.planState{display:inline-block;border-radius:999px;padding:2px 7px;font-size:.72rem;font-weight:800;margin-left:5px;background:#edf5f9}
+.planState.activeNow{background:#e7f6ea;color:#246a35}
+.planState.upcoming{background:#fff4d9;color:#795b10}
+.planState.completed{background:#f0f2f3;color:#6b747a}
+@media(max-width:700px){
+ .dateRangeInputs{grid-template-columns:1fr}
+ .calendarGrid .calDay{min-height:41px;font-size:.9rem}
+ .leavePlanItem{grid-template-columns:1fr}
+}
+
+.slotComplete{background:#e7f6ea;border:1px solid #9bc9a5;color:#246a35;padding:12px 14px;border-radius:14px;font-weight:700;margin:10px 0}
+
+.emergencyBtn{background:#fff1e6!important;border-color:#e6b17b!important}
+.emergencyBox{background:#fff8f1;border:1px solid #e6b17b;padding:12px;border-radius:14px;margin-top:10px}
+.supervisionTag{display:inline-block;background:#fff0df;border:1px solid #e5b47e;border-radius:999px;padding:3px 8px;margin-top:4px;font-size:.9em}
+.emergencyAction{margin-top:12px;padding-top:10px;border-top:1px dashed #d8b98e}.emergencyAction>.emergencyBtn{font-weight:700}
+
+.printHead{text-align:center;margin-bottom:14px}.printHead h2,.printHead h3{margin:4px 0}
+@media print{
+ html,body{margin:0!important;padding:0!important;background:#fff!important;height:auto!important;min-height:0!important}
+ body>*{display:none!important}
+ main{display:block!important;margin:0!important;padding:0!important;width:100%!important}
+ main>*{display:none!important}
+ #allot{display:block!important;margin:0!important;padding:0!important;border:0!important;box-shadow:none!important;background:#fff!important;width:100%!important}
+ #allot>*{display:none!important}
+ #allotReview{display:block!important;position:static!important;margin:0!important;padding:0!important;width:100%!important;background:#fff!important;color:#000!important;overflow:visible!important}
+ #allotReview>*{display:none!important}
+ #allotReview .printSheet{display:block!important;margin:0!important;padding:0!important;width:100%!important;background:#fff!important}
+ .printSheet *{visibility:visible!important}
+ .printHead{display:block!important;text-align:center!important;margin:0 0 8mm 0!important}
+ .printHead h2,.printHead h3{margin:2mm 0!important}
+ .printSheet .table{display:block!important;margin:0!important;padding:0!important}
+ table{width:100%!important;border-collapse:collapse!important;font-size:10pt!important;page-break-inside:auto}
+ tr{page-break-inside:avoid;page-break-after:auto}
+ th,td{border:1px solid #444!important;padding:4px!important;color:#000!important;background:#fff!important}
+ .principalSignature{display:block!important;text-align:right!important;margin:12mm 0 0 0!important;padding:0!important;page-break-inside:avoid!important}
+ @page{size:A4 portrait;margin:10mm}
+}
+
+.signatureCell{min-width:120px;height:42px}
+.principalSignature{text-align:right;margin-top:34px;font-weight:700;padding-right:8px}
+@media print{
+ .signatureCell{min-width:32mm;height:10mm}
+}
+
+.actions button{cursor:pointer;transition:transform .08s ease,filter .08s ease,background .12s ease}
+.actions button:active{transform:scale(.97);filter:brightness(.92)}
+.actions button:focus-visible{outline:3px solid rgba(31,111,159,.28);outline-offset:2px}
+
+/* v43 Cloud Edition: public HTML contains no master timetable or teacher roster data. */
+#authGate{position:fixed;inset:0;z-index:99999;background:#edf6f1;display:flex;align-items:center;justify-content:center;padding:20px}
+#authGate.hidden{display:none}.authCard{width:min(560px,100%);background:#fff;border:1px solid #cbdce5;border-radius:20px;padding:26px;box-shadow:0 12px 35px #17324d22}.authCard h2{margin:0 0 8px}.authCard p{line-height:1.5}.authInfo{background:#eef7fb;border-radius:12px;padding:12px;margin:12px 0}.authError{background:#fff1d6;border:1px solid #e4b75c;color:#785515;border-radius:12px;padding:12px;margin:12px 0}.uidBox{font-family:ui-monospace,Consolas,monospace;word-break:break-all;background:#f4f7f8;border-radius:9px;padding:9px;margin-top:6px}.authActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+#cloudBar{display:none;background:#f8fbfd;border-bottom:1px solid #cbdce5;padding:8px 12px;color:#294b60;font-size:.85rem}#cloudBar.show{display:block}.cloudInner{max-width:1250px;margin:auto;display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap}.cloudBadge{display:inline-block;padding:3px 8px;border-radius:999px;background:#e7f6ea;color:#246a35;font-weight:700}.cloudSync{color:#627885}.cloudBtn{padding:6px 9px;border-radius:9px;font-size:.82rem}
+body.readOnly .recordActions .dangerBtn,body.readOnly .recordActions button:first-child{opacity:.55}.readonlyNote{background:#fff4d9;border:1px solid #e4c873;border-radius:10px;padding:8px 10px;margin:8px 0;font-size:.86rem}
+#publishedProxyBtn{background:#e7f6ea!important;border-color:#a8d1b1!important}
+
+.publishedMeta{background:#e7f6ea;border:1px solid #a8d1b1;color:#245c34;border-radius:12px;padding:10px 12px;margin-bottom:12px}
+.draftNote{background:#fff8e8;border:1px solid #e4c873;color:#6b5618;border-radius:10px;padding:8px 10px;margin:10px 0;font-size:.86rem}
+.adminOnlyLink,.leaveRegisterLink{display:none}
+@media print{
+ body.printPublishedMode #allot{display:none!important}
+ body.printPublishedMode #publishedProxy{display:block!important;margin:0!important;padding:0!important;border:0!important;box-shadow:none!important;background:#fff!important;width:100%!important}
+ body.printPublishedMode #publishedProxy>*{display:none!important}
+ body.printPublishedMode #publishedProxy #publishedProxyResult{display:block!important;margin:0!important;padding:0!important;background:#fff!important}
+ body.printPublishedMode #publishedProxyResult>*{display:none!important}
+ body.printPublishedMode #publishedProxyResult .printSheet{display:block!important;margin:0!important;padding:0!important;width:100%!important;background:#fff!important;color:#000!important}
+}
+
+
+
+
+/* v54 Clean everyday UI */
+#cloudBar.show{display:block;padding:5px 12px;background:#f8fbfd;border-bottom:1px solid #e0eaef}
+#cloudBar .cloudInner{justify-content:flex-end}
+#cloudBar .cloudTechnical{display:none!important}
+#cloudBar .cloudBtn{background:#f2f6f8!important;font-weight:650;padding:6px 10px}
+.tempTeacherTag{display:inline-block;margin-left:5px;padding:2px 6px;border-radius:999px;background:#fff4d9;color:#6b5618;font-size:.72rem;font-weight:700}
+
+/* v53 Active Schedule Profile integration */
+.activeScheduleBanner{margin:0 0 12px;padding:10px 13px;border:1px solid #c9dce6;border-radius:12px;background:#eef7fb;color:#294b60;font-size:.88rem}
+.activeScheduleBanner.custom{background:#fff4d9;border-color:#e4c873;color:#6b5618}
+.activeScheduleBanner .scheduleHint{font-weight:500;opacity:.88}
+
+/* v66.2 unified selected-state: retain each button's own colour and content. */
+@keyframes vkvSelectedNudge{0%,100%{transform:translateX(0)}32%{transform:translateX(-1.5px)}68%{transform:translateX(1.5px)}}
+button.active,
+.nav button.active,
+.quick button.active,
+.opsGrid button.active,
+.myGrid button.active,
+.myModeBtns button.active,
+.leaveBtns button.active,
+.leaveDateModes button.active,
+.durationBtns button.active{
+  outline:2px solid #c88a18 !important;
+  outline-offset:2px;
+  border-color:#d6a23b !important;
+  box-shadow:0 0 0 3px rgba(200,138,24,.14),0 6px 18px rgba(11,43,66,.08) !important;
+  color:var(--ink) !important;
+  animation:vkvSelectedNudge .20s ease;
+}
+button.active *{color:inherit !important}
+/* marker: vkv-selected-gold-outline */
+
+/* v66.2 Swamiji identity motif — exact supplied portrait, gold line treatment. */
+.head{position:relative;overflow:hidden}
+.homeTitleBlock{min-width:0;position:relative;z-index:2}
+.swamijiHomePortrait{margin-left:auto;width:clamp(92px,12vw,150px);height:auto;max-height:118px;object-fit:contain;opacity:.78;align-self:center;pointer-events:none;filter:drop-shadow(0 3px 8px rgba(91,61,8,.07))}
+@media(max-width:620px){.swamijiHomePortrait{width:86px;max-height:88px;opacity:.68}.head{gap:10px}.homeTitleBlock h1{font-size:1.15rem}}
+
+/* v66.2 header alignment correction */
+@media(min-width:900px){header .head{max-width:1250px;justify-content:flex-start}.homeTitleBlock{margin-right:auto}.swamijiHomePortrait{margin-left:auto}}
+@media(max-width:899px){header .head{justify-content:flex-start}.homeTitleBlock{margin-right:auto}}

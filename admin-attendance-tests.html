@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Test Attendance Records · VKV Nalbari</title>
+<style>
+:root{--navy:#123b58;--line:#bfd0da;--bg:#f4f8fa;--blue:#eaf4fa;--amber:#fff5da;--red:#9b2c2c;--green:#eaf7ec}*{box-sizing:border-box}body{margin:0;background:var(--bg);font:14px system-ui;color:#18313f}header{background:var(--navy);color:#fff;padding:18px}.wrap{max-width:1100px;margin:auto}main{padding:14px}.card{background:#fff;border:1px solid var(--line);border-radius:15px;padding:16px;margin:12px 0}.actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}button,input,select{font:inherit;border:1px solid var(--line);border-radius:9px;padding:10px}button{cursor:pointer;font-weight:750;background:var(--blue)}button.danger{background:#fdecec;color:var(--red);border-color:#e5b7b7}.warn{background:var(--amber);border:1px solid #e6c66f;padding:10px;border-radius:10px}.ok{background:var(--green);padding:10px;border-radius:10px}.table{overflow:auto}table{width:100%;border-collapse:collapse;min-width:850px}th,td{padding:9px;border-bottom:1px solid #dce6eb;text-align:left;vertical-align:top}.small{font-size:12px;color:#526a76}.badge{display:inline-block;border-radius:999px;padding:3px 8px;background:var(--amber);font-weight:700}.badge.test{background:#fdecec;color:var(--red)}
+</style>
+<link rel="stylesheet" href="v66-design-system.css?v=66.0-school-identity-1"><script src="v66-ui.js?v=66.0-school-identity-1" defer></script>
+<link rel="stylesheet" href="v66-final-sixpoint.css?v=66.2-final-1">
+<link rel="stylesheet" href="v66-premium-unified.css?v=66.2-premium-1">
+</head>
+<body>
+<header><div class="wrap"><h1 style="margin:0">Test / Mock Attendance Records</h1><div>Principal-only correction and deletion · Version 66.0</div></div></header>
+<main class="wrap">
+<div id="gate" class="card">Checking Principal/Admin access…</div>
+<div id="app" hidden>
+  <div class="card">
+    <div class="actions"><button onclick="location.href='admin-attendance.html?v=66.0'">← Attendance Administration</button><button onclick="location.href='admin-dashboard.html?v=66.0'">Admin Dashboard</button></div>
+    <div class="warn"><b>Principal control:</b> Any erroneous, duplicate or test attendance record may be deleted after confirmation. An audit copy is retained automatically; no deletion reason is required.</div>
+    <label for="recordDate"><b>Record date (dd/mm/yyyy)</b></label><br>
+    <input id="recordDate" type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/yyyy"><button id="loadBtn">Load Records</button>
+  </div>
+  <div class="card"><div id="msg"></div><div id="records" class="table"></div></div>
+</div>
+</main>
+<script type="module">
+import{initializeApp}from'https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js';
+import{getAuth,onAuthStateChanged,setPersistence,browserLocalPersistence}from'https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js';
+import{getFirestore,doc,getDoc,setDoc,updateDoc,deleteDoc,serverTimestamp,collection,getDocs,query,where}from'https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore-lite.js';
+const cfg={apiKey:'AIzaSyDheZpyXghd1aQ9_RLhwpacVriG__wNZW4',authDomain:'vkv-nalbari-timetable.firebaseapp.com',projectId:'vkv-nalbari-timetable',storageBucket:'vkv-nalbari-timetable.firebasestorage.app',messagingSenderId:'791432856951',appId:'1:791432856951:web:61324065a54bef30f98d72'};
+const fb=initializeApp(cfg),auth=getAuth(fb),db=getFirestore(fb),$=id=>document.getElementById(id),safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+setPersistence(auth,browserLocalPersistence).catch(()=>{});
+let user=null,records=[];
+const dateKey=()=>{const d=new Date(),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`};
+const displayDate=k=>{const m=String(k||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?`${m[3]}/${m[2]}/${m[1]}`:String(k||'')};
+const inputDate=v=>{const m=String(v||'').trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/);if(!m)return'';const iso=`${m[3]}-${m[2]}-${m[1]}`,d=new Date(`${iso}T00:00:00`);return d.getFullYear()===Number(m[3])&&d.getMonth()+1===Number(m[2])&&d.getDate()===Number(m[1])?iso:''};
+const displayTime=ms=>new Date(Number(ms)||0).toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'});
+$('recordDate').value=displayDate(dateKey());
+function message(text,kind='ok'){$('msg').className=kind;$('msg').textContent=text}
+async function load(){const date=inputDate($('recordDate').value);if(!date){message('Enter a valid date as dd/mm/yyyy.','warn');return}$('recordDate').value=displayDate(date);message('Loading…');const s=await getDocs(query(collection(db,'attendanceEvents'),where('date','==',date)));records=s.docs.map(x=>({id:x.id,...x.data()})).sort((a,b)=>(a.clientTimeMs||0)-(b.clientTimeMs||0));render(date)}
+function render(date){$('records').innerHTML=records.length?`<h2>${displayDate(date)}</h2><table><thead><tr><th>Staff</th><th>Event</th><th>Recorded time</th><th>Status</th><th>Principal actions</th></tr></thead><tbody>${records.map(x=>`<tr><td>${safe(x.staffName)}<div class="small">${safe(x.staffCode)} · ${x.staffGroup==='non_teaching'?'Non-teaching':'Teaching'}</div></td><td>${safe(String(x.type||'').replaceAll('_',' '))}</td><td>${safe(displayTime(x.clientTimeMs))}</td><td><span class="badge ${x.testRecord?'test':''}">${x.testRecord?'Test / Mock':'Attendance record'}</span><div class="small">${safe(x.testReason||'')}</div></td><td><button data-edit="${safe(x.id)}">Mark/Edit Test Record</button> <button class="danger" data-delete="${safe(x.id)}">Delete Record</button></td></tr>`).join('')}</tbody></table>`:`<div class="ok">No attendance records are available for ${displayDate(date)}.</div>`;message(`${records.length} record(s) loaded.`)}
+async function editTest(id){const x=records.find(r=>r.id===id);if(!x)return;const reason=prompt('Compulsory reason for marking/editing this test or mock-trial record:',x.testReason||'Test / mock attendance trial');if(!reason?.trim())return;const oldDate=new Date(Number(x.clientTimeMs)||Date.now()),p=n=>String(n).padStart(2,'0'),oldTime=`${p(oldDate.getHours())}:${p(oldDate.getMinutes())}`,time=prompt('Correct test-record time (HH:MM):',oldTime);if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(String(time||''))){alert('Enter time as HH:MM.');return}const [h,m]=time.split(':').map(Number),corrected=new Date(oldDate);corrected.setHours(h,m,0,0);const history=[...(Array.isArray(x.testEditHistory)?x.testEditHistory:[]),{atMs:Date.now(),byUid:user.uid,reason:reason.trim(),beforeClientTimeMs:x.clientTimeMs||0,afterClientTimeMs:corrected.getTime()}].slice(-25);await updateDoc(doc(db,'attendanceEvents',id),{testRecord:true,testReason:reason.trim(),clientTimeMs:corrected.getTime(),testEditedBy:user.uid,testEditedAt:serverTimestamp(),testEditHistory:history});await setDoc(doc(db,'attendanceTestAudit',`${id}_edit_${Date.now()}`),{action:'edit_test_record',eventId:id,date:x.date,reason:reason.trim(),performedBy:user.uid,performedAt:serverTimestamp(),before:x,afterClientTimeMs:corrected.getTime()});await load()}
+async function deleteTest(id){const x=records.find(r=>r.id===id);if(!x)return;if(!confirm(`Delete this attendance record for ${x.staffName}? An audit copy will be retained.`))return;await setDoc(doc(db,'attendanceTestAudit',`${id}_delete_${Date.now()}`),{action:'delete_attendance_record',eventId:id,date:x.date,performedBy:user.uid,performedAt:serverTimestamp(),deletedRecord:x});await deleteDoc(doc(db,'attendanceEvents',id));if(x.type==='arrival'){await deleteDoc(doc(db,'attendanceLate',`${x.date}_${x.uid}`)).catch(()=>{})}await deleteDoc(doc(db,'attendanceVerifications',id)).catch(()=>{});await load()}
+document.addEventListener('click',e=>{const edit=e.target.closest('[data-edit]'),del=e.target.closest('[data-delete]');if(edit)editTest(edit.dataset.edit).catch(x=>alert(x.message||x));if(del)deleteTest(del.dataset.delete).catch(x=>alert(x.message||x))});
+$('loadBtn').onclick=()=>load().catch(e=>message(e.message||String(e),'warn'));
+onAuthStateChanged(auth,async u=>{user=u;if(!u){$('gate').textContent='Please return to the timetable and sign in with the Principal/Admin account.';return}const p=await getDoc(doc(db,'authorizedUsers',u.uid));if(!p.exists()||p.data().active!==true||p.data().role!=='admin'){$('gate').textContent='Only the Principal/Admin can manage test or mock attendance records.';return}$('gate').hidden=true;$('app').hidden=false;await load()});
+</script>
+<script src="v66-final-sixpoint.js?v=66.2-final-1" defer></script>
+</body>
+</html>

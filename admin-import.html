@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
+<title>VKV Nalbari · Master Timetable Import</title>
+<style>
+:root{--ink:#18364e;--deep:#1d638e;--bg:#edf6f1;--line:#cbdce5;--muted:#667b89;--green:#246a35;--greenbg:#e7f6ea;--amber:#785515;--amberbg:#fff6dc;--red:#8b2d2d;--redbg:#fdecec;--bluebg:#eef7fb}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#263d4e;font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif}header{background:var(--deep);color:#fff;padding:18px 16px}.wrap{max-width:900px;margin:auto}.headline{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}h1{font-size:1.45rem;margin:0}.subtitle{opacity:.92;margin-top:4px}.btn,button,input{font:inherit}.btn,button{font-weight:750;border:1px solid #b9ced9;border-radius:11px;padding:10px 13px;background:#e7f2f7;color:var(--ink);cursor:pointer;text-decoration:none}.primary{background:var(--deep);color:#fff;border-color:var(--deep)}button:disabled{opacity:.55;cursor:not-allowed}main{padding:18px 14px 60px}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;margin:14px 0;box-shadow:0 4px 16px #17324d0e}h2{margin:0 0 7px;color:var(--ink);font-size:1.18rem}.help{font-size:.9rem;line-height:1.55;color:var(--muted)}.box{margin:12px 0;padding:12px 13px;background:var(--bluebg);border-radius:12px;line-height:1.5}.ok{background:var(--greenbg);border:1px solid #a9d4b2;color:var(--green)}.warn{background:var(--amberbg);border:1px solid #e4c873;color:var(--amber)}.error{background:var(--redbg);border:1px solid #e5b7b7;color:var(--red)}.actions{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-top:12px}input[type=file]{padding:10px;border:1px solid #c7d5de;border-radius:10px;background:#fbfefd;max-width:100%}
+</style><script>
+(function(){
+  const CURRENT_APP_VERSION = '66.0';
+  try{
+    const u=new URL(window.location.href);
+    if(u.searchParams.get('v')!==CURRENT_APP_VERSION){
+      u.searchParams.set('v',CURRENT_APP_VERSION);
+      history.replaceState(null,'',u.pathname+u.search+u.hash);
+    }
+  }catch(_){}
+})();
+</script>
+
+<link rel="stylesheet" href="v66-design-system.css?v=66.0-school-identity-1"><script src="v66-ui.js?v=66.0-school-identity-1" defer></script>
+<link rel="stylesheet" href="v66-final-sixpoint.css?v=66.2-final-1">
+<link rel="stylesheet" href="v66-premium-unified.css?v=66.2-premium-1">
+</head><body>
+<header><div class="wrap headline"><div><h1>VKV Nalbari Timetable</h1><div class="subtitle">Admin Dashboard → Master Timetable Import / Restore · Cloud v66.0</div></div><a class="btn" href="admin-dashboard.html?v=66.0">← Admin Dashboard</a></div></header>
+<main class="wrap"><div id="status" class="box">Checking sign-in…</div><div id="tools" hidden>
+<section class="card"><h2>📥 Master Timetable Import / Restore</h2>
+<div class="box warn"><b>Master timetable only.</b> This page accepts only the private Master Timetable JSON. <b>Do not upload a leave Excel workbook here.</b> Leave history has its own separate import page.</div>
+<p class="help">Select the private master seed JSON from your computer. It is read locally and uploaded directly to Firestore; the file does not need to be placed on GitHub.</p>
+<div class="actions"><input id="masterFile" type="file" accept="application/json,.json"><button id="uploadMaster" class="primary" disabled>Upload Master Timetable</button></div>
+<div id="masterSummary" class="box">No master file selected.</div></section>
+</div></main>
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+import{getAuth,GoogleAuthProvider,signInWithPopup,onAuthStateChanged,setPersistence,browserLocalPersistence}from"https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+import{getFirestore,doc,getDoc,setDoc,serverTimestamp}from"https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore-lite.js";
+const cfg={apiKey:"AIzaSyDheZpyXghd1aQ9_RLhwpacVriG__wNZW4",authDomain:"vkv-nalbari-timetable.firebaseapp.com",projectId:"vkv-nalbari-timetable",storageBucket:"vkv-nalbari-timetable.firebasestorage.app",messagingSenderId:"791432856951",appId:"1:791432856951:web:61324065a54bef30f98d72"};
+const app=initializeApp(cfg),auth=getAuth(app),db=getFirestore(app),$=id=>document.getElementById(id);
+await setPersistence(auth,browserLocalPersistence).catch(()=>{});
+if(typeof auth.authStateReady==='function')await auth.authStateReady().catch(()=>{});let user=null,masterSeed=null;
+const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function verifyAdmin(u){user=u;try{const p=await getDoc(doc(db,'authorizedUsers',u.uid));if(!p.exists()||p.data().active!==true||p.data().role!=='admin'){throw new Error('Admin access is required.')} $('status').className='box ok';$('status').textContent='Admin verified: '+(u.displayName||u.email);$('tools').hidden=false;}catch(e){$('status').className='box error';$('status').innerHTML='<b>Could not open Master Timetable Import.</b><br>'+esc(e.message||e)}}
+onAuthStateChanged(auth,async u=>{user=u;if(!u){$('status').innerHTML='You are not signed in. <button id="signin">Sign in with Google</button>';$('signin').onclick=()=>signInWithPopup(auth,new GoogleAuthProvider());return}await verifyAdmin(u)});
+$('masterFile').onchange=async()=>{masterSeed=null;$('uploadMaster').disabled=true;const f=$('masterFile').files[0];if(!f){$('masterSummary').className='box';$('masterSummary').textContent='No master file selected.';return}if(!f.name.toLowerCase().endsWith('.json')){$('masterSummary').className='box error';$('masterSummary').textContent='Wrong file type. Master Timetable Import accepts JSON only. Use the separate Leave Import page for Excel files.';return}try{const d=JSON.parse(await f.text());for(const k of ['classes','patterns','times','records','teachers'])if(!d[k])throw new Error('Missing '+k);masterSeed=d;$('masterSummary').className='box ok';$('masterSummary').textContent=`Ready: ${d.teachers.length} teachers, ${d.classes.length} classes/sections, ${d.records.length} timetable entries.`;$('uploadMaster').disabled=false}catch(e){$('masterSummary').className='box error';$('masterSummary').textContent='Invalid master seed JSON: '+e.message}};
+$('uploadMaster').onclick=async()=>{if(!user||!masterSeed)return;if(!confirm('Replace the current Master Timetable with this JSON?\n\nThis action affects the permanent master timetable.'))return;$('uploadMaster').disabled=true;$('status').className='box';$('status').textContent='Uploading master timetable…';try{await setDoc(doc(db,'master','current'),{data:masterSeed,session:'2026-27',updatedAt:serverTimestamp(),updatedBy:user.uid,updatedByEmail:user.email||''});$('status').className='box ok';$('status').textContent='Master timetable uploaded successfully.'}catch(e){$('status').className='box error';$('status').textContent='Upload failed: '+e.message}finally{$('uploadMaster').disabled=false}};
+</script><script src="v66-final-sixpoint.js?v=66.2-final-1" defer></script>
+</body></html>

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>VKV Nalbari · Timetable Integrity Checker</title>
+<style>
+:root{--ink:#17364f;--muted:#617685;--line:#cbdce5;--bg:#edf6f1;--deep:#236d99;--greenbg:#e7f6ea;--amberbg:#fff7df;--redbg:#fdecec}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#263d4e;font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif}header{background:#1d638e;color:#fff;padding:18px 16px}.wrap{max-width:1250px;margin:auto}h1{margin:0;font-size:1.5rem}.subtitle{opacity:.92;margin-top:4px}main{padding:18px 14px 70px}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;margin:14px 0;box-shadow:0 4px 16px #17324d0e}.top{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}button,.btn{font:inherit;font-weight:750;border:1px solid #b9ced9;border-radius:11px;padding:10px 13px;background:#e7f2f7;color:var(--ink);cursor:pointer;text-decoration:none}.metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:9px}.metric{background:#f6fafc;border:1px solid #dde8ed;border-radius:12px;padding:11px}.metric b{display:block;font-size:1.35rem;color:var(--deep)}.metric span,.help{font-size:.82rem;color:var(--muted);line-height:1.45}.status{padding:11px 13px;border-radius:12px;margin:10px 0}.ok{background:var(--greenbg);border:1px solid #a9d4b2}.warn{background:var(--amberbg);border:1px solid #e4c873}.error{background:var(--redbg);border:1px solid #e5b7b7}.tablewrap{overflow:auto;border:1px solid #dce7ec;border-radius:12px;margin-top:10px}table{border-collapse:collapse;width:100%;min-width:850px}th,td{border-bottom:1px solid #e0e9ee;padding:8px;text-align:left;font-size:.82rem;vertical-align:top}th{background:#edf5f9;color:var(--ink)}.badge{display:inline-block;border-radius:999px;padding:3px 8px;background:#e9f3f7;font-size:.75rem;font-weight:750}.good{background:#dff2e4}.info{background:#eef7fb}.hide{display:none}.code{font-family:ui-monospace,Consolas,monospace}@media(max-width:850px){.metrics{grid-template-columns:1fr 1fr}}
+</style><script>
+(function(){
+  const CURRENT_APP_VERSION = '66.0';
+  try{
+    const u=new URL(window.location.href);
+    if(u.searchParams.get('v')!==CURRENT_APP_VERSION){
+      u.searchParams.set('v',CURRENT_APP_VERSION);
+      history.replaceState(null,'',u.pathname+u.search+u.hash);
+    }
+  }catch(_){}
+})();
+</script>
+
+<link rel="stylesheet" href="v66-design-system.css?v=66.0-school-identity-1"><script src="v66-ui.js?v=66.0-school-identity-1" defer></script>
+<link rel="stylesheet" href="v66-final-sixpoint.css?v=66.2-final-1">
+<link rel="stylesheet" href="v66-premium-unified.css?v=66.2-premium-1">
+</head>
+<body><header><div class="wrap top"><div><h1>VKV Nalbari · Timetable Integrity Checker</h1><div class="subtitle">Read-only master sanitation & cross-view duty verification · Cloud v66.0</div></div><a class="btn" href="admin-dashboard.html?v=66.0">← Admin Dashboard</a></div></header>
+<main class="wrap">
+<section id="gate" class="card"><h2>Checking Principal/Admin access…</h2><div id="gateMsg" class="status info">Please wait.</div><button id="signInBtn" class="hide">Sign in with Google</button></section>
+<div id="app" class="hide">
+<section class="card"><div class="top"><div><h2>🧼 Sanitised Timetable Audit</h2><div class="help">This checker does <b>not</b> rewrite the Master Timetable. It resolves legacy teacher-code formats in memory and verifies how the operational engine should read them.</div></div><button id="runBtn">🔎 Re-run Check</button></div><div id="summary" class="status info"></div><div id="metrics" class="metrics"></div></section>
+<section class="card"><h2>❌ Structural anomalies requiring attention</h2><div class="help">Only genuinely unresolved/contradictory structures appear here. A legacy entry such as <span class="code">Hindi-DK</span> is no longer treated as an error when DK can be resolved from the assignment.</div><div id="anomalies"></div></section>
+<section class="card"><h2>🔗 Combined teacher duties</h2><div class="help">Multiple class records for the same teacher, day and period are treated as <b>one teacher duty / one proxy requirement</b>. These are informational, not errors.</div><div id="combined"></div></section>
+<section class="card"><h2>🗓 Active-schedule suppression</h2><div class="help">Master records that exist but are not active under the current schedule profile are listed here. This helps explain why an assignment may be visible in master data but absent operationally.</div><div id="suppressed"></div></section>
+</div></main>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+import {getAuth,GoogleAuthProvider,signInWithPopup,onAuthStateChanged,setPersistence,browserLocalPersistence} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+import {getFirestore,doc,getDoc} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore-lite.js";
+const cfg={apiKey:"AIzaSyDheZpyXghd1aQ9_RLhwpacVriG__wNZW4",authDomain:"vkv-nalbari-timetable.firebaseapp.com",projectId:"vkv-nalbari-timetable",storageBucket:"vkv-nalbari-timetable.firebasestorage.app",messagingSenderId:"791432856951",appId:"1:791432856951:web:61324065a54bef30f98d72"};
+const fb=initializeApp(cfg),auth=getAuth(fb),db=getFirestore(fb),provider=new GoogleAuthProvider();setPersistence(auth,browserLocalPersistence).catch(()=>{});
+const $=id=>document.getElementById(id),safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));let master=null;
+$('signInBtn').onclick=()=>signInWithPopup(auth,provider);$('runBtn').onclick=run;
+onAuthStateChanged(auth,async u=>{if(!u){$('gateMsg').textContent='Sign in with the Admin Google account.';$('signInBtn').classList.remove('hide');return}try{const ps=await getDoc(doc(db,'authorizedUsers',u.uid));if(!ps.exists()||ps.data().active!==true||ps.data().role!=='admin'){throw new Error('Admin access is required.')}const ms=await getDoc(doc(db,'master','current'));if(!ms.exists())throw new Error('Master timetable is not available.');const raw=ms.data();master=raw.data||raw;$('gate').classList.add('hide');$('app').classList.remove('hide');run()}catch(e){$('gateMsg').className='status error';$('gateMsg').textContent=e.message||e}});
+function roster(){return Array.isArray(master?.teachers)?master.teachers:[]}function records(){return Array.isArray(master?.records)?master.records:[]}function teacher(code){return roster().find(t=>String(t.code)===String(code))||null}
+function codeSource(r){if(Array.isArray(r?.codes)&&r.codes.length)return'codes array';if(Array.isArray(r?.teacherCodes)&&r.teacherCodes.length)return'teacherCodes array';if(r?.teacherCode)return'teacherCode field';if(r?.code)return'code field';return'assignment text'}
+function inferCodes(r){const out=[],seen=new Set(),add=c=>{c=String(c||'').trim();if(c&&teacher(c)&&!seen.has(c)){seen.add(c);out.push(c)}};if(Array.isArray(r?.codes))r.codes.forEach(add);if(Array.isArray(r?.teacherCodes))r.teacherCodes.forEach(add);add(r?.teacherCode);add(r?.code);const text=String(r?.entry||'');for(const c of roster().map(t=>String(t.code||'')).filter(Boolean).sort((a,b)=>b.length-a.length)){const q=c.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');if(new RegExp('(^|[^A-Za-z0-9])'+q+'(?=$|[^A-Za-z0-9])').test(text))add(c)}return out}
+function activeProfile(){const p=master?.scheduleProfiles||{},id=master?.activeScheduleProfileId||'normal';return p[id]||p.normal||null}function classPeriods(cls){const p=activeProfile();if(p?.classPeriods&&Array.isArray(p.classPeriods[cls]))return p.classPeriods[cls].map(Number);if(master?.patterns&&Array.isArray(master.patterns[cls]))return master.patterns[cls].map(Number);return [...new Set(records().filter(r=>r.class===cls).map(r=>Number(r.period)).filter(Boolean))]}
+function table(headers,rows){if(!rows.length)return'<div class="status ok">None found.</div>';return'<div class="tablewrap"><table><thead><tr>'+headers.map(h=>'<th>'+safe(h)+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+r.map(c=>'<td>'+c+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>'}
+function run(){if(!master)return;const rs=records(),san=rs.map((r,i)=>({...r,_row:i+1,_codes:inferCodes(r),_source:codeSource(r)}));const anomalies=[],exactSeen=new Map(),slotSeen=new Map();let inferred=0;
+ for(const r of san){if(r._source==='assignment text'&&r._codes.length)inferred++;if(!r._codes.length)anomalies.push(['Unresolved teacher',String(r._row),safe(r.day),`P${safe(r.period)}`,safe(r.class),safe(r.entry)]);const ex=[r.class,r.day,r.period,r.entry].join('|');if(exactSeen.has(ex))anomalies.push(['Exact duplicate master row',`${exactSeen.get(ex)}, ${r._row}`,safe(r.day),`P${safe(r.period)}`,safe(r.class),safe(r.entry)]);else exactSeen.set(ex,r._row);const sk=[r.class,r.day,r.period].join('|');if(!slotSeen.has(sk))slotSeen.set(sk,[]);slotSeen.get(sk).push(r)}
+ for(const arr of slotSeen.values())if(arr.length>1){const distinct=new Set(arr.map(x=>String(x.entry)));if(distinct.size>1)anomalies.push(['Multiple entries in one class slot',arr.map(x=>x._row).join(', '),safe(arr[0].day),`P${safe(arr[0].period)}`,safe(arr[0].class),arr.map(x=>safe(x.entry)).join('<br>')])}
+ const duties=new Map();for(const r of san)for(const c of r._codes){const k=[c,r.day,r.period].join('|');if(!duties.has(k))duties.set(k,{code:c,day:r.day,period:r.period,classes:[],entries:[]});const d=duties.get(k);if(!d.classes.includes(r.class))d.classes.push(r.class);if(!d.entries.includes(r.entry))d.entries.push(r.entry)}const combined=[...duties.values()].filter(d=>d.classes.length>1).sort((a,b)=>a.code.localeCompare(b.code)||String(a.day).localeCompare(String(b.day))||a.period-b.period);
+ const suppressed=san.filter(r=>!classPeriods(r.class).includes(Number(r.period)));
+ $('summary').className='status '+(anomalies.length?'warn':'ok');$('summary').innerHTML=anomalies.length?`<b>${anomalies.length} structural anomaly${anomalies.length===1?'':'ies'} require review.</b> Legacy teacher-code formatting has been sanitised in memory; no master row was rewritten.`:`<b>Structural scan passed.</b> Legacy code formats are safely normalised at runtime; the stored Master Timetable remains untouched.`;
+ $('metrics').innerHTML=`<div class="metric"><b>${rs.length}</b><span>Raw master records</span></div><div class="metric"><b>${inferred}</b><span>Legacy entries resolved from assignment text</span></div><div class="metric"><b>${anomalies.length}</b><span>Structural anomalies</span></div><div class="metric"><b>${combined.length}</b><span>Combined teacher-duty slots</span></div><div class="metric"><b>${suppressed.length}</b><span>Suppressed by active schedule</span></div>`;
+ $('anomalies').innerHTML=table(['Issue','Master row','Day','Period','Class','Entry'],anomalies);
+ $('combined').innerHTML=table(['Teacher','Day','Period','Classes','Assignments'],combined.map(d=>{const t=teacher(d.code);return[`${safe(t?.name||d.code)} (${safe(d.code)})`,safe(d.day),`P${safe(d.period)}`,safe(d.classes.join(' + ')),safe(d.entries.join(' / '))]}));
+ $('suppressed').innerHTML=table(['Master row','Day','Period','Class','Entry','Resolved teacher(s)'],suppressed.map(r=>[String(r._row),safe(r.day),`P${safe(r.period)}`,safe(r.class),safe(r.entry),safe(r._codes.join(', ')||'—')]));
+}
+</script><script src="v66-final-sixpoint.js?v=66.2-final-1" defer></script>
+</body></html>

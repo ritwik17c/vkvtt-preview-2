@@ -1,1 +1,328 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>VKVTT Preview 2 · Admin Dashboard</title></head><body><div style="font:16px system-ui;padding:24px">Loading Admin Dashboard…</div><script>(async()=>{try{let h=await (await fetch('https://raw.githubusercontent.com/ritwik17c/vkvtt-preview/main/admin-dashboard.html?preview2=22',{cache:'no-store'})).text();h=h.replace('<head>','<head><base href="https://ritwik17c.github.io/vkvtt-preview/">');const P='https://ritwik17c.github.io/vkvtt-preview-2/';h=h.replace(/admin-question-bank-v2\.html(?:\?[^\"' )<]*)?/g,P+'admin-question-bank-v2.html?v=66.0');h=h.replace(/admin-timetable-studio\.html(?:\?[^\"' )<]*)?/g,P+'admin-timetable-studio.html?v=66.0');h=h.replace(/timetable-studio\.html(?:\?[^\"' )<]*)?/g,P+'admin-timetable-studio.html?v=66.0');h=h.replace(/admin-export\.html(?:\?[^\"' )<]*)?/g,P+'admin-export.html?v=66.0');h=h.replace(/admin-attendance\.html(?:\?[^\"' )<]*)?/g,P+'admin-attendance.html?v=66.0');h=h.replace(/index\.html(?:\?[^\"' )<]*)?/g,P+'?v=66.0');h=h.replace('</body>','<script src="https://ritwik17c.github.io/vkvtt-preview-2/vkv-route-policy.js?v=c6e519f"><\/script><script src="https://ritwik17c.github.io/vkvtt-preview-2/vkv-admin-dashboard-runtime.js?v=56ae1b0"><\/script><script src="https://ritwik17c.github.io/vkvtt-preview-2/vkv-dashboard-metrics-final.js?v=f764347"><\/script><script src="https://ritwik17c.github.io/vkvtt-preview-2/vkv-teacher-transfer.js?v=b6f588c"><\/script><script src="https://ritwik17c.github.io/vkvtt-preview-2/vkv-teacher-shortcode-rename.js?v=a87db48"><\/script></body>');document.open();document.write(h);document.close()}catch(e){document.body.innerHTML='<p style="padding:24px">The Preview 2 Admin Dashboard could not open. <a href="https://ritwik17c.github.io/vkvtt-preview-2/?v=66.0">Return Home</a></p>'}})();</script></body></html>
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>VKV Nalbari · Admin Dashboard</title>
+<style>
+:root{--ink:#17364f;--muted:#617685;--line:#cbdce5;--bg:#edf6f1;--deep:#236d99;--green:#2d7d46;--greenbg:#e7f6ea;--amber:#7a5b18;--amberbg:#fff7df;--red:#8b2d2d;--redbg:#fdecec;--bluebg:#eef7fb}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#263d4e;font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif}header{background:#1d638e;color:#fff;padding:18px 16px}.wrap{max-width:1180px;margin:auto}.headline{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}h1{font-size:1.5rem;margin:0}.subtitle{opacity:.92;margin-top:4px}main{padding:18px 14px 60px}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;margin:14px 0;box-shadow:0 4px 16px #17324d0e}h2{margin:0 0 7px;color:var(--ink);font-size:1.2rem}h3{color:var(--ink)}.help{color:var(--muted);font-size:.9rem;line-height:1.5}.status{padding:11px 13px;border-radius:12px;background:var(--bluebg);margin:10px 0;line-height:1.45}.ok{background:var(--greenbg);color:#245c34;border:1px solid #a9d4b2}.warn{background:var(--amberbg);color:var(--amber);border:1px solid #e4c873}.error{background:var(--redbg);color:var(--red);border:1px solid #e5b7b7}.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}button,.btn{font:inherit;font-weight:750;border:1px solid #b9ced9;border-radius:11px;padding:10px 13px;background:#e7f2f7;color:var(--ink);cursor:pointer;text-decoration:none}button:hover,.btn:hover{filter:brightness(.98)}button:disabled{opacity:.55;cursor:not-allowed}.primary{background:var(--deep);color:#fff;border-color:var(--deep)}.green{background:var(--greenbg);color:#245c34;border-color:#a9d4b2}.danger{background:var(--redbg);color:var(--red);border-color:#e5b7b7}.smallbtn{padding:7px 9px;font-size:.84rem}.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}.tile{border:1px solid #d4e1e8;border-radius:15px;padding:16px;background:#fbfefd;cursor:pointer}.tile:hover{border-color:#92b8cd;background:#f5fbfd}.tile b{display:block;font-size:1rem;color:var(--ink);margin-bottom:4px}.tile span{font-size:.84rem;color:var(--muted);line-height:1.35}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:12px}.metric{background:#f6fafc;border:1px solid #dde8ed;border-radius:13px;padding:13px}.metric .num{font-size:1.5rem;font-weight:850;color:var(--deep)}.metric .lab{font-size:.8rem;color:var(--muted)}.panel{display:none}.panel.active{display:block}.sectionTop{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}label{display:block;font-size:.82rem;color:#617685;margin:7px 0 5px}select,input,textarea{width:100%;padding:11px;border:1px solid #c7d5de;border-radius:10px;background:#fbfefd;color:#263d4e;font:inherit}textarea{min-height:90px;resize:vertical}.currentBox{background:#f3f8fb;border:1px solid #d5e4eb;border-radius:13px;padding:13px;margin:12px 0}.currentEntry{font-weight:850;color:var(--ink);font-size:1.06rem}.teacherGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:10px 0}.teacherChoice{display:flex;gap:9px;align-items:flex-start;border:1px solid #d6e3e9;border-radius:11px;padding:9px;background:#fbfefd}.teacherChoice input{width:auto;margin-top:3px}.teacherChoice .name{font-weight:700;color:var(--ink)}.teacherChoice .meta{font-size:.78rem;color:var(--muted)}.tablewrap{overflow:auto;margin-top:10px}table{border-collapse:collapse;width:100%;min-width:720px}th,td{border:1px solid #e0e9ee;padding:8px;text-align:left;font-size:.86rem}th{background:#edf5f9;color:var(--ink)}.code{font-family:ui-monospace,Consolas,monospace}.badge{display:inline-block;padding:3px 8px;border-radius:999px;background:#e9f3f7;font-size:.76rem;font-weight:700}.badge.active{background:#e7f6ea;color:#245c34}.badge.upcoming{background:#fff7df;color:#7a5b18}.badge.completed{background:#eef1f3;color:#5d6870}.badge.cancelled{background:#fdecec;color:#8b2d2d}.replacementItem{border:1px solid #dbe6eb;border-radius:13px;padding:13px;margin:9px 0;background:#fbfefd}.replacementTitle{font-weight:800;color:var(--ink)}.replacementMeta{font-size:.83rem;color:var(--muted);margin-top:4px;line-height:1.5}.historyItem{border:1px solid #dbe6eb;border-radius:12px;padding:12px;margin:8px 0;background:#fbfefd}.historyItem .when{font-size:.78rem;color:var(--muted);margin:3px 0}.empty{padding:18px;text-align:center;color:var(--muted);background:#f7fafb;border-radius:12px}.breadcrumb{font-size:.8rem;color:var(--muted);margin-bottom:4px}#app{display:none}
+@media(max-width:850px){.tiles{grid-template-columns:1fr 1fr}.metrics{grid-template-columns:1fr 1fr}.grid4,.grid3{grid-template-columns:1fr 1fr}.teacherGrid{grid-template-columns:1fr}}
+@media(max-width:560px){.tiles,.grid4,.grid3,.grid2{grid-template-columns:1fr}.metrics{grid-template-columns:1fr 1fr}}
+</style><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+(function(){
+  const CURRENT_APP_VERSION = '66.0';
+  try{
+    const u=new URL(window.location.href);
+    if(u.searchParams.get('v')!==CURRENT_APP_VERSION){
+      u.searchParams.set('v',CURRENT_APP_VERSION);
+      history.replaceState(null,'',u.pathname+u.search+u.hash);
+    }
+  }catch(_){}
+})();
+</script>
+
+<link rel="stylesheet" href="v66-design-system.css?v=66.0-school-identity-1"><script src="v66-ui.js?v=66.0-school-identity-1" defer></script>
+<!-- v66.2 dashboard-width-fix -->
+<style id="v66-2-dashboard-width-fix">
+@media (min-width:1100px){
+ main.wrap{max-width:none!important;width:auto!important;margin:0!important;padding-left:12px!important;padding-right:12px!important}
+ main.wrap>.card{margin-left:0!important;margin-right:0!important}
+}
+</style>
+<link rel="stylesheet" href="v66-visual-alignment-fix.css?v=66.2-align-1">
+<link rel="stylesheet" href="v66-final-sixpoint.css?v=66.2-final-1">
+<link rel="stylesheet" href="v66-remaining-polish.css?v=66.2-remain-1">
+<link rel="stylesheet" href="v66-admin-reference-polish.css?v=66.2-adminref-1">
+<link rel="stylesheet" href="v66-premium-unified.css?v=66.2-premium-1">
+</head>
+<body class="adminDashboardPage">
+<header><div class="wrap headline"><div><h1>VKV Nalbari · Admin Dashboard</h1><div class="subtitle">Administration and timetable management · Cloud v66.0</div></div><button id="homeBtn">🏠 Timetable Home</button></div></header>
+<main class="wrap">
+<div id="gate" class="card"><h2>Administrator Verification</h2><div id="gateMsg" class="status">Checking Admin access…</div><div class="actions"><button id="signInBtn" style="display:none">Sign in with Google</button><button id="retryAdminBtn" style="display:none">Retry Admin Check</button></div></div>
+<div id="app">
+  <div id="dashboardHome" class="card">
+    <h2>Admin Dashboard</h2>
+    <div class="help">Choose an administrative area. No section opens automatically.</div>
+    <div class="adminWorkspaceHero"><div class="adminWorkspaceCopy"><div class="eyebrow">Vivekananda Kendra Vidyalaya, Nalbari</div><strong>School Administration Workspace</strong><p>Timetable, classes, staff, attendance and academic records in one organised workspace.</p></div><div class="adminWorkspaceArt" aria-hidden="true"></div></div>
+    <div id="activeScheduleStatus" class="status">Active schedule: loading…</div>
+    <div class="tiles">
+      <div class="tile" data-open="masterEditor"><b>📅 Master Timetable</b><span>Edit a permanent timetable slot without changing the original roster structure.</span></div>
+      <div class="tile" id="openTimetableStudio" style="background:linear-gradient(145deg,#eef8ff,#edf8f2);border-color:#8fc2d2"><b>✦ Timetable Studio</b><span>Configure components, generate new candidates, edit colourful cards and retain named timetable versions for later activation.</span></div>
+      <div class="tile" id="openAnnualCalendar" style="background:linear-gradient(145deg,#fff8df,#edf8f2);border-color:#d9c277"><b>🗓 Annual Calendar Management</b><span>Add, edit or delete session milestones, examinations, holidays, celebrations, observances and common programmes.</span></div>
+      <div class="tile" id="openSchedules"><b>🗓 Schedule Profiles</b><span>Normal, Heat Wave and other timing profiles.</span></div>
+      <div class="tile" data-open="replacements"><b>👩‍🏫 Temporary Leave-Vacancy Replacements</b><span>Assign a temporary local teacher for a defined period without adding that person to the main roster.</span></div>
+      <div class="tile" data-open="teachers"><b>👥 Teachers & Workload</b><span>Permanent teacher directory and current master teaching load.</span></div>
+      <div class="tile" data-open="nonTeaching"><b>🧑‍💼 Non-Teaching Staff</b><span>Maintain the separate non-teaching roster for leave records only. These members never enter the timetable or proxy system.</span></div>
+      <div class="tile" id="openAttendance" style="background:#eaf7ec;border-color:#add2b5"><b>📍 Pilot Attendance</b><span>Schedules, school/OD geofences, daily verification, late and early-departure review.</span></div>
+      <div class="tile" data-open="classes"><b>🏫 Classes & Sections</b><span>Current class/section structure and scheduled entries.</span></div>
+      <div class="tile" id="openUsers"><b>🔐 Roles & User Access</b><span>Viewer, Proxy Manager, Manager, Approved Leave Viewer and Admin permissions.</span></div>
+      <div class="tile" id="openTimetableIntegrity" style="background:#eef8ff;border-color:#aacdde"><b>🧼 Timetable Integrity Checker</b><span>Read-only sanitation scan for legacy teacher-code formats, combined teaching duties, structural anomalies and active-schedule suppression.</span></div>
+      <div class="tile" id="openLeaveRules" style="background:#f1edfb;border-color:#c9bcec"><b>⚙️ Leave Rules</b><span>Configure leave categories, entitlement periods, staff applicability and administrative classification.</span></div>
+      <div class="tile" id="openLeaveEditor" style="background:#fff8e8;border-color:#e5c979"><b>🛠 Leave Master Editor + Integrity</b><span>Principal-only leave workspace with date ranges, date-wise correction, duplicate/conflict prevention, pending legacy resolution and Leave Integrity Checker.</span></div>
+      <div class="tile" id="openLeaveRegister"><b>🗂 Approved Leave Register</b><span>Teacher-wise approved Leave / OD / Special history and date-wise approved-status view for any past, present or future date.</span></div>
+      <div class="tile" id="openLeaveImport" style="background:#f4fbf5;border-color:#b8d9bf"><b>🗓 Import Approved Leave History</b><span>Excel leave import only. Validates dated events and preserves non-dated legacy accounting separately; it cannot replace the Master Timetable.</span></div>
+      <div class="tile" id="openImport" style="background:#f3f8fc;border-color:#b8d2e3"><b>📥 Master Timetable Import / Restore</b><span>Master timetable JSON only. Leave Excel files are not accepted on this page.</span></div>
+      <div class="tile" data-open="history"><b>📜 Change History</b><span>Audit trail for timetable and temporary replacement changes.</span></div>
+      <div class="tile" id="openExport"><b>📤 Export Master Timetable</b><span>Export or print the master timetable.</span></div>
+      <div class="tile" id="downloadBackup"><b>💾 Backup Master</b><span>Download the current master data as JSON.</span></div>
+      <div class="tile" data-open="overview"><b>📊 Master Overview</b><span>Session, permanent roster, classes and timetable counts.</span></div>
+    </div>
+    <div class="metrics">
+      <div class="metric"><div class="num" id="mTeachers">—</div><div class="lab">Permanent Teachers</div></div>
+      <div class="metric"><div class="num" id="mClasses">—</div><div class="lab">Classes / Sections</div></div>
+      <div class="metric"><div class="num" id="mEntries">—</div><div class="lab">Timetable Entries</div></div>
+      <div class="metric"><div class="num" id="mTemp">—</div><div class="lab">Active Temporary Replacements</div></div>
+    </div>
+  </div>
+
+  <section id="masterEditor" class="card panel">
+    <div class="sectionTop"><div><div class="breadcrumb">Admin Dashboard → Master Timetable</div><h2>📅 Master Timetable Administration</h2></div><button data-back-dashboard>← Admin Dashboard</button></div>
+    <div class="help">This edits the permanent master timetable. Temporary leave-vacancy teachers are deliberately not part of the permanent teacher selector.</div>
+    <div class="grid4"><div><label>Day</label><select id="editDay"></select></div><div><label>Class / Section</label><select id="editClass"></select></div><div><label>Period</label><select id="editPeriod"></select></div><div><label>Time</label><input id="editTime" readonly></div></div>
+    <div id="slotCurrent" class="currentBox">Choose a slot.</div>
+    <div class="grid2"><div><label>Subject / Assignment</label><input id="editSubject" placeholder="e.g. English, Maths, Chemistry"></div><div><label>Teacher selection</label><div class="help">Only permanent roster teachers are available here.</div></div></div>
+    <div id="availableTeachers" class="teacherGrid"></div>
+    <div class="actions"><button class="primary" id="saveSlot">Save Timetable Change</button><button id="reloadSlot">Reload Current Slot</button></div><div id="saveMsg" class="status" style="display:none"></div>
+  </section>
+
+  <section id="replacements" class="card panel">
+    <div class="sectionTop"><div><div class="breadcrumb">Admin Dashboard → Temporary Leave-Vacancy Replacements</div><h2>👩‍🏫 Temporary Leave-Vacancy Replacements</h2></div><button data-back-dashboard>← Admin Dashboard</button></div>
+    <div class="help">The replacement teacher remains outside the permanent roster. During the selected dates, the app operationally places the temporary teacher in the absent teacher's timetable. The original master timetable is preserved.</div>
+    <input type="hidden" id="replacementId">
+    <div class="grid3">
+      <div><label>Permanent Teacher on Leave</label><select id="replacementOriginal"></select></div>
+      <div><label>Temporary Teacher Name</label><input id="replacementName" placeholder="Name of locally appointed teacher"></div>
+      <div><label>Temporary Code</label><input id="replacementCode" placeholder="e.g. TMP1" maxlength="12"></div>
+      <div><label>From Date (dd/mm/yyyy)</label><input id="replacementFrom" type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/yyyy"></div>
+      <div><label>To Date (dd/mm/yyyy)</label><input id="replacementTo" type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/yyyy"></div>
+      <div><label>Remarks</label><input id="replacementRemarks" placeholder="Optional appointment / leave-vacancy note"></div>
+    </div>
+    <div class="actions"><button class="primary" id="saveReplacement">Save Temporary Replacement</button><button id="clearReplacement">Clear Form</button></div>
+    <div id="replacementMsg" class="status" style="display:none"></div>
+    <h3>Saved Temporary Replacements</h3>
+    <div id="replacementList"></div>
+  </section>
+
+  <section id="teachers" class="card panel">
+    <div class="sectionTop"><div><div class="breadcrumb">Admin Dashboard → Teachers & Workload</div><h2>👥 Teachers & Workload</h2></div><button data-back-dashboard>← Admin Dashboard</button></div>
+    <div class="help">This is the permanent roster only. Temporary leave-vacancy teachers are intentionally excluded.</div><div id="teacherTable" class="tablewrap"></div>
+  </section>
+
+  <section id="nonTeaching" class="card panel">
+    <div class="sectionTop"><div><div class="breadcrumb">Admin Dashboard → Non-Teaching Staff</div><h2>🧑‍💼 Non-Teaching Staff Register</h2></div><button data-back-dashboard>← Admin Dashboard</button></div>
+    <div class="help">These records are available only in Leave / OD / Special Assignment and the Approved Leave Register. They have no connection with the timetable, workload, Free Teachers or proxy allotment.</div>
+    <input type="hidden" id="nonTeachingId">
+    <div class="grid3"><div><label>Full Name</label><input id="nonTeachingName" placeholder="Staff member's full name"></div><div><label>Staff Code</label><input id="nonTeachingCode" placeholder="e.g. NT01" maxlength="16"></div><div><label>Designation</label><select id="nonTeachingDesignation"><option value="">Select…</option><option>LDC</option><option>UDC</option><option>Accountant</option><option>Office Assistant</option><option>Librarian</option><option>Lab Assistant</option><option>Driver</option><option>Conductor</option><option>Peon</option><option>Attendant</option><option>Security Guard</option><option>Cleaner</option><option>Other</option></select></div><div><label>Email (optional)</label><input id="nonTeachingEmail" type="email" placeholder="Google/email address"></div><div><label>Remarks</label><input id="nonTeachingRemarks" placeholder="Optional"></div></div>
+    <div class="actions"><button class="primary" id="saveNonTeaching">Save Non-Teaching Staff</button><button id="clearNonTeaching">Clear Form</button><button id="downloadNonTeachingTemplate">Download Validated Excel Template</button><button id="chooseNonTeachingImport">Preview Excel Import</button><input id="nonTeachingImportFile" type="file" accept=".xlsx,.xls" hidden></div><div id="nonTeachingMsg" class="status" style="display:none"></div><div id="nonTeachingImportPreview"></div>
+    <h3>Saved Non-Teaching Staff</h3><div id="nonTeachingList"></div>
+  </section>
+
+  <section id="classes" class="card panel">
+    <div class="sectionTop"><div><div class="breadcrumb">Admin Dashboard → Classes & Sections</div><h2>🏫 Classes & Sections</h2></div><button data-back-dashboard>← Admin Dashboard</button></div>
+    <div id="classTable" class="tablewrap"></div>
+  </section>
+
+  <section id="history" class="card panel">
+    <div class="sectionTop"><div><div class="breadcrumb">Admin Dashboard → Change History</div><h2>📜 Administrative Change History</h2></div><button data-back-dashboard>← Admin Dashboard</button></div>
+    <div class="help">Historical records are retained. Temporary replacement records are not automatically deleted when they end.</div><div id="historyList"></div>
+  </section>
+
+  <section id="overview" class="card panel">
+    <div class="sectionTop"><div><div class="breadcrumb">Admin Dashboard → Master Overview</div><h2>📊 Master Overview</h2></div><button data-back-dashboard>← Admin Dashboard</button></div>
+    <div id="overviewBox" class="status"></div>
+  </section>
+</div>
+</main>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore-lite.js";
+
+const firebaseConfig={apiKey:"AIzaSyDheZpyXghd1aQ9_RLhwpacVriG__wNZW4",authDomain:"vkv-nalbari-timetable.firebaseapp.com",projectId:"vkv-nalbari-timetable",storageBucket:"vkv-nalbari-timetable.firebasestorage.app",messagingSenderId:"791432856951",appId:"1:791432856951:web:61324065a54bef30f98d72"};
+const fb=initializeApp(firebaseConfig),auth=getAuth(fb),db=getFirestore(fb),provider=new GoogleAuthProvider();
+await setPersistence(auth,browserLocalPersistence).catch(()=>{});
+if(typeof auth.authStateReady==='function')await auth.authStateReady().catch(()=>{});
+const $=id=>document.getElementById(id),safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const DAYS=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+let currentUser=null,profile=null,masterDoc=null,master=null,selectedRecordIndex=-1;
+function todayKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function displayDate(k){const m=String(k||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?`${m[3]}/${m[2]}/${m[1]}`:String(k||'')}
+function inputDate(v){const m=String(v||'').trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/);if(!m)return'';const iso=`${m[3]}-${m[2]}-${m[1]}`,d=new Date(`${iso}T00:00:00`);return d.getFullYear()===Number(m[3])&&d.getMonth()+1===Number(m[2])&&d.getDate()===Number(m[1])?iso:''}
+function displayDateTime(ms){const d=new Date(Number(ms)||0);if(isNaN(d))return'';const p=n=>String(n).padStart(2,'0');return `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`}
+function displayDatesInText(x){return String(x||'').replace(/(\d{4})-(\d{2})-(\d{2})/g,(_,y,m,d)=>`${d}/${m}/${y}`)}
+function msg(id,text,kind='ok'){const el=$(id);el.style.display='block';el.className='status '+kind;el.innerHTML=text}
+function goTimetableHome(){location.href='index.html?v=66.0'}
+$('homeBtn').onclick=goTimetableHome;
+$('signInBtn').onclick=()=>signInWithPopup(auth,provider);
+
+let adminCheckToken=0;
+async function verifyAndOpenAdmin(user){
+ const token=++adminCheckToken;
+ $('retryAdminBtn').style.display='none';$('gateMsg').className='status';$('gateMsg').textContent='Checking Admin access…';
+ const slowTimer=setTimeout(()=>{if(token===adminCheckToken){$('gateMsg').className='status warn';$('gateMsg').textContent='Admin verification is taking longer than expected. You may wait or retry.';$('retryAdminBtn').style.display='inline-block'}},2500);
+ try{
+   const ps=await getDoc(doc(db,'authorizedUsers',user.uid));
+   if(token!==adminCheckToken)return;
+   if(!ps.exists()||ps.data().active!==true||ps.data().role!=='admin'){$('gateMsg').className='status warn';$('gateMsg').textContent='Admin Dashboard access is not available for this account.';return}
+   profile=ps.data();
+   $('gate').style.display='none';$('app').style.display='block';$('app').style.opacity='1';$('app').style.pointerEvents='auto';$('app').removeAttribute('aria-busy');
+   showDashboard();
+   // Preload master only when the browser is idle. Keep heavy tables lazy,
+   // but update the lightweight dashboard schedule/metrics as soon as data arrives.
+   const preload=()=>ensureMasterLoaded(false).then(renderDashboardSummary).catch(e=>renderDashboardLoadError(e));
+   if('requestIdleCallback' in window)requestIdleCallback(preload,{timeout:2500});else setTimeout(preload,1200);
+ }catch(e){if(token!==adminCheckToken)return;$('gateMsg').className='status error';$('gateMsg').textContent='Could not open Admin Dashboard: '+(e.message||e);$('retryAdminBtn').style.display='inline-block'}
+ finally{clearTimeout(slowTimer)}
+}
+
+onAuthStateChanged(auth,user=>{
+ currentUser=user;
+ if(!user){$('gateMsg').textContent='Sign in with the Admin Google account.';$('signInBtn').style.display='inline-block';$('retryAdminBtn').style.display='none';return}
+ $('signInBtn').style.display='none';verifyAndOpenAdmin(user);
+});
+$('retryAdminBtn').onclick=()=>{if(currentUser)verifyAndOpenAdmin(currentUser)};
+let masterLoadingPromise=null,masterRendered=false;
+async function ensureMasterLoaded(render=false){
+ if(master&&Array.isArray(master.records)){
+   if(render&&!masterRendered){renderAll();masterRendered=true}
+   return master;
+ }
+ if(!masterLoadingPromise)masterLoadingPromise=(async()=>{
+   const snap=await getDoc(doc(db,'master','current'));if(!snap.exists())throw new Error('Master timetable is not available.');
+   masterDoc=snap.data();master=structuredClone(masterDoc.data||masterDoc);
+   if(!Array.isArray(master.records)||!Array.isArray(master.teachers)||!Array.isArray(master.classes))throw new Error('Master timetable structure is incomplete.');
+   if(!Array.isArray(master.temporaryReplacements))master.temporaryReplacements=[];
+   if(!Array.isArray(master.nonTeachingStaff))master.nonTeachingStaff=[];
+   return master;
+ })().finally(()=>{masterLoadingPromise=null});
+ await masterLoadingPromise;
+ if(render&&!masterRendered){renderAll();masterRendered=true}
+ return master;
+}
+async function loadMaster(){master=null;masterRendered=false;return ensureMasterLoaded(true)}
+
+function activeSchedule(){const id=master.activeScheduleProfileId||'normal',profiles=master.scheduleProfiles||{};return profiles[id]||profiles.normal||{name:'Normal Schedule'}}
+function activeReplacements(date=todayKey()){return master.temporaryReplacements.filter(r=>r&&r.active!==false&&r.startDate&&r.endDate&&date>=r.startDate&&date<=r.endDate)}
+function renderDashboardSummary(){
+ if(!master||!Array.isArray(master.records))return;
+ const ap=activeSchedule(),status=$('activeScheduleStatus');
+ if(status){status.className='status ok';status.innerHTML='<b>Active Schedule:</b> '+safe(ap.name||'Normal Schedule')}
+ if($('mTeachers'))$('mTeachers').textContent=master.teachers.length;
+ if($('mClasses'))$('mClasses').textContent=master.classes.length;
+ if($('mEntries'))$('mEntries').textContent=master.records.length;
+ if($('mTemp'))$('mTemp').textContent=activeReplacements().length;
+}
+function renderDashboardLoadError(e){
+ const status=$('activeScheduleStatus');if(!status)return;
+ status.className='status error';
+ status.innerHTML='<b>Active schedule unavailable.</b> '+safe((e&&e.message)||e||'Please retry.');
+}
+function renderAll(){
+ renderDashboardSummary();
+ fill($('editDay'),DAYS.map(x=>({value:x,label:x})));fill($('editClass'),master.classes.map(x=>({value:x,label:x})));fill($('replacementOriginal'),master.teachers.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(t=>({value:t.code,label:t.name+' ('+t.code+')'})));
+ renderTeacherTable();renderClassTable();renderReplacementList();renderNonTeachingList();renderHistory();renderOverview();
+ if(!$('editDay').value)$('editDay').value='Monday';if(!$('editClass').value)$('editClass').value=master.classes[0]||'';updatePeriods();
+}
+function fill(sel,items){const old=sel.value;sel.innerHTML=items.map(x=>'<option value="'+safe(x.value)+'">'+safe(x.label)+'</option>').join('');if([...sel.options].some(o=>o.value===old))sel.value=old}
+function teacherByCode(c){return master.teachers.find(t=>t.code===c)||null}
+function allTeacherCodes(){return master.teachers.map(t=>t.code).sort((a,b)=>b.length-a.length)}
+function inferCodes(r){if(Array.isArray(r.codes)&&r.codes.length)return [...new Set(r.codes)];const entry=String(r.entry||'');return allTeacherCodes().filter(code=>new RegExp('(^|[^A-Za-z0-9])'+code.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'($|[^A-Za-z0-9])').test(entry))}
+function subjectFromRecord(r){let text=String(r?.entry||'').trim();for(const code of inferCodes(r)){const re=new RegExp('(^|[-/ ,&])'+code.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?=$|[-/ ,&])','g');text=text.replace(re,'$1')}return text.replace(/[\s\-\/,&]+$/g,'').trim()||String(r?.entry||'').trim()}
+function buildEntry(subject,codes){const clean=String(subject||'').trim();return codes.length?clean+'-'+codes.join('/'):clean}
+function findRecordIndex(cls,day,period){return master.records.findIndex(r=>r.class===cls&&r.day===day&&Number(r.period)===Number(period))}
+function recordTime(r,p){return r?.time||(master.times&&master.times[String(p)])||''}
+function updatePeriods(){const cls=$('editClass').value;let ps=(master.patterns&&master.patterns[cls])||Object.keys(master.times||{}).map(Number);ps=[...new Set(ps.map(Number))].sort((a,b)=>a-b);fill($('editPeriod'),ps.map(p=>({value:String(p),label:'P'+p})));loadSlot()}
+function busyCodes(day,period,exclude=-1){const set=new Set();master.records.forEach((r,i)=>{if(i!==exclude&&r.day===day&&Number(r.period)===Number(period))inferCodes(r).forEach(c=>set.add(c))});return set}
+function loadSlot(){
+ const cls=$('editClass').value,day=$('editDay').value,p=Number($('editPeriod').value||0);selectedRecordIndex=findRecordIndex(cls,day,p);
+ if(selectedRecordIndex<0){$('editTime').value=(master.times&&master.times[String(p)])||'';$('slotCurrent').innerHTML='<b>No master timetable record exists for this slot.</b>';$('editSubject').value='';$('availableTeachers').innerHTML='';return}
+ const r=master.records[selectedRecordIndex],codes=inferCodes(r);$('editTime').value=recordTime(r,p);$('slotCurrent').innerHTML='<div class="help">Current permanent master entry</div><div class="currentEntry">'+safe(r.entry)+'</div><div class="help">'+safe(r.class)+' · '+safe(r.day)+' · P'+safe(r.period)+'</div>';$('editSubject').value=subjectFromRecord(r);
+ const busy=busyCodes(day,p,selectedRecordIndex),current=new Set(codes);const allowed=master.teachers.filter(t=>!busy.has(t.code)||current.has(t.code)).sort((a,b)=>(current.has(a.code)?0:1)-(current.has(b.code)?0:1)||a.name.localeCompare(b.name));
+ $('availableTeachers').innerHTML=allowed.map(t=>`<label class="teacherChoice"><input type="checkbox" class="teacherCheck" value="${safe(t.code)}" ${current.has(t.code)?'checked':''}><div><div class="name">${safe(t.name)} <span class="code">(${safe(t.code)})</span></div><div class="meta">${current.has(t.code)?'Current permanent teacher':'Available in this slot'}</div></div></label>`).join('');
+}
+$('editDay').onchange=loadSlot;$('editClass').onchange=updatePeriods;$('editPeriod').onchange=loadSlot;$('reloadSlot').onclick=loadSlot;
+
+async function persistMaster(change){
+ const history=[...(masterDoc.changeHistory||[])];if(change){history.unshift(change);if(history.length>150)history.length=150}
+ await setDoc(doc(db,'master','current'),{data:master,changeHistory:history,session:masterDoc.session||'2026-27',updatedAt:serverTimestamp(),updatedBy:currentUser.uid,updatedByEmail:currentUser.email||''},{merge:true});
+ masterDoc={...masterDoc,data:structuredClone(master),changeHistory:history};renderAll();
+}
+$('saveSlot').onclick=async()=>{
+ if(selectedRecordIndex<0){msg('saveMsg','No existing master record is selected.','warn');return}
+ const codes=[...document.querySelectorAll('.teacherCheck:checked')].map(x=>x.value),subject=$('editSubject').value.trim();if(!codes.length||!subject){msg('saveMsg','Subject and at least one permanent teacher are required.','warn');return}
+ const before=structuredClone(master.records[selectedRecordIndex]),after={...before,entry:buildEntry(subject,codes),codes:[...codes]};if(before.entry===after.entry&&JSON.stringify(inferCodes(before))===JSON.stringify(after.codes)){msg('saveMsg','No change to save.','warn');return}
+ master.records[selectedRecordIndex]=after;$('saveSlot').disabled=true;
+ try{await persistMaster({atMs:Date.now(),type:'slot_edit',byUid:currentUser.uid,byName:currentUser.displayName||profile.name||currentUser.email||'Admin',class:before.class,day:before.day,period:Number(before.period),before:{entry:before.entry,codes:inferCodes(before)},after:{entry:after.entry,codes:after.codes}});loadSlot();msg('saveMsg','Master timetable updated.','ok')}catch(e){master.records[selectedRecordIndex]=before;msg('saveMsg','Save failed: '+safe(e.message||e),'error')}finally{$('saveSlot').disabled=false}
+};
+
+function clearReplacementForm(){$('replacementId').value='';$('replacementOriginal').selectedIndex=0;$('replacementName').value='';$('replacementCode').value='';$('replacementFrom').value='';$('replacementTo').value='';$('replacementRemarks').value='';$('saveReplacement').textContent='Save Temporary Replacement';$('replacementMsg').style.display='none'}
+$('clearReplacement').onclick=clearReplacementForm;
+function rangesOverlap(a1,a2,b1,b2){return a1<=b2&&b1<=a2}
+function replacementState(r){const t=todayKey();if(r.active===false)return ['Cancelled','cancelled'];if(t<r.startDate)return ['Upcoming','upcoming'];if(t>r.endDate)return [r.archived?'Completed · Archived':'Completed','completed'];return ['Active Now','active']}
+$('saveReplacement').onclick=async()=>{
+ const id=$('replacementId').value.trim(),originalCode=$('replacementOriginal').value,tempName=$('replacementName').value.trim(),tempCode=$('replacementCode').value.trim().toUpperCase().replace(/\s+/g,''),startDate=inputDate($('replacementFrom').value),endDate=inputDate($('replacementTo').value),remarks=$('replacementRemarks').value.trim();
+ if(!originalCode||!tempName||!tempCode||!startDate||!endDate){msg('replacementMsg','Permanent teacher, temporary teacher name/code, From Date and To Date are required.','warn');return}if(startDate>endDate){msg('replacementMsg','From Date cannot be later than To Date.','warn');return}if(master.teachers.some(t=>t.code===tempCode)){msg('replacementMsg','Temporary code '+safe(tempCode)+' already belongs to the permanent roster. Use a different temporary code.','warn');return}
+ const others=master.temporaryReplacements.filter(r=>r.id!==id&&r.active!==false);
+ if(others.some(r=>r.originalCode===originalCode&&rangesOverlap(startDate,endDate,r.startDate,r.endDate))){msg('replacementMsg','This permanent teacher already has another replacement overlapping these dates.','warn');return}
+ if(others.some(r=>r.tempCode===tempCode&&rangesOverlap(startDate,endDate,r.startDate,r.endDate))){msg('replacementMsg','This temporary code is already being used by another overlapping replacement record.','warn');return}
+ const now=Date.now(),existing=id?master.temporaryReplacements.find(r=>r.id===id):null;const rec={...(existing||{}),id:id||('TMP_'+now+'_'+Math.random().toString(36).slice(2,7)),originalCode,tempName,tempCode,startDate,endDate,remarks,active:existing?existing.active!==false:true,archived:existing?existing.archived===true:false,createdAtMs:existing?.createdAtMs||now,updatedAtMs:now};
+ const idx=master.temporaryReplacements.findIndex(r=>r.id===rec.id);if(idx>=0)master.temporaryReplacements[idx]=rec;else master.temporaryReplacements.push(rec);
+ $('saveReplacement').disabled=true;
+ try{await persistMaster({atMs:now,type:existing?'replacement_edit':'replacement_create',byUid:currentUser.uid,byName:currentUser.displayName||profile.name||currentUser.email||'Admin',summary:(existing?'Updated':'Created')+' temporary replacement: '+tempName+' ('+tempCode+') for '+(teacherByCode(originalCode)?.name||originalCode)+' · '+displayDate(startDate)+' to '+displayDate(endDate)});clearReplacementForm();showPanel('replacements');msg('replacementMsg','Temporary leave-vacancy replacement saved. The permanent roster and master timetable remain unchanged.','ok')}catch(e){msg('replacementMsg','Could not save replacement: '+safe(e.message||e),'error')}finally{$('saveReplacement').disabled=false}
+};
+function renderReplacementList(){
+ const rows=master.temporaryReplacements.slice().sort((a,b)=>String(b.startDate).localeCompare(String(a.startDate))||String(a.tempName).localeCompare(String(b.tempName)));if(!rows.length){$('replacementList').innerHTML='<div class="empty">No temporary leave-vacancy replacement has been configured.</div>';return}
+ $('replacementList').innerHTML=rows.map(r=>{const orig=teacherByCode(r.originalCode),[state,cls]=replacementState(r),today=todayKey(),canEdit=r.active!==false&&today<=r.endDate;let actions='';if(canEdit)actions+=`<button class="smallbtn" data-edit-rep="${safe(r.id)}">Edit</button> `;if(r.active!==false&&today<r.startDate)actions+=`<button class="smallbtn danger" data-cancel-rep="${safe(r.id)}">Cancel Future Assignment</button> `;if(r.active!==false&&today>=r.startDate&&today<r.endDate)actions+=`<button class="smallbtn" data-end-rep="${safe(r.id)}">End After Today</button> `;if(today>r.endDate&&!r.archived)actions+=`<button class="smallbtn" data-archive-rep="${safe(r.id)}">Archive</button>`;return `<div class="replacementItem"><div class="replacementTitle">${safe(r.tempName)} <span class="code">(${safe(r.tempCode)})</span> <span class="badge ${cls}">${safe(state)}</span></div><div class="replacementMeta"><b>Leave vacancy for:</b> ${safe(orig?orig.name:r.originalCode)} (${safe(r.originalCode)})<br><b>Period:</b> ${safe(displayDate(r.startDate))} → ${safe(displayDate(r.endDate))}${r.remarks?'<br><b>Remarks:</b> '+safe(r.remarks):''}<br><b>Roster status:</b> Temporary only — not part of the permanent roster.</div>${actions?'<div class="actions">'+actions+'</div>':''}</div>`}).join('');
+}
+function editReplacement(id){const r=master.temporaryReplacements.find(x=>x.id===id);if(!r)return;$('replacementId').value=r.id;$('replacementOriginal').value=r.originalCode;$('replacementName').value=r.tempName;$('replacementCode').value=r.tempCode;$('replacementFrom').value=displayDate(r.startDate);$('replacementTo').value=displayDate(r.endDate);$('replacementRemarks').value=r.remarks||'';$('saveReplacement').textContent='Update Temporary Replacement';window.scrollTo({top:$('replacements').offsetTop-10,behavior:'smooth'})}
+async function mutateReplacement(id,kind){const r=master.temporaryReplacements.find(x=>x.id===id);if(!r)return;const before=structuredClone(r),now=Date.now();if(kind==='cancel'){if(!confirm('Cancel this future temporary replacement? The record will be retained in history.'))return;r.active=false;r.updatedAtMs=now}else if(kind==='end'){if(!confirm('End this temporary replacement after today? Today will remain covered and the permanent teacher will resume from the next day.'))return;r.endDate=todayKey();r.updatedAtMs=now}else if(kind==='archive'){r.archived=true;r.updatedAtMs=now}
+ try{await persistMaster({atMs:now,type:'replacement_'+kind,byUid:currentUser.uid,byName:currentUser.displayName||profile.name||currentUser.email||'Admin',summary:(kind==='cancel'?'Cancelled future assignment':kind==='end'?'Ended assignment after today':'Archived completed assignment')+': '+r.tempName+' ('+r.tempCode+') for '+(teacherByCode(r.originalCode)?.name||r.originalCode),before,after:structuredClone(r)});showPanel('replacements')}catch(e){Object.assign(r,before);alert('Could not update replacement: '+(e.message||e))}
+}
+document.addEventListener('click',e=>{const edit=e.target.closest('[data-edit-rep]');if(edit)return editReplacement(edit.dataset.editRep);const cancel=e.target.closest('[data-cancel-rep]');if(cancel)return mutateReplacement(cancel.dataset.cancelRep,'cancel');const end=e.target.closest('[data-end-rep]');if(end)return mutateReplacement(end.dataset.endRep,'end');const arc=e.target.closest('[data-archive-rep]');if(arc)return mutateReplacement(arc.dataset.archiveRep,'archive')});
+
+function clearNonTeachingForm(){$('nonTeachingId').value='';$('nonTeachingName').value='';$('nonTeachingCode').value='';$('nonTeachingDesignation').value='';$('nonTeachingEmail').value='';$('nonTeachingRemarks').value='';$('saveNonTeaching').textContent='Save Non-Teaching Staff';$('nonTeachingMsg').style.display='none'}
+$('clearNonTeaching').onclick=clearNonTeachingForm;
+$('saveNonTeaching').onclick=async()=>{const id=$('nonTeachingId').value.trim(),name=$('nonTeachingName').value.trim(),code=$('nonTeachingCode').value.trim().toUpperCase().replace(/\s+/g,''),designation=$('nonTeachingDesignation').value.trim(),email=$('nonTeachingEmail').value.trim().toLowerCase(),remarks=$('nonTeachingRemarks').value.trim();if(!name||!code||!designation){msg('nonTeachingMsg','Full Name, Staff Code and Designation are required.','warn');return}if(master.teachers.some(t=>String(t.code)===code)||master.temporaryReplacements.some(t=>String(t.tempCode)===code)||master.nonTeachingStaff.some(t=>t.id!==id&&String(t.code)===code)){msg('nonTeachingMsg','Staff Code '+safe(code)+' is already in use.','warn');return}const now=Date.now(),old=id?master.nonTeachingStaff.find(x=>x.id===id):null,rec={...(old||{}),id:id||('NTS_'+now+'_'+Math.random().toString(36).slice(2,7)),name,code,designation,email,remarks,active:true,createdAtMs:old?.createdAtMs||now,updatedAtMs:now};const i=master.nonTeachingStaff.findIndex(x=>x.id===rec.id);if(i>=0)master.nonTeachingStaff[i]=rec;else master.nonTeachingStaff.push(rec);try{await persistMaster({atMs:now,type:old?'non_teaching_edit':'non_teaching_create',byUid:currentUser.uid,byName:currentUser.displayName||profile.name||currentUser.email||'Admin',summary:(old?'Updated':'Added')+' non-teaching staff: '+name+' ('+code+') · '+designation});clearNonTeachingForm();showPanel('nonTeaching');msg('nonTeachingMsg','Saved for leave-register use only.','ok')}catch(e){msg('nonTeachingMsg','Could not save: '+safe(e.message||e),'error')}};
+function renderNonTeachingList(){const rows=(master.nonTeachingStaff||[]).slice().sort((a,b)=>String(a.name).localeCompare(String(b.name)));$('nonTeachingList').innerHTML=rows.length?'<div class="tablewrap"><table><thead><tr><th>Name</th><th>Code</th><th>Designation</th><th>Email</th><th>Action</th></tr></thead><tbody>'+rows.map(x=>`<tr><td>${safe(x.name)}</td><td class="code">${safe(x.code)}</td><td>${safe(x.designation)}</td><td>${safe(x.email||'—')}</td><td><button class="smallbtn" data-edit-nts="${safe(x.id)}">Edit</button> <button class="smallbtn danger" data-delete-nts="${safe(x.id)}">Delete</button></td></tr>`).join('')+'</tbody></table></div>':'<div class="empty">No non-teaching staff added yet.</div>'}
+async function deleteNonTeaching(id){const x=master.nonTeachingStaff.find(r=>r.id===id);if(!x||!confirm('Delete '+x.name+' from the non-teaching staff register? Existing historical leave records will remain.'))return;master.nonTeachingStaff=master.nonTeachingStaff.filter(r=>r.id!==id);try{await persistMaster({atMs:Date.now(),type:'non_teaching_delete',byUid:currentUser.uid,byName:currentUser.displayName||profile.name||currentUser.email||'Admin',summary:'Deleted non-teaching staff roster entry: '+x.name+' ('+x.code+')',before:x});showPanel('nonTeaching')}catch(e){master.nonTeachingStaff.push(x);alert('Could not delete: '+(e.message||e))}}
+document.addEventListener('click',e=>{const edit=e.target.closest('[data-edit-nts]');if(edit){const x=master.nonTeachingStaff.find(r=>r.id===edit.dataset.editNts);if(!x)return;$('nonTeachingId').value=x.id;$('nonTeachingName').value=x.name;$('nonTeachingCode').value=x.code;$('nonTeachingDesignation').value=x.designation;$('nonTeachingEmail').value=x.email||'';$('nonTeachingRemarks').value=x.remarks||'';$('saveNonTeaching').textContent='Update Non-Teaching Staff';return}const del=e.target.closest('[data-delete-nts]');if(del)deleteNonTeaching(del.dataset.deleteNts)});
+
+const NON_TEACHING_HEADERS=['Staff Code*','Full Name*','Designation*','Email','Remarks','Active (Yes/No)'];
+$('downloadNonTeachingTemplate').onclick=()=>{const rows=[NON_TEACHING_HEADERS,['NT01','Example Staff','Office Assistant','','Delete this example row before import','Yes']],ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:16},{wch:28},{wch:22},{wch:30},{wch:38},{wch:18}];const notes=XLSX.utils.aoa_to_sheet([['VKV Nalbari · Non-Teaching Staff Import — Version 66.0'],['Required columns are marked *. Staff Code is the unique update key.'],['Codes already used by permanent or temporary teachers are rejected.'],['Active accepts Yes/No. Existing records are updated only after preview confirmation.'],['Non-teaching staff remain outside timetable, workload and proxy calculations.']]);notes['!cols']=[{wch:95}];const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Non-Teaching Staff');XLSX.utils.book_append_sheet(wb,notes,'Instructions');XLSX.writeFile(wb,'VKV_Nalbari_Non_Teaching_Staff_Import_v66_0.xlsx')};
+$('chooseNonTeachingImport').onclick=()=>$('nonTeachingImportFile').click();
+$('nonTeachingImportFile').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{const wb=XLSX.read(await file.arrayBuffer(),{type:'array'}),ws=wb.Sheets['Non-Teaching Staff']||wb.Sheets[wb.SheetNames[0]],raw=XLSX.utils.sheet_to_json(ws,{defval:'',raw:false});if(!raw.length)throw new Error('No data rows were found.');const usedTeacher=new Set([...(master.teachers||[]).map(x=>String(x.code).toUpperCase()),...(master.temporaryReplacements||[]).map(x=>String(x.tempCode).toUpperCase())]),seen=new Set(),valid=[],errors=[];raw.forEach((r,i)=>{const row=i+2,code=String(r['Staff Code*']||'').trim().toUpperCase().replace(/\s+/g,''),name=String(r['Full Name*']||'').trim(),designation=String(r['Designation*']||'').trim(),email=String(r.Email||'').trim().toLowerCase(),remarks=String(r.Remarks||'').trim(),activeText=String(r['Active (Yes/No)']||'Yes').trim().toLowerCase();let err='';if(!code||!name||!designation)err='Staff Code, Full Name and Designation are required.';else if(!/^[A-Z0-9_-]{1,16}$/.test(code))err='Invalid Staff Code.';else if(usedTeacher.has(code))err='Code clashes with a teacher/temporary replacement.';else if(seen.has(code))err='Duplicate Staff Code inside the workbook.';else if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))err='Invalid email.';else if(!['yes','no','y','n','true','false','1','0'].includes(activeText))err='Active must be Yes or No.';seen.add(code);const rec={row,code,name,designation,email,remarks,active:['yes','y','true','1'].includes(activeText)};if(err)errors.push({...rec,error:err});else valid.push(rec)});window.__ntsImport={valid,errors,fileName:file.name};$('nonTeachingImportPreview').innerHTML='<div class="status '+(errors.length?'warn':'ok')+'"><b>Preview only — nothing imported yet.</b><br>'+valid.length+' valid row(s); '+errors.length+' rejected row(s).</div><div class="tablewrap"><table><thead><tr><th>Row</th><th>Code</th><th>Name</th><th>Designation</th><th>Result</th></tr></thead><tbody>'+[...valid.map(x=>({...x,error:'Ready: '+(master.nonTeachingStaff.some(n=>n.code===x.code)?'Update':'Add')})),...errors].map(x=>`<tr><td>${x.row}</td><td>${safe(x.code)}</td><td>${safe(x.name)}</td><td>${safe(x.designation)}</td><td>${safe(x.error)}</td></tr>`).join('')+'</tbody></table></div>'+(valid.length?'<div class="actions"><button class="primary" id="confirmNonTeachingImport">Confirm Import of '+valid.length+' Valid Row(s)</button><button id="cancelNonTeachingImport">Cancel</button></div>':'');$('confirmNonTeachingImport')?.addEventListener('click',confirmNonTeachingImport);$('cancelNonTeachingImport')?.addEventListener('click',()=>{$('nonTeachingImportPreview').innerHTML='';window.__ntsImport=null})}catch(err){msg('nonTeachingMsg','Import preview failed: '+safe(err.message||err),'error')}finally{e.target.value=''}};
+async function confirmNonTeachingImport(){const pack=window.__ntsImport;if(!pack?.valid?.length)return;if(!confirm('Import '+pack.valid.length+' validated row(s)? Existing non-teaching records with the same Staff Code will be updated.'))return;const now=Date.now(),before=structuredClone(master.nonTeachingStaff||[]);for(const x of pack.valid){const old=master.nonTeachingStaff.find(n=>String(n.code).toUpperCase()===x.code),rec={...(old||{}),id:old?.id||('NTS_'+now+'_'+Math.random().toString(36).slice(2,7)),code:x.code,name:x.name,designation:x.designation,email:x.email,remarks:x.remarks,active:x.active,createdAtMs:old?.createdAtMs||now,updatedAtMs:now};if(old)master.nonTeachingStaff[master.nonTeachingStaff.indexOf(old)]=rec;else master.nonTeachingStaff.push(rec)}try{await persistMaster({atMs:now,type:'non_teaching_excel_import',byUid:currentUser.uid,byName:currentUser.displayName||profile.name||currentUser.email||'Admin',summary:'Validated non-teaching Excel import: '+pack.valid.length+' accepted, '+pack.errors.length+' rejected · '+pack.fileName,importSummary:{accepted:pack.valid.length,rejected:pack.errors.length,fileName:pack.fileName}});window.__ntsImport=null;$('nonTeachingImportPreview').innerHTML='';showPanel('nonTeaching');msg('nonTeachingMsg','Import completed: '+pack.valid.length+' row(s) added or updated; '+pack.errors.length+' rejected.','ok')}catch(err){master.nonTeachingStaff=before;msg('nonTeachingMsg','Import was not saved: '+safe(err.message||err),'error')}}
+
+function renderTeacherTable(){const rows=master.teachers.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(t=>{const slots=new Set(master.records.filter(r=>inferCodes(r).includes(t.code)).map(r=>r.day+'|'+r.period));const rep=activeReplacements().find(r=>r.originalCode===t.code);return `<tr><td>${safe(t.name)}</td><td class="code">${safe(t.code)}</td><td>${slots.size}</td><td>${rep?safe(rep.tempName)+' ('+safe(rep.tempCode)+') until '+safe(displayDate(rep.endDate)):'—'}</td></tr>`});$('teacherTable').innerHTML='<table><thead><tr><th>Permanent Teacher</th><th>Code</th><th>Distinct Teaching Slots / Week</th><th>Active Leave-Vacancy Replacement</th></tr></thead><tbody>'+rows.join('')+'</tbody></table>'}
+function renderClassTable(){const rows=master.classes.map(c=>`<tr><td>${safe(c)}</td><td>${master.records.filter(r=>r.class===c).length}</td><td>${safe(((master.patterns&&master.patterns[c])||[]).join(', '))}</td></tr>`);$('classTable').innerHTML='<table><thead><tr><th>Class / Section</th><th>Scheduled Entries</th><th>Periods Used</th></tr></thead><tbody>'+rows.join('')+'</tbody></table>'}
+function changeLabel(c){const map={slot_edit:'Master timetable slot edited',replacement_create:'Temporary replacement created',replacement_edit:'Temporary replacement updated',replacement_cancel:'Temporary replacement cancelled',replacement_end:'Temporary replacement ended',replacement_archive:'Temporary replacement archived'};return map[c.type]||c.type||'Administrative change'}
+function renderHistory(){const h=masterDoc.changeHistory||[];$('historyList').innerHTML=h.length?h.map(c=>`<div class="historyItem"><b>${safe(changeLabel(c))}</b><div class="when">${safe(displayDateTime(c.atMs||0))} · ${safe(c.byName||'Admin')}</div>${c.summary?'<div>'+safe(displayDatesInText(c.summary))+'</div>':''}${c.class?'<div>'+safe(c.class)+' · '+safe(c.day||'')+' · P'+safe(c.period||'')+'</div>':''}${c.before?.entry?'<div><b>Before:</b> '+safe(c.before.entry)+'</div>':''}${c.after?.entry?'<div><b>After:</b> '+safe(c.after.entry)+'</div>':''}</div>`).join(''):'<div class="empty">No administrative changes have been recorded through this dashboard yet.</div>'}
+function renderOverview(){const session=masterDoc.session||'2026-27';$('overviewBox').innerHTML='<b>Session:</b> '+safe(session)+'<br><b>Permanent teachers:</b> '+master.teachers.length+'<br><b>Non-teaching staff:</b> '+(master.nonTeachingStaff||[]).length+'<br><b>Temporary replacement records:</b> '+master.temporaryReplacements.length+'<br><b>Active temporary replacements today:</b> '+activeReplacements().length+'<br><b>Classes / Sections:</b> '+master.classes.length+'<br><b>Timetable entries:</b> '+master.records.length+'<br><b>Active schedule:</b> '+safe(activeSchedule().name||'Normal Schedule')}
+function showDashboard(){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));$('dashboardHome').style.display='block';window.scrollTo({top:0,behavior:'smooth'})}
+async function showPanel(id){
+ try{
+   await ensureMasterLoaded(true);
+   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+   const el=$(id);if(el){el.classList.add('active');el.scrollIntoView({behavior:'smooth',block:'start'})}
+ }catch(e){alert('Could not load Master Timetable data: '+(e.message||e))}
+}
+document.querySelectorAll('[data-open]').forEach(el=>el.onclick=()=>showPanel(el.dataset.open));document.querySelectorAll('[data-back-dashboard]').forEach(el=>el.onclick=showDashboard);
+$('openLeaveRules').onclick=()=>location.href='admin-leave-rules.html?v=66.1-leave-rules';$('openTimetableStudio').onclick=()=>location.href='admin-timetable-studio.html?v=66.0';$('openAnnualCalendar').onclick=()=>location.href='admin-annual-calendar.html?v=66.0';$('openAttendance').onclick=()=>location.href='admin-attendance.html?v=66.0';$('openTimetableIntegrity').onclick=()=>location.href='admin-timetable-integrity.html?v=66.0';$('openSchedules').onclick=()=>location.href='admin-schedules.html?v=66.0';$('openLeaveEditor').onclick=()=>location.href='admin-leave-editor.html?v=66.0-leave-fix-1';$('openUsers').onclick=()=>location.href='admin-users.html?v=66.0';$('openImport').onclick=()=>location.href='admin-import.html?v=66.0';$('openLeaveImport').onclick=()=>location.href='admin-leave-import.html?v=66.0';$('openLeaveRegister').onclick=()=>location.href='admin-leave.html?v=66.0-leave-fix-1';$('openExport').onclick=()=>location.href='admin-export.html?v=66.0';
+$('downloadBackup').onclick=()=>{const blob=new Blob([JSON.stringify(master,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='VKV_Nalbari_Master_Timetable_Backup_'+todayKey()+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
+</script>
+<script src="v64-dashboard-addon.js?v=66.0-leave-fix-1"></script>
+<script src="v66-final-sixpoint.js?v=66.2-final-1" defer></script>
+<script src="v66-admin-reference-polish.js?v=66.2-adminref-1" defer></script>
+
+<script src="vkv-route-policy.js?v=prod"></script>
+<script src="vkv-admin-dashboard-runtime.js?v=prod"></script>
+<script src="vkv-dashboard-metrics-final.js?v=prod"></script>
+<script src="vkv-teacher-transfer.js?v=prod"></script>
+<script src="vkv-teacher-shortcode-rename.js?v=prod"></script>
+</body>
+</html>

@@ -1,1 +1,0 @@
-import './vkv-home-app-final.js?v=f2fe32f';
