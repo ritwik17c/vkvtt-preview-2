@@ -1,0 +1,198 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function authEmail() {
+      return signedIn() ? request.auth.token.get('email', '') : '';
+    }
+
+    function verifiedEmail() {
+      return signedIn()
+             && request.auth.token.get('email_verified', false) == true
+             && authEmail() is string
+             && authEmail().size() > 0;
+    }
+
+    function hasUidProfile() {
+      return signedIn()
+             && exists(/databases/$(database)/documents/authorizedUsers/$(request.auth.uid));
+    }
+
+    function uidProfile() {
+      return get(/databases/$(database)/documents/authorizedUsers/$(request.auth.uid));
+    }
+
+    function uidActive() {
+      return hasUidProfile() && uidProfile().data.active == true;
+    }
+
+    function uidRole() {
+      return uidActive() ? uidProfile().data.role : '';
+    }
+
+    function viewerAllowed() {
+      return verifiedEmail()
+             && exists(/databases/$(database)/documents/viewerEmails/$(authEmail()))
+             && get(/databases/$(database)/documents/viewerEmails/$(authEmail())).data.active == true;
+    }
+
+    function canReadSchool() {
+      return uidActive() || viewerAllowed();
+    }
+
+    function isAdmin() {
+      return uidActive() && uidRole() == 'admin';
+    }
+
+    function isStatusEditor() {
+      return uidActive() && uidRole() in ['admin', 'manager'];
+    }
+
+    function isProxyManager() {
+      return uidActive() && uidRole() == 'proxy_manager';
+    }
+
+    function isLeaveViewer() {
+      return (uidActive() && uidRole() == 'leave_viewer')
+             || (verifiedEmail()
+                 && exists(/databases/$(database)/documents/viewerEmails/$(authEmail()))
+                 && get(/databases/$(database)/documents/viewerEmails/$(authEmail())).data.active == true
+                 && get(/databases/$(database)/documents/viewerEmails/$(authEmail())).data.role == 'leave_viewer');
+    }
+
+
+    function leaveHistoryVisible() {
+      return exists(/databases/$(database)/documents/leaveControl/current)
+             && get(/databases/$(database)/documents/leaveControl/current).data.myAreaLeaveHistoryVisible == true;
+    }
+
+    function canPublishProxy() {
+      return isStatusEditor() || isProxyManager();
+    }
+
+    function proxyOnlyUpdate() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        'allotments',
+        'supervisions',
+        'updatedAt',
+        'updatedBy',
+        'updatedByEmail'
+      ])
+      && request.resource.data.updatedBy == request.auth.uid;
+    }
+
+    function proxyOnlyCreate(date) {
+      return request.resource.data.keys().hasOnly([
+        'date',
+        'dayName',
+        'allotments',
+        'supervisions',
+        'updatedAt',
+        'updatedBy',
+        'updatedByEmail'
+      ])
+      && request.resource.data.keys().hasAll([
+        'date',
+        'dayName',
+        'allotments',
+        'supervisions',
+        'updatedBy'
+      ])
+      && request.resource.data.date == date
+      && request.resource.data.updatedBy == request.auth.uid;
+    }
+
+    match /authorizedUsers/{uid} {
+      allow get: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow list, create, update, delete: if isAdmin();
+    }
+
+    match /viewerEmails/{email} {
+      allow get: if isAdmin() || (verifiedEmail() && authEmail() == email);
+      allow list, create, update, delete: if isAdmin();
+    }
+
+    match /master/{documentId} {
+      allow read: if canReadSchool();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /dailyRecords/{date} {
+      allow read: if uidActive() && uidRole() in ['admin', 'manager', 'proxy_manager'];
+
+      allow create: if isStatusEditor()
+                    || (isProxyManager() && proxyOnlyCreate(date));
+
+      allow update: if isStatusEditor()
+                    || (isProxyManager() && proxyOnlyUpdate());
+
+      allow delete: if isAdmin();
+    }
+
+    match /publishedProxy/{date} {
+      allow read: if canReadSchool();
+
+      allow create, update: if canPublishProxy()
+                            && request.resource.data.date == date
+                            && request.resource.data.finalizedByUid == request.auth.uid;
+
+      allow delete: if isAdmin();
+    }
+
+
+    // School-wide approved Leave / OD / Special Assignment projections.
+    // These collections intentionally contain only approved status information,
+    // never draft proxy allotments or other private daily-management fields.
+    match /approvedStatusPlans/{planId} {
+      allow read: if isAdmin() || isLeaveViewer();
+      allow create, update, delete: if isStatusEditor();
+    }
+
+    match /approvedDailyStatus/{date} {
+      allow read: if isAdmin() || isLeaveViewer();
+      allow create, update, delete: if isStatusEditor();
+    }
+
+    // Personal school-approved Leave / OD / Special Assignment projection.
+    // Teachers can read only the subcollection under their own verified Google email.
+    // Admin / Manager can write projections from the private daily operational records.
+    match /personalStatus/{email}/records/{date} {
+      // The teacher can read only their own projection.
+      // Admin / Manager may also read it so the Sync My Area process can
+      // safely inspect and rebuild existing projections.
+      allow read: if (verifiedEmail() && authEmail() == email && canReadSchool() && leaveHistoryVisible())
+                  || isStatusEditor();
+      allow create, update, delete: if isStatusEditor();
+    }
+
+
+
+    // Leave reconciliation/publication control.
+    // Staff may read only the visibility flag. Only Principal/Admin can change it.
+    match /leaveControl/{documentId} {
+      allow read: if canReadSchool();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Principal/Admin audit trail for approved-leave corrections.
+    match /leaveAudit/{auditId} {
+      allow read, create, update, delete: if isAdmin();
+    }
+
+    // Legacy non-dated leave accounting imported from reviewed historical workbooks.
+    // Principal/Admin only. These records must never generate proxy duties by themselves.
+    match /legacyLeaveAccounting/{entryId} {
+      allow read: if isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

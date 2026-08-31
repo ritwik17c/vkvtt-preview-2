@@ -1,0 +1,367 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function authEmail() {
+      return signedIn() ? request.auth.token.get('email', '') : '';
+    }
+
+    function verifiedEmail() {
+      return signedIn()
+             && request.auth.token.get('email_verified', false) == true
+             && authEmail() is string
+             && authEmail().size() > 0;
+    }
+
+    function hasUidProfile() {
+      return signedIn()
+             && exists(/databases/$(database)/documents/authorizedUsers/$(request.auth.uid));
+    }
+
+    function uidProfile() {
+      return get(/databases/$(database)/documents/authorizedUsers/$(request.auth.uid));
+    }
+
+    function uidActive() {
+      return hasUidProfile() && uidProfile().data.active == true;
+    }
+
+    function uidRole() {
+      return uidActive() ? uidProfile().data.role : '';
+    }
+
+    function viewerAllowed() {
+      return verifiedEmail()
+             && exists(/databases/$(database)/documents/viewerEmails/$(authEmail()))
+             && get(/databases/$(database)/documents/viewerEmails/$(authEmail())).data.active == true;
+    }
+
+    function canReadSchool() {
+      return uidActive() || viewerAllowed();
+    }
+
+    function isAdmin() {
+      return uidActive() && uidRole() == 'admin';
+    }
+
+    // Timetable Studio is available to the Principal/Admin and to individual
+    // UID accounts explicitly delegated through User Access & Roles.
+    function canUseTimetableStudio() {
+      return uidActive()
+             && (uidRole() == 'admin'
+                 || uidProfile().data.get('permissions', {}).get('timetableStudio', false) == true);
+    }
+
+    function isStatusEditor() {
+      return uidActive() && uidRole() in ['admin', 'manager'];
+    }
+
+    function isProxyManager() {
+      return uidActive() && uidRole() == 'proxy_manager';
+    }
+
+    function isLeaveViewer() {
+      return (uidActive() && uidRole() == 'leave_viewer')
+             || (verifiedEmail()
+                 && exists(/databases/$(database)/documents/viewerEmails/$(authEmail()))
+                 && get(/databases/$(database)/documents/viewerEmails/$(authEmail())).data.active == true
+                 && get(/databases/$(database)/documents/viewerEmails/$(authEmail())).data.role == 'leave_viewer');
+    }
+
+
+    function leaveHistoryVisible() {
+      return exists(/databases/$(database)/documents/leaveControl/current)
+             && get(/databases/$(database)/documents/leaveControl/current).data.myAreaLeaveHistoryVisible == true;
+    }
+
+    function canPublishProxy() {
+      return isStatusEditor() || isProxyManager();
+    }
+
+    function isAttendanceManager() {
+      return uidActive() && uidRole() in ['admin', 'manager', 'attendance_manager'];
+    }
+
+    function attendanceOwner() {
+      return signedIn() && request.resource.data.uid == request.auth.uid;
+    }
+
+    function proxyOnlyUpdate() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        'allotments',
+        'supervisions',
+        'updatedAt',
+        'updatedBy',
+        'updatedByEmail'
+      ])
+      && request.resource.data.updatedBy == request.auth.uid;
+    }
+
+    function proxyOnlyCreate(date) {
+      return request.resource.data.keys().hasOnly([
+        'date',
+        'dayName',
+        'allotments',
+        'supervisions',
+        'updatedAt',
+        'updatedBy',
+        'updatedByEmail'
+      ])
+      && request.resource.data.keys().hasAll([
+        'date',
+        'dayName',
+        'allotments',
+        'supervisions',
+        'updatedBy'
+      ])
+      && request.resource.data.date == date
+      && request.resource.data.updatedBy == request.auth.uid;
+    }
+
+    match /authorizedUsers/{uid} {
+      allow get: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow list, create, update, delete: if isAdmin();
+    }
+
+    match /viewerEmails/{email} {
+      allow get: if isAdmin() || (verifiedEmail() && authEmail() == email);
+      allow list, create, update, delete: if isAdmin();
+    }
+
+    match /master/{documentId} {
+      allow read: if canReadSchool();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // The Annual Calendar can be turned on or off by the Principal/Admin.
+    // When off, staff cannot read the managed event document directly.
+    match /annualCalendar/{documentId} {
+      allow read: if isAdmin()
+                  || (canReadSchool()
+                      && resource.data.get('visible', true) == true);
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Complete named timetable versions. Delegated designers can create and
+    // edit non-active versions. Only the Principal/Admin can activate/delete.
+    match /timetableVersions/{versionId} {
+      allow read: if canUseTimetableStudio();
+      allow create: if canUseTimetableStudio()
+                    && request.resource.data.status in ['draft', 'ready', 'inactive'];
+      allow update: if isAdmin()
+                    || (canUseTimetableStudio()
+                        && resource.data.status != 'active'
+                        && request.resource.data.status in ['draft', 'ready', 'inactive']);
+      allow delete: if isAdmin() && resource.data.status != 'active';
+    }
+
+    // Immutable activation audit. Activation also requires the existing
+    // Admin-only write permission on master/current.
+    match /timetableActivations/{activationId} {
+      allow read: if canUseTimetableStudio();
+      allow create: if isAdmin()
+                    && request.resource.data.activatedByUid == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    match /dailyRecords/{date} {
+      allow read: if uidActive() && uidRole() in ['admin', 'manager', 'proxy_manager'];
+
+      allow create: if isStatusEditor()
+                    || (isProxyManager() && proxyOnlyCreate(date));
+
+      allow update: if isStatusEditor()
+                    || (isProxyManager() && proxyOnlyUpdate());
+
+      allow delete: if isAdmin();
+    }
+
+    match /publishedProxy/{date} {
+      allow read: if canReadSchool();
+
+      allow create, update: if isAdmin()
+                            || (canPublishProxy()
+                                && request.resource.data.date == date
+                                && request.resource.data.finalizedByUid == request.auth.uid);
+
+      allow delete: if isAdmin();
+    }
+
+    // Principal-issued permission for creating or correcting an earlier proxy
+    // record. The dated document retains the reason, authoriser and timestamp.
+    match /proxyEditAuthorizations/{date} {
+      allow read: if uidActive() && uidRole() in ['admin', 'manager', 'proxy_manager'];
+      allow create, update: if isAdmin()
+                            && request.resource.data.date == date
+                            && request.resource.data.enabled == true
+                            && request.resource.data.enabledByUid == request.auth.uid;
+      allow delete: if isAdmin();
+    }
+
+
+    // School-wide approved Leave / OD / Special Assignment projections.
+    // These collections intentionally contain only approved status information,
+    // never draft proxy allotments or other private daily-management fields.
+    match /approvedStatusPlans/{planId} {
+      allow read: if isAdmin() || isLeaveViewer();
+      allow create, update, delete: if isStatusEditor();
+    }
+
+    match /approvedDailyStatus/{date} {
+      allow read: if isAdmin() || isLeaveViewer();
+      allow create, update, delete: if isStatusEditor();
+    }
+
+    // Personal school-approved Leave / OD / Special Assignment projection.
+    // Teachers can read only the subcollection under their own verified Google email.
+    // Admin / Manager can write projections from the private daily operational records.
+    match /personalStatus/{email}/records/{date} {
+      // The teacher can read only their own projection.
+      // Admin / Manager may also read it so the Sync My Area process can
+      // safely inspect and rebuild existing projections.
+      allow read: if (verifiedEmail() && authEmail() == email && canReadSchool() && leaveHistoryVisible())
+                  || isStatusEditor();
+      allow create, update, delete: if isStatusEditor();
+    }
+
+
+
+    // Leave reconciliation/publication control.
+    // Staff may read only the visibility flag. Only Principal/Admin can change it.
+    match /leaveControl/{documentId} {
+      allow read: if canReadSchool();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Principal/Admin audit trail for approved-leave corrections.
+    match /leaveAudit/{auditId} {
+      allow read, create, update, delete: if isAdmin();
+    }
+
+    // Legacy non-dated leave accounting imported from reviewed historical workbooks.
+    // Principal/Admin only. These records must never generate proxy duties by themselves.
+    match /legacyLeaveAccounting/{entryId} {
+      allow read: if isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Principal/Admin-configured leave entitlements, applicability and period metadata.
+    // The Leave Master Editor is Principal/Admin-only, so keep this configuration narrow.
+    match /leaveRules/{documentId} {
+      allow read: if isStatusEditor();
+      allow create, update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // Version 65.4 pilot attendance configuration. Staff can read the schedule
+    // applied to them; only the Principal/Admin can alter school timing/geofence.
+    match /attendanceSettings/{documentId} {
+      allow read: if canReadSchool();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /attendanceSchedules/{scheduleId} {
+      allow read: if canReadSchool();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Staff punches are append-only for staff accounts. The Principal/Admin may
+    // edit or delete junk/mock-trial records through the audited Attendance panel.
+    match /attendanceEvents/{eventId} {
+      allow get: if isAttendanceManager()
+                 || (canReadSchool() && resource.data.uid == request.auth.uid);
+      allow list: if isAttendanceManager()
+                  || (canReadSchool() && resource.data.uid == request.auth.uid);
+      allow create: if canReadSchool()
+                    && attendanceOwner()
+                    && request.resource.data.keys().hasAll([
+                      'uid', 'date', 'type', 'recordedAt', 'latitude', 'longitude',
+                      'accuracy', 'vpnMockAcknowledged', 'verificationStatus',
+                      'scheduleSnapshot'
+                    ])
+                    && request.resource.data.type in [
+                      'arrival', 'leave', 'return', 'final',
+                      'od_check_in', 'od_check_out'
+                    ]
+                    && request.resource.data.verificationStatus == 'provisional'
+                    && request.resource.data.vpnMockAcknowledged == true;
+      allow update, delete: if isAdmin();
+    }
+
+    // Immutable audit copies created before a Principal/Admin edits or deletes
+    // an attendance event. Audit records themselves cannot be changed/deleted.
+    match /attendanceTestAudit/{auditId} {
+      allow read, create: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    // Privacy-safe school-wide Latecomers Today projection: no coordinates,
+    // IP address, movement reason or private remarks are permitted.
+    match /attendanceLate/{lateId} {
+      allow read: if canReadSchool();
+      allow create: if canReadSchool()
+                    && attendanceOwner()
+                    && request.resource.data.keys().hasOnly([
+                      'date', 'uid', 'staffName', 'staffGroup', 'arrivalTime',
+                      'arrivalClientTimeMs', 'lateMinutes',
+                      'lateThresholdMinutes', 'verificationStatus'
+                    ])
+                    && request.resource.data.verificationStatus == 'provisional';
+      allow update, delete: if isAttendanceManager();
+    }
+
+    // OD assignments are approved by an authorised manager. A staff member can
+    // read only an assignment addressed to their UID or verified email.
+    match /odAssignments/{assignmentId} {
+      allow get, list: if isAttendanceManager()
+                       || (canReadSchool()
+                           && (resource.data.staffUid == request.auth.uid
+                               || (verifiedEmail() && resource.data.staffEmail == authEmail())));
+      allow create, update, delete: if isAttendanceManager();
+    }
+
+    // Biometric machine imports remain separate from app/geofence punches.
+    // Attendance managers may import/read batches; only Principal/Admin may undo/delete.
+    match /biometricImports/{batchId} {
+      allow get, list: if isAttendanceManager();
+      allow create: if isAttendanceManager()
+                    && request.resource.data.importedBy == request.auth.uid
+                    && request.resource.data.status == 'active';
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /biometricRecords/{recordId} {
+      allow get, list: if isAttendanceManager();
+      allow create: if isAttendanceManager()
+                    && request.resource.data.importedBy == request.auth.uid
+                    && request.resource.data.batchId is string;
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+
+    // Biometric comparison/correction is stored separately. The original event
+    // snapshot and verifier identity form the verification audit record.
+    match /attendanceVerifications/{eventId} {
+      allow get, list: if isAttendanceManager()
+                       || (canReadSchool() && resource.data.uid == request.auth.uid);
+      allow create, update: if isAttendanceManager()
+                            && request.resource.data.eventId == eventId
+                            && request.resource.data.verifiedBy == request.auth.uid
+                            && request.resource.data.status in [
+                              'verified', 'verified_correction', 'app_only',
+                              'biometric_only', 'mismatch'
+                            ];
+      allow delete: if isAdmin();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

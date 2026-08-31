@@ -1,0 +1,85 @@
+// VKVTT v66.3 Phase 2 — provisional leave / approval workflow patch
+// REVIEW AND MERGE INTO THE ACTIVE FIRESTORE RULESET ONLY AFTER PREVIEW TESTING.
+// Do not publish this patch by itself.
+
+// Add beside the existing role helpers:
+function emailLeaveEditor() {
+  return verifiedEmail()
+         && exists(/databases/$(database)/documents/viewerEmails/$(authEmail()))
+         && get(/databases/$(database)/documents/viewerEmails/$(authEmail())).data.active == true
+         && get(/databases/$(database)/documents/viewerEmails/$(authEmail())).data.role == 'leave_editor';
+}
+
+function isLeaveEditor() {
+  return (uidActive() && uidRole() == 'leave_editor') || emailLeaveEditor();
+}
+
+function canPrepareLeave() {
+  return isAdmin() || isLeaveEditor();
+}
+
+// Keep the generic Manager role operational. It may continue to work with
+// proxy/daily operational status where existing rules allow it, but it must NOT
+// create, edit, approve or delete the school's approved leave projections.
+// Use these narrower rules when merging Phase 2 into the active ruleset:
+//
+// match /approvedStatusPlans/{planId} {
+//   allow read: if isAdmin() || isLeaveViewer();
+//   allow create, update, delete: if isAdmin();
+// }
+//
+// match /approvedDailyStatus/{date} {
+//   allow read: if isAdmin() || isLeaveViewer();
+//   allow create, update, delete: if isAdmin();
+// }
+//
+// match /personalStatus/{email}/records/{date} {
+//   allow read: if (verifiedEmail() && authEmail() == email && canReadSchool() && leaveHistoryVisible())
+//               || isStatusEditor();
+//   allow create, update, delete: if isAdmin();
+// }
+//
+// This intentionally separates operational Manager authority from final leave
+// authority. Leave Editor prepares; Principal/Admin approves/corrects.
+
+// Phase-2 provisional leave documents.
+// Leave Editors may create/update only their own provisional/returned work.
+// Admin may review all records and is the only role allowed to transition a
+// record to approved/cancelled state.
+match /provisionalLeavePlans/{planId} {
+  allow read: if isAdmin() || isLeaveEditor() || isProxyManager() || isStatusEditor();
+
+  allow create: if canPrepareLeave()
+                && request.resource.data.approvalStatus == 'provisional'
+                && request.resource.data.createdByUid == request.auth.uid
+                && request.resource.data.createdByEmail == authEmail();
+
+  allow update: if isAdmin()
+                || (isLeaveEditor()
+                    && resource.data.createdByUid == request.auth.uid
+                    && resource.data.approvalStatus in ['provisional', 'returned']
+                    && request.resource.data.approvalStatus == 'provisional'
+                    && request.resource.data.createdByUid == resource.data.createdByUid
+                    && request.resource.data.createdByEmail == authEmail()
+                    && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+                      'approvedByUid','approvedByEmail','approvedAt',
+                      'approvalDecision','officialPostedAt'
+                    ]));
+
+  allow delete: if false;
+}
+
+// Immutable approval decision trail. The Principal/Admin alone creates it.
+match /leaveApprovalAudit/{auditId} {
+  allow read: if isAdmin();
+  allow create: if isAdmin()
+                && request.resource.data.action in ['approved','returned','cancelled']
+                && request.resource.data.actedByUid == request.auth.uid;
+  allow update, delete: if false;
+}
+
+// Important integration rules:
+// 1. Do NOT broaden approvedStatusPlans or approvedDailyStatus writes to Leave Editor.
+// 2. Do NOT leave those approved collections writable by generic Manager after Phase 2.
+// 3. A provisional entry may influence Proxy Manager through provisionalLeavePlans,
+//    but must not become an approved school record until Principal/Admin approval.

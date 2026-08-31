@@ -1,0 +1,56 @@
+// VKVTT QB Paper Builder — safe local-first foundation
+// Phase E2.4: editable sections + live marks + section targets + internal choice + local question/section reordering + safe verified-bank insertion API. No Firestore writes.
+(function(){
+  const STORAGE='vkvtt.qb.paperDraft.v1';
+  const $=id=>document.getElementById(id);
+  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+  const state={title:'',className:'',subject:'',exam:'',duration:'',target:0,sections:[]};
+  function load(){try{Object.assign(state,JSON.parse(localStorage.getItem(STORAGE)||'{}'))}catch(_){} state.sections=(state.sections||[]).map(s=>({...s,name:s.name||'',instructions:s.instructions||'',targetMarks:Number(s.targetMarks)||0,questions:(s.questions||[]).map(q=>({...q,choice:q.choice||''}))}));}
+  function persist(){localStorage.setItem(STORAGE,JSON.stringify(state));const e=$('pbSaved');if(e){e.textContent='Saved just now';setTimeout(()=>e.textContent='Autosaved on this device',1800)}}
+  function qmarks(q){return Number(q.marks)||0}
+  function marks(){return state.sections.reduce((a,s)=>a+s.questions.reduce((x,q)=>x+qmarks(q),0),0)}
+  function moveQuestion(si,qi,delta){const qs=state.sections[si]?.questions||[],to=qi+delta;if(to<0||to>=qs.length)return;[qs[qi],qs[to]]=[qs[to],qs[qi]];persist();render()}
+  function moveSection(si,delta){const to=si+delta;if(si<0||si>=state.sections.length||to<0||to>=state.sections.length)return;[state.sections[si],state.sections[to]]=[state.sections[to],state.sections[si]];persist();render()}
+  function addVerifiedQuestion(q,sectionIndex){
+    if(!q||!String(q.questionText||q.text||'').trim())return{ok:false,reason:'Question text is empty.'};
+    const sourceId=String(q.id||q.questionId||'').trim();
+    if(sourceId&&state.sections.some(s=>(s.questions||[]).some(x=>String(x.sourceQuestionId||'')===sourceId)))return{ok:false,reason:'This verified question is already in the paper.'};
+    if(!state.sections.length)state.sections.push({name:'',instructions:'',targetMarks:0,questions:[]});
+    let si=Number(sectionIndex);if(!Number.isInteger(si)||si<0||si>=state.sections.length)si=state.sections.length-1;
+    state.sections[si].questions.push({text:String(q.questionText||q.text||'').trim(),choice:'',marks:Number(q.marks)||0,sourceQuestionId:sourceId,source:'verified_bank',sourceSubject:String(q.subject||''),sourceClass:String(q.className||'')});
+    persist();render();return{ok:true,sectionIndex:si};
+  }
+  function render(){
+    const used=marks(),remain=(Number(state.target)||0)-used;
+    $('pbUsed').textContent=used;$('pbTargetView').textContent=Number(state.target)||0;$('pbRemaining').textContent=remain;$('pbRemaining').style.fontWeight='800';
+    $('pbBalance').textContent=!state.target?'Set target marks':remain===0?'✓ Paper matches target':remain>0?remain+' marks still to allocate':Math.abs(remain)+' marks over target';
+    $('pbSections').innerHTML=state.sections.length?state.sections.map((s,si)=>{const sectionUsed=s.questions.reduce((a,q)=>a+qmarks(q),0),sectionTarget=Number(s.targetMarks)||0,sectionRemain=sectionTarget-sectionUsed,sectionStatus=!sectionTarget?`${sectionUsed} marks`:sectionRemain===0?`${sectionUsed} / ${sectionTarget} marks ✓`:sectionRemain>0?`${sectionUsed} / ${sectionTarget} marks · ${sectionRemain} short`:`${sectionUsed} / ${sectionTarget} marks · ${Math.abs(sectionRemain)} over`;return`<div class="qcard"><div class="actions" style="justify-content:space-between;align-items:center"><div class="actions" style="gap:5px;align-items:center"><b>Section ${String.fromCharCode(65+si)}</b><button data-sup="${si}" title="Move section up" aria-label="Move section up" ${si===0?'disabled':''}>↑</button><button data-sdown="${si}" title="Move section down" aria-label="Move section down" ${si===state.sections.length-1?'disabled':''}>↓</button></div><span class="small">${sectionStatus}</span></div><div class="grid3" style="margin-top:8px"><div><label>Section title</label><input data-sn="${si}" value="${esc(s.name)}" placeholder="e.g. Reading / Grammar / Long Answer"></div><div><label>Instructions</label><input data-si="${si}" value="${esc(s.instructions)}" placeholder="Optional section instruction"></div><div><label>Section Target Marks</label><input data-st="${si}" type="number" min="0" step="0.5" value="${sectionTarget||''}" placeholder="Optional"></div></div>${s.questions.map((q,qi)=>`<div style="display:grid;grid-template-columns:auto minmax(0,1fr) 82px auto;gap:8px;align-items:start;margin-top:10px"><b>${qi+1}.</b><div><textarea data-q="${si}:${qi}" style="min-height:58px">${esc(q.text)}</textarea>${q.sourceQuestionId?`<div class="small" style="margin-top:3px">✓ From Verified Bank</div>`:''}<textarea data-c="${si}:${qi}" style="min-height:48px;margin-top:5px" placeholder="Optional internal choice: OR ...">${esc(q.choice)}</textarea></div><input data-m="${si}:${qi}" type="number" min="0" step="0.5" value="${qmarks(q)}" aria-label="Marks"><div class="actions" style="gap:4px;flex-wrap:nowrap"><button data-up="${si}:${qi}" title="Move question up" aria-label="Move question up" ${qi===0?'disabled':''}>↑</button><button data-down="${si}:${qi}" title="Move question down" aria-label="Move question down" ${qi===s.questions.length-1?'disabled':''}>↓</button><button data-del="${si}:${qi}" title="Remove question" aria-label="Remove question">×</button></div></div>`).join('')}<div class="actions" style="margin-top:9px"><button data-addq="${si}">＋ Add Question</button><button data-dels="${si}">Remove Section</button></div></div>`}).join(''):'<div class="empty">Add a section to begin building the paper.</div>';
+    document.querySelectorAll('[data-addq]').forEach(b=>b.onclick=()=>{state.sections[+b.dataset.addq].questions.push({text:'',choice:'',marks:1});persist();render()});
+    document.querySelectorAll('[data-dels]').forEach(b=>b.onclick=()=>{const i=+b.dataset.dels;if(confirm('Remove Section '+String.fromCharCode(65+i)+' and its questions?')){state.sections.splice(i,1);persist();render()}});
+    document.querySelectorAll('[data-sup]').forEach(b=>b.onclick=()=>moveSection(+b.dataset.sup,-1));
+    document.querySelectorAll('[data-sdown]').forEach(b=>b.onclick=()=>moveSection(+b.dataset.sdown,1));
+    document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{const[s,q]=b.dataset.del.split(':').map(Number);state.sections[s].questions.splice(q,1);persist();render()});
+    document.querySelectorAll('[data-up]').forEach(b=>b.onclick=()=>{const[s,q]=b.dataset.up.split(':').map(Number);moveQuestion(s,q,-1)});
+    document.querySelectorAll('[data-down]').forEach(b=>b.onclick=()=>{const[s,q]=b.dataset.down.split(':').map(Number);moveQuestion(s,q,1)});
+    document.querySelectorAll('[data-q]').forEach(e=>e.oninput=()=>{const[s,q]=e.dataset.q.split(':').map(Number);state.sections[s].questions[q].text=e.value;persist()});
+    document.querySelectorAll('[data-c]').forEach(e=>e.oninput=()=>{const[s,q]=e.dataset.c.split(':').map(Number);state.sections[s].questions[q].choice=e.value;persist()});
+    document.querySelectorAll('[data-m]').forEach(e=>e.oninput=()=>{const[s,q]=e.dataset.m.split(':').map(Number);state.sections[s].questions[q].marks=Number(e.value)||0;persist();render()});
+    document.querySelectorAll('[data-sn]').forEach(e=>e.oninput=()=>{state.sections[+e.dataset.sn].name=e.value;persist()});
+    document.querySelectorAll('[data-si]').forEach(e=>e.oninput=()=>{state.sections[+e.dataset.si].instructions=e.value;persist()});
+    document.querySelectorAll('[data-st]').forEach(e=>{e.oninput=()=>{state.sections[+e.dataset.st].targetMarks=Number(e.value)||0;persist()};e.onchange=()=>render()});
+    $('pbSectionCount').textContent=state.sections.length;
+    window.dispatchEvent(new CustomEvent('vkv-qb-paper-rendered'));
+  }
+  function init(){
+    const app=$('app');if(!app||$('paperBuilderTab'))return;const tabs=app.querySelector('.tabs');if(!tabs)return;
+    const tab=document.createElement('button');tab.id='paperBuilderTab';tab.dataset.panel='paperBuilder';tab.textContent='📝 Paper Builder';tabs.appendChild(tab);
+    const panel=document.createElement('section');panel.id='paperBuilder';panel.className='card panel';panel.innerHTML=`<h2>Question Paper Builder</h2><div class="tip">Build safely with live marks. Add section titles, instructions and optional section target marks; each section then shows its live shortfall/overage. Add an optional <b>OR</b> choice under any question. Use ↑ / ↓ beside a section or question to reorder it without retyping. Verified Bank questions can be copied into this local draft without changing the Question Bank. Nothing is published automatically.</div><div class="grid3" style="margin-top:10px"><div><label>Class</label><input id="pbClass"></div><div><label>Subject</label><input id="pbSubject"></div><div><label>Examination</label><input id="pbExam" placeholder="e.g. Half-Yearly Examination"></div></div><div class="grid3"><div><label>Target Marks</label><input id="pbTarget" type="number" min="0" step="0.5"></div><div><label>Duration</label><input id="pbDuration" placeholder="e.g. 3 hours"></div><div><label>Paper Title / Note</label><input id="pbTitle"></div></div><div class="metrics" style="margin-top:12px"><div class="metric"><div class="num"><span id="pbUsed">0</span> / <span id="pbTargetView">0</span></div><div class="lab">Marks Used / Target</div></div><div class="metric"><div class="num" id="pbRemaining">0</div><div class="lab">Marks Remaining</div></div><div class="metric"><div class="num" id="pbSectionCount">0</div><div class="lab">Sections</div></div><div class="metric"><div class="small" id="pbSaved">Autosaved on this device</div><div class="lab">Draft Safety</div></div></div><div id="pbBalance" class="tip" style="margin-top:10px">Set target marks</div><div class="actions" style="margin-top:12px"><button id="pbAddSection">＋ Add Section</button><button id="pbClear">Clear Local Draft</button></div><div id="pbSections" style="margin-top:10px"></div>`;tabs.after(panel);
+    load();[['pbClass','className'],['pbSubject','subject'],['pbExam','exam'],['pbDuration','duration'],['pbTitle','title']].forEach(([id,k])=>{const e=$(id);e.value=state[k]||'';e.oninput=()=>{state[k]=e.value;persist()}});$('pbTarget').value=state.target||'';$('pbTarget').oninput=()=>{state.target=Number($('pbTarget').value)||0;persist();render()};
+    $('pbAddSection').onclick=()=>{state.sections.push({name:'',instructions:'',targetMarks:0,questions:[{text:'',choice:'',marks:1}]});persist();render()};$('pbClear').onclick=()=>{if(confirm('Clear this local paper draft?')){localStorage.removeItem(STORAGE);location.reload()}};
+    tab.onclick=()=>{document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('active',x===tab));document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('active',x===panel));render()};
+    window.__vkvQbPaperBuilder={addVerifiedQuestion,getState:()=>JSON.parse(JSON.stringify(state)),render};
+    window.dispatchEvent(new CustomEvent('vkv-qb-paper-ready'));
+    render();
+  }
+  const timer=setInterval(()=>{if($('app')&&$('app').style.display!=='none'){clearInterval(timer);init()}},300);setTimeout(()=>{clearInterval(timer);init()},7000);
+})();

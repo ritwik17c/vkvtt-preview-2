@@ -1,0 +1,54 @@
+// VKVTT Question Bank — teacher self-edit / withdrawal / resubmission patch
+// MERGE into the ACTIVE Firestore ruleset; do not publish this fragment by itself.
+// Purpose: allow a teacher to correct or withdraw only their own unverified/returned question,
+// and allow a returned question to be resubmitted for coordinator verification.
+// Verified/approved questions remain locked to teacher edits.
+
+function ownsQuestion(data) {
+  return signedIn()
+         && (data.teacherUid == request.auth.uid
+             || (verifiedEmail()
+                 && data.teacherEmail is string
+                 && data.teacherEmail == authEmail()));
+}
+
+function teacherEditableQuestion(data) {
+  return ownsQuestion(data)
+         && data.status in ['draft', 'submitted', 'returned'];
+}
+
+match /qbQuestions/{questionId} {
+  // Keep your existing read/create/coordinator/admin permissions here.
+
+  // Teacher may update only their own editable question. Allowed status transitions:
+  // - keep current status while correcting fields
+  // - draft/submitted/returned -> withdrawn
+  // - returned -> submitted (resubmit after correction)
+  // Teacher cannot self-approve/self-verify.
+  allow update: if isAdmin()
+                || (
+                  teacherEditableQuestion(resource.data)
+                  && ownsQuestion(request.resource.data)
+                  && request.resource.data.teacherUid == resource.data.teacherUid
+                  && request.resource.data.teacherEmail == resource.data.teacherEmail
+                  && request.resource.data.teacherCode == resource.data.teacherCode
+                  && (
+                    request.resource.data.status == resource.data.status
+                    || request.resource.data.status == 'withdrawn'
+                    || (resource.data.status == 'returned'
+                        && request.resource.data.status == 'submitted')
+                  )
+                  && request.resource.data.status != 'approved'
+                  && request.resource.data.status != 'verified'
+                );
+
+  // Do not hard-delete teacher submissions. Use status='withdrawn' instead.
+  allow delete: if isAdmin();
+}
+
+// Recommended application behaviour:
+// - draft/submitted/returned => teacher may edit own question.
+// - returned => teacher may resubmit after correction; append workflow event and resubmission timestamp.
+// - submitted/returned => teacher may withdraw own question with a reason.
+// - approved/verified => teacher cannot edit, withdraw or resubmit directly.
+// - Principal/Admin may withdraw with audit trail.
