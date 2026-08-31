@@ -1,0 +1,44 @@
+name: Clean repaste from production
+
+on:
+  push:
+    paths:
+      - '.github/workflows/clean-repaste-from-production.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  repaste:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Preview-2
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Clone production main
+        run: |
+          git clone --depth 1 --branch main https://github.com/ritwik17c/vkvtt.git /tmp/vkvtt-production
+
+      - name: Delete preview working files and copy production
+        run: |
+          find . -mindepth 1 -maxdepth 1 ! -name '.git' ! -name '.github' -exec rm -rf {} +
+          find .github -mindepth 1 -maxdepth 1 ! -name 'workflows' -exec rm -rf {} + 2>/dev/null || true
+          find .github/workflows -mindepth 1 -maxdepth 1 ! -name 'clean-repaste-from-production.yml' -exec rm -rf {} + 2>/dev/null || true
+          rsync -a --delete \
+            --exclude='.git/' \
+            --exclude='.github/workflows/clean-repaste-from-production.yml' \
+            /tmp/vkvtt-production/ ./
+
+      - name: Commit clean production snapshot
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'Preview-2 already matches production main.'
+          else
+            git commit -m 'Clean repaste from current production main'
+            git push origin HEAD:main
+          fi
