@@ -1,0 +1,57 @@
+VKV NALBARI TIMETABLE — CLOUD v64.0
+CLEAN LEAVE EDITOR + THREE PROXY BUTTONS
+
+A. REPLACE THE LEAVE EDITOR
+1. Download admin-leave-editor-v64-clean.html.
+2. In GitHub repository ritwik17c/vkvtt, delete/replace the current admin-leave-editor.html.
+3. Rename the downloaded file to exactly:
+   admin-leave-editor.html
+4. Upload and commit.
+
+NEW LEAVE ENTRY LOGIC
+• + Add Date Row = exactly ONE row per click.
+• + Add Date-Range Row = exactly ONE range row per click.
+• Both row types can be mixed in one record.
+• Full Leave automatically counts 1 unit/date.
+• Half Leave automatically counts 0.5 unit/date.
+• OD / Special do not add leave units.
+• Every range shows its own Total.
+• The reconciliation bar totals ALL Date Rows + ALL Date-Range Rows.
+• Category totals are shown separately as well.
+• No Duplicate Remover / Duplicate Manager card is present.
+• Duplicate/overlap protection still works quietly as a save-safety check.
+• DD/MM/YYYY is used visibly.
+
+B. QUICK ADD LEAVE ON ADMIN DASHBOARD
+1. Upload v64-dashboard-addon.js to the repository root.
+2. If admin-dashboard.html already contains:
+   <script src="v63-dashboard-addon.js"></script>
+   remove that line.
+3. Immediately before </body> in admin-dashboard.html add:
+   <script src="v64-dashboard-addon.js"></script>
+4. Commit.
+
+C. THREE PROXY BUTTONS
+The intended three buttons are:
+1. My Proxy Today — individual teacher.
+2. Proxy Allotment — Proxy Manager / Manager / Admin working screen.
+3. Today’s Proxy Classes — complete school-wide final list.
+
+To retain the third button permanently:
+1. Upload v64-index-addon.js to the repository root.
+2. If index.html already contains:
+   <script src="v63-index-addon.js"></script>
+   remove that line.
+3. Immediately before </body> in index.html add:
+   <script src="v64-index-addon.js"></script>
+4. Commit.
+
+TEST AFTER UPLOAD
+• Hard refresh with Ctrl+F5.
+• Open a pending legacy leave of 12 units.
+• Add one 3-day range: total should become 3, NOT 9.
+• Add a second range: grand total should increase by that range total.
+• Add one individual Date Row: grand total should increase by 1 (or 0.5 for Half Leave).
+• Mix CL and another leave category and confirm category-wise totals.
+• Confirm there is no Duplicate Remover card.
+• Confirm Today’s Proxy Classes remains visible even before finalisation.
