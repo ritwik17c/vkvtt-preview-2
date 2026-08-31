@@ -1,0 +1,42 @@
+VKV NALBARI TIMETABLE — V63 UPLOAD STEPS
+
+IMPORTANT
+The connected GitHub account is read-only in this ChatGPT session, so these files were prepared for manual upload rather than committed automatically.
+
+1. LEAVE MASTER EDITOR
+   - Download: admin-leave-editor-v63.html
+   - In GitHub repo ritwik17c/vkvtt, replace the current admin-leave-editor.html with this file.
+   - Rename it to exactly:
+     admin-leave-editor.html
+   - Commit the change.
+
+2. ADMIN DASHBOARD ADD-ON
+   - Upload v63-dashboard-addon.js to the repository root.
+   - Open admin-dashboard.html in GitHub Edit mode.
+   - Immediately before </body>, add:
+     <script src="v63-dashboard-addon.js"></script>
+   - Commit the change.
+
+3. MAIN TIMETABLE / TODAY'S ALLOTTED PROXY
+   - Upload v63-index-addon.js to the repository root.
+   - Open index.html in GitHub Edit mode.
+   - Immediately before </body>, add:
+     <script src="v63-index-addon.js"></script>
+   - Commit the change.
+
+4. OPTIONAL VERSION NOTES
+   - Upload VERSION_63_0_NOTES.md to the repository root.
+
+5. TEST
+   - Hard refresh the live app (Ctrl+F5).
+   - Admin Dashboard: confirm 'Quick Add Leave' and 'Duplicate & Conflict Manager'.
+   - Quick Add Leave: save one single-date test record.
+   - Test one Date Range with two separate range cards.
+   - Test Staggered Dates.
+   - Confirm reconciliation totals and category breakdown.
+   - Main timetable: confirm 'Today's Allotted Proxy' is always visible.
+   - Hover clickable cards/buttons: confirm hand cursor.
+   - Run Duplicate & Conflict Manager before removing any duplicate.
+
+ROLLBACK
+If anything unexpected occurs, restore the previous admin-leave-editor.html and remove the two v63 <script> tags. No Firestore schema migration is required by this version.
