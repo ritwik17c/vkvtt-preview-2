@@ -25,3 +25,4 @@
 ## Release decision
 
 **DO NOT MERGE OR DEPLOY YET.** Backend-rule publication and authenticated field testing are mandatory safety gates. The live v65.3 app must remain unchanged until these checks pass.
+
