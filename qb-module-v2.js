@@ -1,7 +1,7 @@
 import './qb-module-v3.js?v=20260831-authstall-fixed-1';
 import './vkv-qb-dictation.js?v=20260831-correction-preview-4';
 import './vkv-qb-history-enhancement.js?v=20260830-unverified-2';
-import './vkv-qb-imported-history-bridge.js?v=20260830-imported-history-2';
+import './vkv-qb-imported-history-bridge.js?v=20260902-complete-legacy-history-1';
 import './vkv-qb-coordinator-ui.js?v=20260831-feedback-1';
 import './vkv-qb-coordinator-feedback-bridge.js?v=20260831-feedback-1';
 import './vkv-qb-submission-readiness.js?v=20260831-readiness-2';
@@ -15,3 +15,4 @@ import './vkv-qb-paper-checkpoint.js?v=20260831-e4-7';
 import './vkv-qb-paper-subquestion-drafting.js?v=20260831-e4-8';
 import './vkv-qb-callouts-sound.js?v=20260830-1';
 import './vkv-qb-smart-defaults.js?v=20260831-quickdefaults-1';
+import './vkv-qb-teacher-bulk-import.js?v=20260903-mark-aware-dedup-1';
