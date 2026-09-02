@@ -16,8 +16,8 @@
 - [x] Shared visible-date layer `vkv-date-ui.js` exists and preserves ISO values internally.
 - [x] Home proxy-history date selector uses the shared date layer.
 - [x] Routed Leave / Attendance / Calendar pages load the shared date layer or already use explicit dd/mm/yyyy text inputs.
-- [ ] Examination Department: ensure Start/End date controls display dd/mm/yyyy.
-- [ ] Examination Department advanced multi-date fields: either accept dd/mm/yyyy and convert internally, or keep explicitly marked as advanced internal ISO tokens until safely converted.
+- [x] Examination Department Start/End date controls now load the shared dd/mm/yyyy layer while retaining ISO internally.
+- [ ] Examination Department advanced multi-date fields remain explicitly marked as internal ISO tokens; convert them to dd/mm/yyyy only after a safe parser/conversion test.
 - [ ] Spot-check date fields in QB and remaining admin/recovery pages after the latest module sync.
 
 ## Critical signed-in acceptance tests
