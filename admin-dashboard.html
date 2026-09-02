@@ -54,6 +54,7 @@
       <div class="tile" data-open="masterEditor"><b>📅 Master Timetable</b><span>Edit a permanent timetable slot without changing the original roster structure.</span></div>
       <div class="tile" id="openTimetableStudio" style="background:linear-gradient(145deg,#eef8ff,#edf8f2);border-color:#8fc2d2"><b>✦ Timetable Studio</b><span>Configure components, generate new candidates, edit colourful cards and retain named timetable versions for later activation.</span></div>
       <div class="tile" id="openAnnualCalendar" style="background:linear-gradient(145deg,#fff8df,#edf8f2);border-color:#d9c277"><b>🗓 Annual Calendar Management</b><span>Add, edit or delete session milestones, examinations, holidays, celebrations, observances and common programmes.</span></div>
+      <a class="tile" id="openExamDepartmentDirect" href="exam-department.html?v=1.1.0" style="text-decoration:none;background:linear-gradient(145deg,#fff8df,#eef8ff);border-color:#d9c277"><b>🗓️ Examination Department</b><span>Prepare, submit, approve and publish examination timetables, invigilation and reliever duties.</span></a>
       <div class="tile" id="openSchedules"><b>🗓 Schedule Profiles</b><span>Normal, Heat Wave and other timing profiles.</span></div>
       <div class="tile" data-open="replacements"><b>👩‍🏫 Temporary Leave-Vacancy Replacements</b><span>Assign a temporary local teacher for a defined period without adding that person to the main roster.</span></div>
       <div class="tile" data-open="teachers"><b>👥 Teachers & Workload</b><span>Permanent teacher directory and current master teaching load.</span></div>
@@ -320,7 +321,7 @@ $('downloadBackup').onclick=()=>{const blob=new Blob([JSON.stringify(master,null
 <script src="v66-admin-reference-polish.js?v=66.2-adminref-1" defer></script>
 
 <script src="vkv-route-policy.js?v=prod"></script>
-<script src="vkv-admin-dashboard-runtime.js?v=prod"></script>
+<script src="vkv-admin-dashboard-runtime.js?v=20260902-exam-workflow-1"></script>
 <script src="vkv-dashboard-metrics-final.js?v=prod"></script>
 <script src="vkv-teacher-transfer.js?v=prod"></script>
 <script src="vkv-teacher-shortcode-rename.js?v=prod"></script>

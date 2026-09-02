@@ -57,6 +57,12 @@ service cloud.firestore {
                  || uidProfile().data.get('permissions', {}).get('timetableStudio', false) == true);
     }
 
+    function canUseExamDepartment() {
+      return uidActive()
+             && (uidRole() == 'admin'
+                 || uidProfile().data.get('permissions', {}).get('examDepartment', false) == true);
+    }
+
     function isStatusEditor() {
       return uidActive() && uidRole() in ['admin', 'manager'];
     }
@@ -169,6 +175,28 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    match /examSchedules/{scheduleId} {
+      allow read: if canUseExamDepartment();
+      allow create: if canUseExamDepartment()
+                    && request.resource.data.ownerUid == request.auth.uid
+                    && request.resource.data.status == 'draft';
+      allow update: if isAdmin()
+                    || (canUseExamDepartment()
+                        && resource.data.ownerUid == request.auth.uid
+                        && request.resource.data.ownerUid == resource.data.ownerUid
+                        && resource.data.status in ['draft', 'returned']
+                        && request.resource.data.status in ['draft', 'submitted']);
+      allow delete: if isAdmin()
+                    || (canUseExamDepartment()
+                        && resource.data.ownerUid == request.auth.uid
+                        && resource.data.status in ['draft', 'returned']);
+    }
+
+    match /publishedExam/{documentId} {
+      allow read: if canReadSchool();
+      allow create, update, delete: if isAdmin();
+    }
+
     match /dailyRecords/{date} {
       allow read: if uidActive() && uidRole() in ['admin', 'manager', 'proxy_manager'];
 
@@ -208,12 +236,12 @@ service cloud.firestore {
     // These collections intentionally contain only approved status information,
     // never draft proxy allotments or other private daily-management fields.
     match /approvedStatusPlans/{planId} {
-      allow read: if isAdmin() || isLeaveViewer();
+      allow read: if isAdmin() || isLeaveViewer() || canUseExamDepartment();
       allow create, update, delete: if isStatusEditor();
     }
 
     match /approvedDailyStatus/{date} {
-      allow read: if isAdmin() || isLeaveViewer();
+      allow read: if isAdmin() || isLeaveViewer() || canUseExamDepartment();
       allow create, update, delete: if isStatusEditor();
     }
 
