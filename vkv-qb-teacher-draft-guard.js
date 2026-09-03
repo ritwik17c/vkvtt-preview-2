@@ -21,6 +21,9 @@
     if(!doc.getElementById('qbHistoryRefreshEnhancement')){
       const history=doc.createElement('script');history.id='qbHistoryRefreshEnhancement';history.type='module';history.src='vkv-qb-safe-history-refresh.js?v=20260902-1';doc.body.appendChild(history);
     }
+    if(!doc.getElementById('qbImportedHistoryFix')){
+      const imported=doc.createElement('script');imported.id='qbImportedHistoryFix';imported.type='module';imported.src='vkv-qb-imported-history-fix.js?v=20260903-1';doc.body.appendChild(imported);
+    }
     if(doc.getElementById('qbDraftGuardStatus'))return;
     const qt=doc.getElementById('qt');
     const status=doc.createElement('div');
