@@ -251,12 +251,15 @@ service cloud.firestore {
     }
 
     match /provisionalLeavePlans/{requestId} {
-      allow read: if isAdmin() || isLeaveEditor();
-      allow create: if (isAdmin() || isLeaveEditor())
+      // Manager is already a Status Editor. Managers and delegated Leave Editors
+      // may prepare only their own provisional/returned requests. Principal/Admin
+      // remains the only approval and deletion authority.
+      allow read: if isStatusEditor() || isLeaveEditor();
+      allow create: if (isStatusEditor() || isLeaveEditor())
                     && request.resource.data.createdByUid == request.auth.uid
                     && request.resource.data.approvalStatus == 'provisional';
       allow update: if isAdmin()
-                    || (isLeaveEditor()
+                    || ((isStatusEditor() || isLeaveEditor())
                         && resource.data.createdByUid == request.auth.uid
                         && request.resource.data.createdByUid == request.auth.uid
                         && resource.data.approvalStatus in ['provisional', 'returned']
