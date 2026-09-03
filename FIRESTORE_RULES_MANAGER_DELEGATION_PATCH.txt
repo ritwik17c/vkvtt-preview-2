@@ -1,0 +1,53 @@
+VKVTT MANAGER DELEGATION PATCH — 03/09/2026
+
+Purpose
+-------
+Align the declared `manager` role with the existing operational model:
+- Proxy management: already allowed by current rules.
+- Attendance management: already allowed by current rules.
+- Leave / Duty preparation: Manager may prepare provisional entries for Principal approval.
+- Principal/Admin remains the only approval authority for provisional leave requests.
+
+Apply this patch to the current merged rules file `FIRESTORE_RULES_V66_REPLACE_ALL.txt`.
+Do NOT remove the surrounding leave/audit rules.
+
+REPLACE THIS CURRENT BLOCK:
+
+    match /provisionalLeavePlans/{requestId} {
+      allow read: if isAdmin() || isLeaveEditor();
+      allow create: if (isAdmin() || isLeaveEditor())
+                    && request.resource.data.createdByUid == request.auth.uid
+                    && request.resource.data.approvalStatus == 'provisional';
+      allow update: if isAdmin()
+                    || (isLeaveEditor()
+                        && resource.data.createdByUid == request.auth.uid
+                        && request.resource.data.createdByUid == request.auth.uid
+                        && resource.data.approvalStatus in ['provisional', 'returned']
+                        && request.resource.data.approvalStatus == 'provisional');
+      allow delete: if isAdmin();
+    }
+
+WITH:
+
+    match /provisionalLeavePlans/{requestId} {
+      // Principal/Admin, Manager (status editor), and explicitly delegated
+      // Leave Editors may see provisional requests. Manager/Leave Editor may
+      // create and revise only their own provisional/returned request and may
+      // never change it to an approved state. Approval remains Admin-only.
+      allow read: if isStatusEditor() || isLeaveEditor();
+      allow create: if (isStatusEditor() || isLeaveEditor())
+                    && request.resource.data.createdByUid == request.auth.uid
+                    && request.resource.data.approvalStatus == 'provisional';
+      allow update: if isAdmin()
+                    || ((isStatusEditor() || isLeaveEditor())
+                        && resource.data.createdByUid == request.auth.uid
+                        && request.resource.data.createdByUid == request.auth.uid
+                        && resource.data.approvalStatus in ['provisional', 'returned']
+                        && request.resource.data.approvalStatus == 'provisional');
+      allow delete: if isAdmin();
+    }
+
+Security note
+-------------
+`isStatusEditor()` is already defined as active role in ['admin', 'manager'].
+The replacement therefore grants Manager only the same provisional preparation path used by Leave Editor. It does NOT grant approval, delete, Ultimate Leave Editor, historical destructive edit, role administration, or Admin Dashboard authority.
