@@ -25,7 +25,7 @@
   }
   function asText(m){
     const lines=['VIVEKANANDA KENDRA VIDYALAYA, NALBARI',`TIMETABLE FOR ${title().toUpperCase()}`];
-    const tm=timeText(); if(tm)lines.push(`Exam Timings: ${tm}`); lines.push('');
+    const tm=timeText();if(tm)lines.push(`Exam Timings: ${tm}`);lines.push('');
     lines.push(['Date','Day',...m.classes].join('\t'));
     for(const r of m.rows)lines.push([r.date,r.day,...r.subjects.map(x=>x||'—')].join('\t'));
     return lines.join('\n');
@@ -37,10 +37,15 @@
   async function copySaved(){const m=matrixData();if(!m)return alert('Open a saved timetable first.');try{await navigator.clipboard.writeText(asText(m));alert('Saved timetable copied.')}catch{alert('Copy is not available in this browser.')}}
   async function shareSaved(){const m=matrixData();if(!m)return alert('Open a saved timetable first.');const text=asText(m);if(navigator.share){try{await navigator.share({title:'VKV Nalbari · '+title(),text});return}catch(e){if(e?.name==='AbortError')return}}try{await navigator.clipboard.writeText(text);alert('Sharing is unavailable here; the saved timetable was copied instead.')}catch{alert('Sharing is unavailable in this browser.')}}
   function printSaved(){const m=matrixData();if(!m)return alert('Open a saved timetable first.');let host=$('majorOfficialPrint');if(!host){host=document.createElement('div');host.id='majorOfficialPrint';host.style.display='none';document.body.appendChild(host)}host.innerHTML=asHtml(m);document.body.classList.add('majorExamPrint');host.style.display='block';const done=()=>{document.body.classList.remove('majorExamPrint');host.style.display='none';window.removeEventListener('afterprint',done)};window.addEventListener('afterprint',done);setTimeout(()=>window.print(),50);setTimeout(done,2000)}
-  document.addEventListener('click',e=>{
-    const b=e.target.closest('#majorCopy,#majorShare,#majorPrint');if(!b)return;
-    const m=matrixData();if(!m)return;
-    e.preventDefault();e.stopImmediatePropagation();
-    if(b.id==='majorCopy')copySaved(); else if(b.id==='majorShare')shareSaved(); else printSaved();
-  },true);
+  function replaceAndBind(id,handler){
+    const old=$(id);if(!old||old.dataset.savedOutputBound==='1')return !!old;
+    const fresh=old.cloneNode(true);fresh.dataset.savedOutputBound='1';old.replaceWith(fresh);fresh.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();handler()});return true;
+  }
+  function bind(){
+    const a=replaceAndBind('majorCopy',copySaved),b=replaceAndBind('majorShare',shareSaved),c=replaceAndBind('majorPrint',printSaved);
+    return a&&b&&c;
+  }
+  let tries=0,t=setInterval(()=>{if(bind()||++tries>60)clearInterval(t)},200);
+  window.addEventListener('load',()=>setTimeout(bind,700));
+  document.addEventListener('click',e=>{if(e.target.closest('[data-pane-target="timetable"],[data-open-cloud],[data-revise-cloud]'))setTimeout(bind,350)},true);
 })();
