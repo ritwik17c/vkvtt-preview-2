@@ -19,16 +19,27 @@ function ensureTemplateSection(){
   section.className='surface';
   section.innerHTML=`<div class="sectionTitle"><div><h3>Saved Examination Templates</h3><p>Reusable class-and-subject structures. Using a template starts a new timetable and does not alter any saved timetable.</p></div></div><div id="savedExamTemplateList" class="draftList"><div class="notice info">Loading saved templates…</div></div>`;
   const timetableSection=document.getElementById('draftList')?.closest('article.surface');
-  if(timetableSection)timetableSection.insertAdjacentElement('afterend',section);else outputs.appendChild(section);
+  if(timetableSection){
+    const heading=timetableSection.querySelector('h3');if(heading)heading.textContent='Saved Examination Timetables';
+    const note=timetableSection.querySelector('.sectionTitle p');if(note)note.textContent='Complete saved examination workspaces. Open, edit, submit, publish or preserve them independently of templates.';
+    timetableSection.insertAdjacentElement('afterend',section);
+  }else outputs.appendChild(section);
   return section;
 }
 
+function cardId(card){return card.querySelector('[data-open-cloud]')?.dataset.openCloud||card.querySelector('[data-revise-cloud]')?.dataset.reviseCloud||''}
+
 function keepListsIndependent(){
-  const list=document.getElementById('draftList');
-  if(!list)return;
+  const list=document.getElementById('draftList');if(!list)return;
   for(const card of list.querySelectorAll('.draftCard')){
-    const id=card.querySelector('[data-open-cloud]')?.dataset.openCloud||card.querySelector('[data-revise-cloud]')?.dataset.reviseCloud||'';
-    if(/^TEMPLATE_/i.test(id))card.style.display='none';
+    const id=cardId(card);
+    if(/^TEMPLATE_/i.test(id)){
+      card.classList.add('majorHide');
+      card.style.display='none';
+    }else{
+      card.classList.remove('majorHide');
+      card.style.display='';
+    }
   }
 }
 
@@ -53,16 +64,25 @@ async function useTemplate(id){
   document.querySelector('[data-pane-target="setup"]')?.click();
   let n=0;const timer=setInterval(()=>{
     const select=document.getElementById('majorTemplateSelect'),load=document.getElementById('majorLoadTemplate');
-    if(select&&load){
-      clearInterval(timer);select.value=id;select.dispatchEvent(new Event('change',{bubbles:true}));load.click();
-    }else if(++n>30){clearInterval(timer);alert('Template controls are not ready. Please reopen Exam Setup and try again.')}
+    if(select&&load){clearInterval(timer);select.value=id;select.dispatchEvent(new Event('change',{bubbles:true}));load.click()}
+    else if(++n>30){clearInterval(timer);alert('Template controls are not ready. Please reopen Exam Setup and try again.')}
   },100);
+}
+
+function bindDraftListObserver(){
+  const list=document.getElementById('draftList');if(!list||list.dataset.separateListsBound)return;
+  list.dataset.separateListsBound='1';
+  new MutationObserver(()=>setTimeout(keepListsIndependent,0)).observe(list,{childList:true,subtree:true});
+  keepListsIndependent();
 }
 
 document.addEventListener('click',e=>{
   const b=e.target.closest('[data-use-saved-template]');if(b){e.preventDefault();useTemplate(b.dataset.useSavedTemplate);return}
-  if(e.target.closest('[data-pane-target="outputs"]'))setTimeout(()=>{keepListsIndependent();refreshTemplates()},180);
+  if(e.target.closest('[data-pane-target="outputs"]'))setTimeout(()=>{ensureTemplateSection();bindDraftListObserver();keepListsIndependent();refreshTemplates()},120);
 });
 window.addEventListener('vkv-template-saved',()=>setTimeout(refreshTemplates,100));
 
-onAuthStateChanged(auth,user=>{if(!user)return;let n=0;const timer=setInterval(()=>{if(!document.getElementById('examApp')||document.getElementById('examApp').hidden){if(++n>40)clearInterval(timer);return}clearInterval(timer);ensureTemplateSection();keepListsIndependent();refreshTemplates()},250)});
+onAuthStateChanged(auth,user=>{if(!user)return;let n=0;const timer=setInterval(()=>{
+  if(!document.getElementById('examApp')||document.getElementById('examApp').hidden){if(++n>40)clearInterval(timer);return}
+  clearInterval(timer);ensureTemplateSection();bindDraftListObserver();keepListsIndependent();refreshTemplates();
+},250)});
