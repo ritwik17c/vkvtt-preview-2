@@ -73,8 +73,8 @@ function renderAll(){
 
 function renderMasterSummary(){
   const master=state.master||{},data=master.data&&typeof master.data==='object'?{...master,...master.data}:master,source=state.workspace.sourceSchedule||{};
-  $('masterName').textContent=source.name||master.activeTimetableVersionName||'Activated Schedule';
-  $('masterMeta').textContent='Read-only source · '+(master.activeTimetableVersionName||'Operational master timetable');
+  $('masterName').textContent=source.name||'Activated Schedule';
+  $('masterMeta').textContent='Read-only source';
   $('masterStats').innerHTML=[`${state.workspace.classes.length} classes`,`${state.workspace.papers.length} class-subject papers`,`${state.workspace.teachers.length} teachers`,`${(data.records||[]).length} timetable entries`].map(value=>'<span class="chip">'+safe(value)+'</span>').join('');
   $('sideSource').textContent=source.name||'Activated Schedule';
 }
