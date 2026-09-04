@@ -1,6 +1,6 @@
 (function(){
   const $=id=>document.getElementById(id);
-  const VERSION='source-options-1';
+  const VERSION='source-options-2';
 
   function ensureSourceOptions(){
     const setup=document.querySelector('[data-pane="setup"]');
@@ -56,6 +56,49 @@
     });
     return true;
   }
+
+  function showOpenedTimetableTemplateAction(){
+    const setup=document.querySelector('[data-pane="setup"]');
+    if(!setup)return;
+    let box=$('saveOpenedTimetableAsTemplate');
+    if(box)box.remove();
+    box=document.createElement('article');
+    box.id='saveOpenedTimetableAsTemplate';
+    box.className='surface';
+    box.style.border='1px solid #9bc9da';
+    box.style.background='#f7fcfe';
+    const name=String($('workspaceName')?.value||'this saved timetable').trim();
+    box.innerHTML=`
+      <div class="sectionTitle">
+        <div>
+          <div class="eyebrow">Saved timetable opened</div>
+          <h3 style="margin-top:4px">Save This Timetable as a Reusable Template</h3>
+          <p>Create a reusable template from <b>${name.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}</b>. Only the selected classes and subjects are saved in the template. The dates and the saved timetable itself remain unchanged.</p>
+        </div>
+        <button id="saveOpenedAsTemplateButton" class="button primary">Save as Template</button>
+      </div>
+      <div id="saveOpenedTemplateMessage" class="notice info">This action does not edit or overwrite the opened timetable.</div>`;
+    const source=$('examSourceOptions')||$('workflowStatus');
+    source?.insertAdjacentElement('afterend',box);
+    $('saveOpenedAsTemplateButton')?.addEventListener('click',()=>{
+      const save=$('majorSaveTemplate');
+      const msg=$('saveOpenedTemplateMessage');
+      if(!save){if(msg)msg.textContent='Template controls are not ready yet. Please try again in a moment.';return}
+      if(!confirm('Save the current class and subject selection as a reusable template?\n\nThe opened saved timetable will not be changed.'))return;
+      save.click();
+      if(msg)msg.innerHTML='<b>Template save requested.</b> Check the Reusable Examination Template box below for confirmation.';
+      setTimeout(()=>{$('majorTemplateBox')?.scrollIntoView({behavior:'smooth',block:'center'})},150);
+    });
+  }
+
+  document.addEventListener('click',e=>{
+    if(e.target.closest('[data-open-cloud]')){
+      setTimeout(()=>{
+        document.querySelector('[data-pane-target="setup"]')?.click();
+        showOpenedTimetableTemplateAction();
+      },220);
+    }
+  },true);
 
   let attempts=0;
   const timer=setInterval(()=>{
