@@ -42,7 +42,7 @@ async function saveMaster(){
   try{
     const clean={};for(const c of Object.keys(master.classes||{}).sort(sortClasses)){const list=[...new Map((master.classes[c]||[]).map(s=>[norm(s),displaySubject(s)])).values()].filter(Boolean).sort(sortSubjects);if(list.length)clean[c]=list}
     master={classes:clean};
-    await setDoc(doc(db,'examSchedules',CONFIG_ID),{schemaVersion:1,configOnly:true,name:'Examination Subject Master',status:'config',ownerUid:'SYSTEM_EXAM_CONFIG',ownerEmail:'',subjectMaster:master,updatedByUid:user.uid,updatedByEmail:user.email||'',updatedAt:serverTimestamp(),updatedAtMs:Date.now()},{merge:true});
+    await setDoc(doc(db,'examSchedules',CONFIG_ID),{schemaVersion:1,configOnly:true,name:'Examination Subject Master',status:'draft',ownerUid:user.uid,ownerEmail:user.email||'',subjectMaster:master,updatedByUid:user.uid,updatedByEmail:user.email||'',updatedAt:serverTimestamp(),updatedAtMs:Date.now()},{merge:true});
     renderMaster();setStatus('Subject Master saved. Future class selections will import these examination subjects.');
   }catch(e){setStatus('Could not save Subject Master: '+(e.message||e),'warn')}
   finally{if(btn)btn.disabled=false}
