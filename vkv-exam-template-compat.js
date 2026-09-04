@@ -1,3 +1,4 @@
+import'./vkv-exam-save-opened-template.js?v=20260904-direct-template-1';
 import{initializeApp,getApps,getApp}from'https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js';
 import{getAuth,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js';
 import{getFirestore,collection,getDocs,doc,getDoc,setDoc,serverTimestamp}from'https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore-lite.js';
