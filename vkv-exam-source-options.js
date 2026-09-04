@@ -1,6 +1,6 @@
 (function(){
   const $=id=>document.getElementById(id);
-  const VERSION='source-options-4';
+  const VERSION='source-options-5';
 
   function ensureSourceOptions(){
     const setup=document.querySelector('[data-pane="setup"]');
@@ -32,13 +32,6 @@
           <p style="margin:0 0 12px;color:#486577">Start a new timetable from a reusable class-and-subject template. Existing saved timetables remain unchanged.</p>
           <button id="examUseTemplateOption" class="button primary">Start New from Template</button>
         </div>
-      </div>
-      <div style="margin-top:14px;padding:16px;border:2px solid #88bfd2;border-radius:14px;background:#f5fbfd">
-        <div class="eyebrow">Opened saved timetable</div>
-        <h4 style="margin:6px 0 8px">Save Opened Timetable as a Reusable Template</h4>
-        <p style="margin:0 0 12px;color:#486577">After opening a saved timetable, use this button to copy only its selected classes and subjects into a reusable template. Dates and the saved timetable itself are not changed.</p>
-        <button id="examSaveOpenedAsTemplate" class="button primary">Save Opened Timetable as Template</button>
-        <div id="examSaveOpenedTemplateMsg" class="notice info" style="margin-top:10px">Open the saved timetable first, then use this button.</div>
       </div>`;
     const workflow=$('workflowStatus');
     workflow?.insertAdjacentElement('afterend',box);
@@ -57,24 +50,6 @@
         $('majorTemplateBox')?.scrollIntoView({behavior:'smooth',block:'center'});
         $('majorTemplateSelect')?.focus();
       },180);
-    });
-
-    $('examSaveOpenedAsTemplate')?.addEventListener('click',()=>{
-      const msg=$('examSaveOpenedTemplateMsg');
-      const save=$('majorSaveTemplate');
-      if(!save){
-        if(msg)msg.textContent='Template engine is still loading. Please wait a moment and try again.';
-        return;
-      }
-      const name=String($('workspaceName')?.value||'').trim();
-      if(!name||/^New Examination Schedule$/i.test(name)){
-        if(msg)msg.innerHTML='<b>Please open the saved timetable first.</b> Then return to Exam Setup and use this button.';
-        return;
-      }
-      if(!confirm('Save the opened timetable’s selected classes and subjects as a reusable template?\n\nDates and the saved timetable itself will remain unchanged.'))return;
-      save.click();
-      if(msg)msg.innerHTML='<b>Template save requested.</b> Check the Reusable Examination Template section below for the saved confirmation.';
-      setTimeout(()=>$('majorTemplateBox')?.scrollIntoView({behavior:'smooth',block:'center'}),160);
     });
     return true;
   }
