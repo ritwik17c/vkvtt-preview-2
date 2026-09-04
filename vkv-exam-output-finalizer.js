@@ -1,7 +1,7 @@
 (function(){
   const $=id=>document.getElementById(id);
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
-  const VERSION='footer-final-8';
+  const VERSION='footer-final-9';
   function matrix(){const t=$('printableMatrixHost')?.querySelector('table');if(!t)return null;const heads=[...t.querySelectorAll('thead th')].map(x=>x.textContent.trim()),classes=heads.slice(2),rows=[...t.querySelectorAll('tbody tr')].map(tr=>{const c=[...tr.cells];return{date:c[0]?.textContent.trim()||'',day:c[1]?.textContent.trim()||'',subjects:c.slice(2).map(td=>{const s=td.querySelector('select');return s?String(s.value||'').trim():td.textContent.trim()})}});return classes.length&&rows.length?{classes,rows}:null}
   function title(){return String($('workspaceName')?.value||'Examination Timetable').trim()||'Examination Timetable'}
   function to12(v){if(!v)return'';const [h0,m='00']=v.split(':'),h=Number(h0);if(!Number.isFinite(h))return v;return`${h%12||12}:${m} ${h>=12?'pm':'am'}`}
@@ -21,8 +21,28 @@
     return true
   }
   function ensureFooter(){ensurePrintDetailsPane();const box=$('examPrintDetailsHost')||$('majorTimetableActions');if(!box)return false;let d=$('examFooterSettings');if(d?.dataset.footerVersion===VERSION){if(d.parentElement!==box)box.prepend(d);return true}if(d)d.remove();d=document.createElement('div');d.id='examFooterSettings';d.dataset.footerVersion=VERSION;d.style.cssText='margin:0;padding:14px;border:1px solid #cfdfe6;border-radius:12px;background:#f8fcfd';d.innerHTML='<h4 style="margin:0 0 10px">Reporting-Departure Setup</h4><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px"><label>Reporting Time<input id="examFooterReporting" type="time"></label><label>Bus Picking Time (1st stoppage)<input id="examFooterBus" type="time"></label><label>Departure Time<input id="examFooterDeparture" type="time"></label></div><div style="margin-top:12px;padding-top:10px;border-top:1px solid #d8e5ea;color:#486577"><b>Fixed signature placeholders:</b> Exam Dept. &nbsp;•&nbsp; Principal</div>';box.prepend(d);for(const id of['examFooterReporting','examFooterBus','examFooterDeparture'])$(id)?.addEventListener('change',saveFooter);loadFooter();return true}
-  function selectedCount(){const m=matrix();if(m){let n=0;m.rows.forEach(r=>r.subjects.forEach(s=>{if(String(s||'').trim())n++}));if(n)return n}const checked=[...document.querySelectorAll('#majorSubjectGrid [data-major-subject]:checked')];if(checked.length)return checked.length;const seen=new Set();for(const tr of document.querySelectorAll('#paperRows tr[data-paper]')){const box=tr.querySelector('[data-paper-field="included"]');if(!box?.checked)continue;let cls=String(tr.cells[1]?.textContent||'').trim().replace(/(?:\s*[-–]\s*|\s+)(?:SECTION\s*)?[A-DV]$/i,'').replace(/\s*\((?:A|B|C|D|V)\)$/i,'');let sub=String(tr.cells[2]?.textContent||'').trim().replace(/^IT(?:\s*[-–(]?\s*BB\s*\)?)$/i,'IT').replace(/^Maths?(?:\s*[-–(]?\s*BB\s*\)?)$/i,'Maths').replace(/^Hindi$/i,'Hindi');if(cls&&sub)seen.add(cls.toLowerCase()+'|'+sub.toLowerCase())}return seen.size}
-  function metric(){const cards=[...($('timetableMetrics')?.children||[])];if(cards.length<2)return;const n=selectedCount(),strong=cards[1].querySelector('strong'),span=cards[1].querySelector('span');if(strong)strong.textContent=String(n);if(span)span.textContent='Selected exam subjects'}
+  function selectedCount(){
+    const panel=$('templatePatternQuickEdit');
+    if(panel){
+      const templateSelects=[...panel.querySelectorAll('[data-template-pattern-subject],[data-fallback-class]')];
+      if(templateSelects.length)return templateSelects.filter(s=>String(s.value||'').trim()).length
+    }
+    const m=matrix();if(m){let n=0;m.rows.forEach(r=>r.subjects.forEach(s=>{if(String(s||'').trim())n++}));if(n)return n}
+    const baseClass=v=>String(v||'').trim().replace(/\s+/g,' ').replace(/(?:\s*[-–]\s*|\s+)(?:SECTION\s*)?[A-DV]$/i,'').replace(/\s*\((?:A|B|C|D|V)\)$/i,'').trim();
+    const norm=v=>String(v||'').trim().toLowerCase().replace(/[^a-z0-9]+/g,'');
+    const selected=new Map(),addSubject=(cls,sub)=>{cls=baseClass(cls);sub=String(sub||'').trim();if(!cls||!sub)return;if(!selected.has(cls))selected.set(cls,new Map());selected.get(cls).set(norm(sub),sub)};
+    for(const box of document.querySelectorAll('#majorSubjectGrid [data-major-subject]:checked'))addSubject(box.dataset.majorSubjectClass,box.dataset.majorSubject);
+    for(const box of document.querySelectorAll('#majorSubjectGrid [data-exam-only-subject]:checked')){
+      const cls=baseClass(box.dataset.examOnlyClass),sub=String(box.dataset.examOnlySubject||'').trim();addSubject(cls,sub);
+      const set=selected.get(cls);if(!set||!/^(IX|X)$/i.test(cls))continue;
+      const n=norm(sub);
+      if(n==='science')for(const x of['phy','physics','chem','chemistry','bio','biology'])set.delete(x);
+      if(n==='socialscience'||n==='ssc')for(const x of['hist','history','geo','geography','eco','economics','polsci','politicalscience'])set.delete(x)
+    }
+    if(selected.size)return [...selected.values()].reduce((n,set)=>n+set.size,0);
+    const seen=new Set();for(const tr of document.querySelectorAll('#paperRows tr[data-paper]')){const box=tr.querySelector('[data-paper-field="included"]');if(!box?.checked)continue;let cls=String(tr.cells[1]?.textContent||'').trim().replace(/(?:\s*[-–]\s*|\s+)(?:SECTION\s*)?[A-DV]$/i,'').replace(/\s*\((?:A|B|C|D|V)\)$/i,'');let sub=String(tr.cells[2]?.textContent||'').trim().replace(/^IT(?:\s*[-–(]?\s*BB\s*\)?)$/i,'IT').replace(/^Maths?(?:\s*[-–(]?\s*BB\s*\)?)$/i,'Maths').replace(/^Hindi$/i,'Hindi');if(cls&&sub)seen.add(cls.toLowerCase()+'|'+sub.toLowerCase())}return seen.size
+  }
+  function metric(){const cards=[...($('timetableMetrics')?.children||[])];if(cards.length<2)return;const n=selectedCount(),strong=cards[1].querySelector('strong'),span=cards[1].querySelector('span');if(strong)strong.textContent=String(n);if(span)span.textContent=$('templatePatternQuickEdit')?'Imported timetable papers':'Selected exam subjects'}
   function examTiming(){const t=sessionTimes();return t.start&&t.end?`${to12(t.start)}–${to12(t.end)}`:''}
   function textOut(m){const f=footer(),a=['VIVEKANANDA KENDRA VIDYALAYA, NALBARI',`TIMETABLE FOR ${title().toUpperCase()}`],tm=examTiming();if(tm)a.push(`Exam Timings: ${tm}`);a.push('', ['Date','Day',...m.classes].join('\t'));for(const r of m.rows)a.push([r.date,r.day,...r.subjects.map(x=>x||'—')].join('\t'));a.push('');if(f.reporting)a.push(`Reporting Time: ${to12(f.reporting)}`);a.push(`Bus Timings: Picking Time: ${f.bus?to12(f.bus):'________'} (1st stoppage)    Departure Time: ${f.departure?to12(f.departure):'________'}`,'','____________________                         ____________________','Exam Dept.                                  Principal');return a.join('\n')}
   function footerHtml(){const f=footer();return`<div style="margin-top:20px;font-family:Arial,Helvetica,sans-serif;font-size:10.5pt;color:#111"><div style="margin-bottom:10px"><b>Reporting Time:</b> ${esc(f.reporting?to12(f.reporting):'________')}</div><div style="display:flex;justify-content:space-between;gap:20px;margin-bottom:30px"><div><b>Bus Timings:</b> Picking Time: ${esc(f.bus?to12(f.bus):'________')} (1st stoppage)</div><div><b>Departure Time:</b> ${esc(f.departure?to12(f.departure):'________')}</div></div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;align-items:end;gap:28px;min-height:95px"><div style="text-align:left"><div style="height:50px;border-bottom:1px solid #222"></div><div style="margin-top:7px;font-weight:700">Exam Dept.</div></div><div style="text-align:center;color:#666;padding-bottom:8px">School Seal / Stamp</div><div style="text-align:left"><div style="height:50px;border-bottom:1px solid #222"></div><div style="margin-top:7px;font-weight:700">Principal</div></div></div></div>`}
