@@ -42,8 +42,17 @@
   }
 
   function current(){const i=Number($('savedExamWorkspaceSelect')?.value||0);return items[i]||null}
-  function updateActions(){const x=current(),open=$('savedExamOpen'),revise=$('savedExamRevise'),meta=$('savedExamMeta');if(!x)return;if(open)open.disabled=!x.openId;if(revise)revise.disabled=!x.reviseId;if(meta)meta.innerHTML=`<b>${x.name}</b> · ${x.status}${x.meta?`<br>${x.meta}`:''}<br><small><b>Open / Edit</b> continues the same saved timetable. <b>Start Fresh from Master</b> creates a completely new examination workspace from the currently activated school timetable.</small>`}
-  function trigger(kind){const x=current();if(!x)return;const id=kind==='revise'?x.reviseId:x.openId;if(!id)return;const selector=kind==='revise'?`#draftList [data-revise-cloud="${CSS.escape(id)}"]`:`#draftList [data-open-cloud="${CSS.escape(id)}"]`;document.querySelector(selector)?.click()}
+  function updateActions(){const x=current(),open=$('savedExamOpen'),revise=$('savedExamRevise'),meta=$('savedExamMeta');if(!x)return;if(open)open.disabled=!x.openId;if(revise)revise.disabled=!x.reviseId;if(meta)meta.innerHTML=`<b>${x.name}</b> · ${x.status}${x.meta?`<br>${x.meta}`:''}<br><small><b>Open / Edit</b> continues the same saved timetable. Saving changes will update this saved version. <b>Start Fresh from Master</b> creates a completely new examination workspace from the currently activated school timetable.</small>`}
+  function trigger(kind){
+    const x=current();if(!x)return;
+    if(kind==='open'){
+      const warning=`WARNING — EDITING A SAVED TIMETABLE\n\nYou are about to open “${x.name}” for editing.\n\nIf you make changes and click Save Cloud Draft, this same saved timetable will be updated.\n\nIf you want to keep this timetable unchanged, click Cancel and use a saved examination template for a new exam, or Start Revision when that option is available.\n\nContinue editing this saved timetable?`;
+      if(!window.confirm(warning))return;
+    }
+    const id=kind==='revise'?x.reviseId:x.openId;if(!id)return;
+    const selector=kind==='revise'?`#draftList [data-revise-cloud="${CSS.escape(id)}"]`:`#draftList [data-open-cloud="${CSS.escape(id)}"]`;
+    document.querySelector(selector)?.click()
+  }
   function boot(){const src=source(),h=host();if(!src||!h)return false;render();new MutationObserver(()=>render()).observe(src,{childList:true,subtree:true});new MutationObserver(()=>{placeTemplateBox();cleanImportedSource()}).observe(document.body,{childList:true,subtree:true});return true}
   let tries=0;const timer=setInterval(()=>{cleanImportedSource();placeTemplateBox();if(boot()||++tries>30)clearInterval(timer)},300);
 })();
