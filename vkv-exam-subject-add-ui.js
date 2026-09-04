@@ -7,19 +7,68 @@
   const storeKey=()=>`vkvExamCustomSubjects:${String($('workspaceName')?.value||'new-exam').trim().toLowerCase()}`;
   function read(){try{return JSON.parse(localStorage.getItem(storeKey())||'{}')||{}}catch{return{}}}
   function write(x){try{localStorage.setItem(storeKey(),JSON.stringify(x))}catch{}}
-  function combinedComponents(name){const n=norm(name);if(n==='science')return new Set(['phy','physics','chem','chemistry','bio','biology']);if(n==='socialscience'||n==='ssc')return new Set(['hist','history','geo','geography','eco','economics','polsci','politicalscience']);return null}
-  function uncheckComponents(cls,name){if(!/^(IX|X)$/i.test(cls))return;const set=combinedComponents(name);if(!set)return;for(const box of document.querySelectorAll(`[data-major-subject][data-major-subject-class="${CSS.escape(cls)}"]`)){if(!set.has(norm(box.dataset.majorSubject)))continue;if(box.checked){box.checked=false;box.dispatchEvent(new Event('change',{bubbles:true}))}}}
-  function addOptionsToQuickEdit(){const data=read();for(const sel of document.querySelectorAll('[data-template-pattern-subject][data-template-pattern-class]')){const cls=base(sel.dataset.templatePatternClass),items=data[cls]||[];for(const s of items){if([...sel.options].some(o=>norm(o.value)===norm(s)))continue;const o=document.createElement('option');o.value=s;o.textContent=s+' (exam-only)';sel.appendChild(o)}}}
-  function render(){const grid=$('majorSubjectGrid');if(!grid)return false;const data=read();for(const group of grid.querySelectorAll('.majorGroup')){const h=group.querySelector('h4');if(!h)continue;const cls=base(h.textContent),subjectGrid=group.querySelector('.majorGrid');let box=group.querySelector('[data-exam-subject-add-box]');if(!box){box=document.createElement('div');box.dataset.examSubjectAddBox=cls;box.style.cssText='margin-top:10px;padding:10px;border:1px dashed #9bbdca;border-radius:10px;background:#f7fbfc';box.innerHTML=`<div style="display:flex;gap:8px;align-items:end;flex-wrap:wrap"><label style="flex:1;min-width:220px;margin:0"><small><b>Add exam-only subject for ${esc(cls)}</b></small><input data-exam-subject-input="${esc(cls)}" placeholder="e.g. Science or Social Science"></label><button class="button" data-add-exam-subject="${esc(cls)}">+ Add Subject</button></div><small style="display:block;margin-top:6px;color:#567383">Added examination subjects are selected immediately. For IX/X, Science and Social Science replace their component timetable subjects.</small>`;group.appendChild(box)}
-    for(const old of group.querySelectorAll('[data-exam-only-card]'))old.remove();
-    const items=data[cls]||[];
-    for(const s of items){if(subjectGrid){const label=document.createElement('label');label.className='majorCard';label.dataset.examOnlyCard=s;label.innerHTML=`<input type="checkbox" checked data-exam-only-subject="${esc(s)}" data-exam-only-class="${esc(cls)}"><span><b>${esc(s)}</b><br><small>Exam-only subject</small></span>`;subjectGrid.prepend(label)}}
-  }addOptionsToQuickEdit();document.dispatchEvent(new CustomEvent('vkv-exam-custom-subjects-rendered'));return true}
-  function addSubject(cls,name){const data=read(),items=data[cls]||[];if(!items.some(x=>norm(x)===norm(name)))items.push(name);data[cls]=items;write(data);uncheckComponents(cls,name);render();document.dispatchEvent(new CustomEvent('vkv-exam-custom-subjects-changed',{detail:{className:cls,subject:name,selected:true}}))}
-  document.addEventListener('click',e=>{const add=e.target.closest('[data-add-exam-subject]');if(add){const cls=base(add.dataset.addExamSubject),input=document.querySelector(`[data-exam-subject-input="${CSS.escape(cls)}"]`),name=String(input?.value||'').trim();if(!name)return;if(input)input.value='';addSubject(cls,name);return}},true);
-  document.addEventListener('change',e=>{const box=e.target.closest?.('[data-exam-only-subject]');if(!box)return;const cls=base(box.dataset.examOnlyClass),name=String(box.dataset.examOnlySubject||''),data=read();if(box.checked){if(!(data[cls]||[]).some(x=>norm(x)===norm(name)))(data[cls]||(data[cls]=[])).push(name);uncheckComponents(cls,name)}else data[cls]=(data[cls]||[]).filter(x=>norm(x)!==norm(name));write(data);render();document.dispatchEvent(new CustomEvent('vkv-exam-custom-subjects-changed',{detail:{className:cls,subject:name,selected:box.checked}}))},true);
-  document.addEventListener('click',e=>{if(e.target.closest('[data-pane-target="subjects"],[data-real-use-template],#majorLoadTemplate'))setTimeout(render,250)},true);
+  function addOptionsToQuickEdit(){
+    const data=read();
+    for(const sel of document.querySelectorAll('[data-template-pattern-subject][data-template-pattern-class]')){
+      const cls=base(sel.dataset.templatePatternClass),items=data[cls]||[];
+      for(const s of items){
+        if([...sel.options].some(o=>norm(o.value)===norm(s)))continue;
+        const o=document.createElement('option');o.value=s;o.textContent=s+' (exam-only)';sel.appendChild(o)
+      }
+    }
+  }
+  function render(){
+    const grid=$('majorSubjectGrid');if(!grid)return false;
+    const data=read();
+    for(const group of grid.querySelectorAll('.majorGroup')){
+      const h=group.querySelector('h4');if(!h)continue;
+      const cls=base(h.textContent),subjectGrid=group.querySelector('.majorGrid');
+      let box=group.querySelector('[data-exam-subject-add-box]');
+      if(!box){
+        box=document.createElement('div');box.dataset.examSubjectAddBox=cls;
+        box.style.cssText='margin-top:10px;padding:10px;border:1px dashed #9bbdca;border-radius:10px;background:#f7fbfc';
+        box.innerHTML=`<div style="display:flex;gap:8px;align-items:end;flex-wrap:wrap"><label style="flex:1;min-width:220px;margin:0"><small><b>Add exam-only subject for ${esc(cls)}</b></small><input data-exam-subject-input="${esc(cls)}" placeholder="e.g. Science or Social Science"></label><button class="button" data-add-exam-subject="${esc(cls)}">+ Add Subject</button></div><small style="display:block;margin-top:6px;color:#567383">Added exam-only subjects remain selected. For IX/X, Science and Social Science are treated as combined examination subjects; untick component timetable subjects only when they are not separately examined.</small>`;
+        group.appendChild(box)
+      }
+      for(const old of group.querySelectorAll('[data-exam-only-card]'))old.remove();
+      for(const s of data[cls]||[]){
+        if(!subjectGrid)continue;
+        const label=document.createElement('label');label.className='majorCard';label.dataset.examOnlyCard=s;
+        label.innerHTML=`<input type="checkbox" checked data-exam-only-subject="${esc(s)}" data-exam-only-class="${esc(cls)}"><span><b>${esc(s)}</b><br><small>Exam-only subject</small></span>`;
+        subjectGrid.prepend(label)
+      }
+    }
+    addOptionsToQuickEdit();
+    document.dispatchEvent(new CustomEvent('vkv-exam-custom-subjects-rendered'));
+    return true
+  }
+  function scheduleRender(delay=60){setTimeout(render,delay)}
+  function addSubject(cls,name){
+    const data=read(),items=data[cls]||[];
+    if(!items.some(x=>norm(x)===norm(name)))items.push(name);
+    data[cls]=items;write(data);render();
+    document.dispatchEvent(new CustomEvent('vkv-exam-custom-subjects-changed',{detail:{className:cls,subject:name,selected:true}}))
+  }
+  document.addEventListener('click',e=>{
+    const add=e.target.closest('[data-add-exam-subject]');
+    if(add){
+      const cls=base(add.dataset.addExamSubject),input=document.querySelector(`[data-exam-subject-input="${CSS.escape(cls)}"]`),name=String(input?.value||'').trim();
+      if(!name)return;if(input)input.value='';addSubject(cls,name);return
+    }
+    if(e.target.closest('[data-pane-target="subjects"],[data-real-use-template],#majorLoadTemplate'))scheduleRender(250)
+  },true);
+  document.addEventListener('change',e=>{
+    const custom=e.target.closest?.('[data-exam-only-subject]');
+    if(custom){
+      const cls=base(custom.dataset.examOnlyClass),name=String(custom.dataset.examOnlySubject||''),data=read();
+      if(custom.checked){if(!(data[cls]||[]).some(x=>norm(x)===norm(name)))(data[cls]||(data[cls]=[])).push(name)}
+      else data[cls]=(data[cls]||[]).filter(x=>norm(x)!==norm(name));
+      write(data);scheduleRender(20);
+      document.dispatchEvent(new CustomEvent('vkv-exam-custom-subjects-changed',{detail:{className:cls,subject:name,selected:custom.checked}}));return
+    }
+    if(e.target.matches?.('[data-major-subject]')){scheduleRender(80);return}
+    if(e.target.id==='workspaceName')scheduleRender(80)
+  },true);
   window.addEventListener('load',()=>{let n=0,t=setInterval(()=>{if(render()||++n>40)clearInterval(t)},200)});
-  document.addEventListener('change',e=>{if(e.target.id==='workspaceName')setTimeout(render,50)});
-  window.vkvExamCustomSubjects={read,addSubject};
+  window.vkvExamCustomSubjects={read,addSubject,render};
 })();
