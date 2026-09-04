@@ -3,7 +3,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 let dirty=false,pendingSave=false;
 const expected=new Map();
 function cls(v){let s=String(v||'').trim().replace(/\s+/g,' ');s=s.replace(/(?:\s*[-–]\s*|\s+)(?:SECTION\s*)?[A-DV]$/i,'').replace(/\s*\((?:A|B|C|D|V)\)$/i,'');return s.trim()||String(v||'').trim()}
-function subj(v){let s=String(v||'').trim().replace(/\s+/g,' ');if(/^information technology(?:\s*[-–]?\s*(?:it|bb))?$/i.test(s)||/^it(?:\s*[-–(]?\s*(?:it|bb)\s*\)?)?$/i.test(s))return'IT';return s}
+function subj(v){let s=String(v||'').trim().replace(/\s+/g,' ');if(/^information technology(?:\s*[-–]?\s*(?:it|bb))?$/i.test(s)||/^it(?:\s*[-–(]?\s*(?:it|bb)\s*\)?)?$/i.test(s))return'IT';if(/^maths?(?:\s*[-–(]?\s*bb\s*\)?)$/i.test(s))return'Maths';return s}
 function keySub(v){return subj(v).toLocaleLowerCase()}
 function iso(v){const m=String(v||'').trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);return m?`${m[3]}-${String(m[2]).padStart(2,'0')}-${String(m[1]).padStart(2,'0')}`:/^\d{4}-\d{2}-\d{2}$/.test(String(v||''))?String(v):''}
 function disp(k){const m=String(k||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?`${m[3]}/${m[2]}/${m[1]}`:k}
