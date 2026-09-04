@@ -9,6 +9,24 @@ function baseClass(v){return String(v||'').trim().replace(/\s+/g,' ').replace(/(
 function subjectName(v){let s=String(v||'').trim().replace(/\s+/g,' ');if(/^information technology(?:\s*\(\s*(?:it|bb)\s*\))?$/i.test(s)||/^it\s*\(\s*bb\s*\)$/i.test(s))return'IT';if(/^maths?(?:\s*[-–(]?\s*bb\s*\)?)$/i.test(s))return'Maths';return s}
 function wait(ms){return new Promise(r=>setTimeout(r,ms))}
 
+function ensureFreshStartOption(){
+  const box=document.getElementById('examSavedStartChoices');
+  if(!box||document.getElementById('goFreshExamSetup'))return false;
+  const grid=[...box.children].find(el=>el instanceof HTMLElement&&String(el.style.gridTemplateColumns||'').includes('minmax'))||box.querySelector('div[style*="grid-template-columns"]');
+  if(!grid)return false;
+  const card=document.createElement('div');
+  card.style.cssText='padding:16px;border:1px solid #cfdfe6;border-radius:14px;background:#fbfefd';
+  card.innerHTML='<div class="eyebrow">Fresh setup</div><h4 style="margin:6px 0 8px">Start a Fresh Timetable Setup</h4><p style="margin:0 0 12px;color:#486577">Begin from the active master timetable without using any saved timetable or template.</p><button class="button primary" id="goFreshExamSetup">Start Fresh Timetable</button>';
+  grid.appendChild(card);
+  document.getElementById('goFreshExamSetup').onclick=()=>{
+    const fresh=document.getElementById('newDraft');
+    if(!fresh){alert('Fresh timetable setup is not ready yet.');return}
+    fresh.click();
+    setTimeout(()=>document.querySelector('[data-pane-target="setup"]')?.click(),120);
+  };
+  return true;
+}
+
 async function waitForMajorControls(){for(let i=0;i<50;i++){if(document.querySelectorAll('[data-major-class]').length&&document.getElementById('majorSubjectGrid'))return true;await wait(100)}return false}
 function classBox(cls){return [...document.querySelectorAll('[data-major-class]')].find(b=>baseClass(b.dataset.majorClass)===baseClass(cls))}
 function subjectBoxesFor(cls){return [...document.querySelectorAll('[data-major-subject]')].filter(b=>baseClass(b.dataset.majorSubjectClass)===baseClass(cls))}
@@ -72,3 +90,6 @@ window.addEventListener('click',e=>{
   e.preventDefault();e.stopImmediatePropagation();e.stopPropagation();
   handle(b.dataset.realUseTemplate);
 },true);
+
+let freshTries=0;const freshTimer=setInterval(()=>{if(ensureFreshStartOption()||++freshTries>40)clearInterval(freshTimer)},200);
+window.addEventListener('load',()=>setTimeout(ensureFreshStartOption,600));
