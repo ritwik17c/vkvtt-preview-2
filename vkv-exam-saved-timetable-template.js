@@ -42,15 +42,18 @@ function enhanceCards(){
   let found=false;
   for(const card of list.querySelectorAll('.draftCard')){
     const open=card.querySelector('[data-open-cloud]');if(!open)continue;
+    const id=open.dataset.openCloud||'';
+    if(!/^TEMPLATE_/i.test(id))card.classList.remove('majorHide');
     found=true;
     if(card.querySelector('[data-save-template-cloud]'))continue;
     const row=open.closest('.buttonRow')||open.parentElement;
     const b=document.createElement('button');
     b.className='button';
-    b.dataset.saveTemplateCloud=open.dataset.openCloud;
+    b.dataset.saveTemplateCloud=id;
     b.textContent='Save as Template';
     b.title='Create a reusable class-and-subject template from this saved timetable without changing it.';
     row?.appendChild(b);
+    setTimeout(()=>{if(!/^TEMPLATE_/i.test(id))card.classList.remove('majorHide')},50);
   }
   return found;
 }
