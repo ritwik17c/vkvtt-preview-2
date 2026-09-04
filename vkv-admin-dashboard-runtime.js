@@ -39,7 +39,7 @@ function build(){const home=$('#dashboardHome');if(!home||$('#vkvAdminArchitectu
  g4.append(tile('openStaffNoticeBoard','📢','Staff Notice Board','Create, publish, edit and manage notices/circulars shown to staff.',P2+'admin-staff-notice-board.html?v=1'));
 
  const academic=section('vkvAdminAcademic','5 · Academic Administration','Academic workflows, verification and question-bank administration.');const g5=academic.querySelector('.tiles');
- g5.append(tile('openExamDepartment','🗓️','Examination Department','Prepare, submit, approve and publish exam timetables, invigilator allocations and reliever duty lists.',P2+'exam-department.html?v=1.1.0'));
+ g5.append(tile('openExamDepartment','🗓️','Examination Module','Prepare, submit, approve and publish exam timetables, invigilator allocations and reliever duty lists.',P2+'exam-department.html?v=20260904-template-apply-direct-3'));
  g5.append(tile('openQuestionBankAdmin','🧠','Question Bank Administration','Manage coordinators, verification, reports and Principal oversight.',P2+'admin-question-bank-v2.html?v=p2'));
  g5.append(tile('openQuestionBankImport','📥','Import Questions from Excel / Google Sheet','Import existing form responses. Repeated/duplicate form columns are consolidated into useful question fields.',P2+'admin-qb-import.html?v=1'));
 
