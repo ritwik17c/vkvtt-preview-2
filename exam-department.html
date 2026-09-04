@@ -10,130 +10,24 @@
 <script src="vkv-date-ui.js?v=20260903-1" defer></script>
 </head>
 <body>
-<header class="topbar">
-  <div class="topbarInner">
-    <div class="brand"><img src="school-logo.jpg" alt="Vivekananda Kendra Vidyalaya, Nalbari logo"><div><h1>Examination Department</h1><p>Exam timetable · Invigilation · Reliever duties</p></div></div>
-    <div class="topActions"><span id="saveState" class="saveState">Loading…</span><button id="saveDraft" class="button pale" hidden>Save Cloud Draft</button><button id="submitDraft" class="button pale" hidden>Submit to Principal</button><button id="approvePublish" class="button pale" hidden>Approve & Publish</button><button id="returnDraft" class="button pale" hidden>Return for Correction</button><a class="button pale" href="index.html?v=66.0">Home</a></div>
-  </div>
-</header>
-
+<header class="topbar"><div class="topbarInner"><div class="brand"><img src="school-logo.jpg" alt="Vivekananda Kendra Vidyalaya, Nalbari logo"><div><h1>Examination Department</h1><p>Exam timetable · Invigilation · Reliever duties</p></div></div><div class="topActions"><span id="saveState" class="saveState">Loading…</span><button id="saveDraft" class="button pale" hidden>Save Cloud Draft</button><button id="submitDraft" class="button pale" hidden>Submit to Principal</button><button id="approvePublish" class="button pale" hidden>Approve & Publish</button><button id="returnDraft" class="button pale" hidden>Return for Correction</button><a class="button pale" href="index.html?v=66.0">Home</a></div></div></header>
 <main>
-  <section id="authGate" class="gateCard">
-    <div class="eyebrow">Authorised workspace</div><h2>Checking Examination Department access…</h2>
-    <p id="gateMessage">Please wait while your delegated permission is verified.</p>
-    <button id="signInButton" class="button primary" hidden>Sign in with Google</button>
-  </section>
-
-  <div id="examApp" class="appShell" hidden>
-    <aside class="sidebar">
-      <div class="workspaceBadge"><span class="eyebrow">Working draft</span><strong id="sideName">New Examination Schedule</strong><small id="sideSource">Active master timetable</small></div>
-      <nav aria-label="Examination Department sections">
-        <button class="navButton active" data-pane-target="setup"><span>1</span> Exam Setup</button>
-        <button class="navButton" data-pane-target="subjects"><span>2</span> Subjects</button>
-        <button class="navButton" data-pane-target="timetable"><span>3</span> Exam Timetable</button>
-        <button class="navButton" data-pane-target="staff"><span>4</span> Staff & Availability</button>
-        <button class="navButton" data-pane-target="duties"><span>5</span> Duties</button>
-        <button class="navButton" data-pane-target="outputs"><span>6</span> Review & Output</button>
-      </nav>
-      <div class="sideNote">This workspace reads the activated master timetable. It does not replace or edit the school timetable.</div>
-    </aside>
-
-    <div class="workspace">
-      <section class="pane active" data-pane="setup">
-        <div class="paneHead"><div><div class="eyebrow">Configuration</div><h2>Exam Setup</h2><p>Set the examination window, cadence and session timings.</p></div></div>
-        <div id="workflowStatus" class="notice info">A cloud draft can be submitted to the Principal. It becomes visible to staff only after approval.</div>
-        <div class="summaryGrid">
-          <article class="summaryCard master"><span class="eyebrow">Imported source</span><h3 id="masterName">Activated Schedule</h3><p id="masterMeta">Reading the active timetable…</p><div id="masterStats" class="chips"></div></article>
-          <article class="summaryCard"><span class="eyebrow">Draft identity</span><label>Examination / session name<input id="workspaceName" value="New Examination Schedule"></label><label>Notes<textarea id="workspaceDescription" rows="3" placeholder="Term, classes, instructions or internal reference"></textarea></label></article>
-        </div>
-        <article class="surface">
-          <h3>Examination Dates</h3>
-          <div class="formGrid four">
-            <label>Start date (dd/mm/yyyy)<input id="startDate" type="date"></label>
-            <label>End date (dd/mm/yyyy)<input id="endDate" type="date"></label>
-            <label>Exam pattern<select id="cadence"><option value="continuous">Continuous eligible days</option><option value="alternate">One calendar-day gap</option><option value="custom">Only selected dates</option></select></label>
-            <label>Maximum exams per class per day<input id="maxPerDay" type="number" min="1" max="4" value="1"></label>
-          </div>
-          <fieldset><legend>Do not conduct examinations on</legend><div id="weekdayChecks" class="inlineChecks"></div></fieldset>
-          <div class="formGrid two">
-            <label>Excluded dates <small>advanced list · internal ISO tokens</small><input id="excludedDates" placeholder="2026-09-05, 2026-09-12"></label>
-            <label>Custom examination dates <small>advanced list used only for “Only selected dates”</small><input id="customDates" placeholder="2026-09-03, 2026-09-07"></label>
-          </div>
-          <div id="datePreview" class="notice info"></div>
-        </article>
-        <article class="surface">
-          <div class="sectionTitle"><div><h3>Exam Sessions</h3><p>Each session has its own examination duration.</p></div><button id="addSession" class="button">+ Add Session</button></div>
-          <div id="sessionRows" class="sessionRows"></div>
-        </article>
-      </section>
-
-      <section class="pane" data-pane="subjects">
-        <div class="paneHead"><div><div class="eyebrow">Master timetable import</div><h2>Subjects for Examination</h2><p>All class-subject combinations are imported. Untick subjects for which no examination is conducted.</p></div></div>
-        <article class="surface">
-          <div class="toolbar"><input id="paperSearch" type="search" placeholder="Search class or subject"><select id="paperClassFilter"><option value="">All classes</option></select><button id="includeVisible" class="button">Include Visible</button><button id="excludeVisible" class="button">Exclude Visible</button></div>
-          <div id="paperCounts" class="notice info"></div><div class="tableWrap"><table><thead><tr><th>Conduct Exam</th><th>Class</th><th>Subject</th><th>Teaching staff in master</th><th>Room / Venue</th><th>Fixed Date (optional)</th><th>Fixed Session</th></tr></thead><tbody id="paperRows"></tbody></table></div>
-        </article>
-      </section>
-
-      <section class="pane" data-pane="timetable">
-        <div class="paneHead"><div><div class="eyebrow">Automatic scheduler</div><h2>Generate Exam Timetable</h2><p>Common subjects are aligned where possible. Hard conflicts and unscheduled papers are reported.</p></div><button id="generateTimetable" class="button primary large">Generate Timetable</button></div>
-        <div id="timetableStatus" class="notice info">Complete Exam Setup and Subjects, then generate a draft timetable.</div>
-        <div id="timetableMetrics" class="metrics"></div>
-        <div class="tableWrap printBlock"><table id="examTable"><thead><tr><th>Date</th><th>Day</th><th>Session</th><th>Time</th><th>Class</th><th>Subject</th></tr></thead><tbody id="examRows"><tr><td colspan="6">No timetable generated.</td></tr></tbody></table></div>
-        <div id="unplacedBlock"></div>
-      </section>
-
-      <section class="pane" data-pane="staff">
-        <div class="paneHead"><div><div class="eyebrow">Master timetable import</div><h2>Invigilators & Availability</h2><p>Teachers are imported using their timetable short codes. Disable staff or list sessions when they are unavailable.</p></div></div>
-        <article class="surface">
-          <div class="sectionTitle"><div><h3>Approved Leave Connection</h3><p>Approved Leave, Duty/OD and Special Assignment records inside the examination window are excluded automatically.</p></div><button id="refreshApprovedLeave" class="button">Refresh Approved Leave</button></div>
-          <div id="leaveSyncStatus" class="notice info">Approved leave will be checked before duty generation.</div>
-          <div class="notice info">Advanced availability tokens currently remain internal ISO format: <b>YYYY-MM-DD</b> blocks the full day; <b>YYYY-MM-DD|SESSION_1</b> blocks one session. Separate entries with commas.</div>
-          <div class="toolbar"><input id="teacherSearch" type="search" placeholder="Search teacher name or code"><button id="enableVisibleTeachers" class="button">Enable Visible</button><button id="disableVisibleTeachers" class="button">Disable Visible</button></div>
-          <div class="tableWrap"><table><thead><tr><th>Available for duty</th><th>Teacher</th><th>Code</th><th>Max invigilation duties</th><th>Max reliever duties</th><th>Unavailable dates / sessions</th></tr></thead><tbody id="teacherRows"></tbody></table></div>
-        </article>
-      </section>
-
-      <section class="pane" data-pane="duties">
-        <div class="paneHead"><div><div class="eyebrow">Duty allocation</div><h2>Invigilators & Relievers</h2><p>Generate a balanced allocation from teacher availability and the exam timetable.</p></div><button id="generateDuties" class="button primary large">Generate Duties</button></div>
-        <article class="surface">
-          <div class="formGrid four">
-            <label>Invigilators per examination room<input id="invigilatorsPerRoom" type="number" min="1" max="5" value="1"></label>
-            <label>Maximum invigilation sessions per teacher per day<input id="maxInvigPerDay" type="number" min="1" max="4" value="1"></label>
-            <label>Relievers per examination session<input id="relieversPerSession" type="number" min="0" max="20" value="1"></label>
-            <label class="checkLabel"><input id="avoidOwnSubject" type="checkbox"> Avoid a teacher's own subject</label>
-            <label>Relieving duty starts<input id="relieverStart" type="time" value="10:30"></label>
-            <label>Relieving duty ends<input id="relieverEnd" type="time" value="11:00"></label>
-          </div>
-          <div class="hardRule"><b>Hard rule:</b> a teacher assigned as an invigilator on a date cannot be assigned as a reliever anywhere on that same date.</div>
-        </article>
-        <div id="dutyStatus" class="notice info">Generate the exam timetable before allocating duties.</div>
-        <div id="dutyMetrics" class="metrics"></div>
-        <div class="outputGrid">
-          <article class="surface"><h3>Invigilation Duty List</h3><p class="tableHint">Use the teacher selector for a day-of correction; hard-rule checks run immediately.</p><div class="tableWrap"><table><thead><tr><th>Date</th><th>Session</th><th>Room / Class</th><th>Assigned Teacher</th><th>Code</th></tr></thead><tbody id="invigilationRows"><tr><td colspan="5">No allocation generated.</td></tr></tbody></table></div></article>
-          <article class="surface"><h3>Reliever Duty List</h3><p class="tableHint">Use the teacher selector for a day-of correction; invigilators remain excluded from reliever duty on the same date.</p><div class="tableWrap"><table><thead><tr><th>Date</th><th>Session</th><th>Time</th><th>Assigned Teacher</th><th>Code</th></tr></thead><tbody id="relieverRows"><tr><td colspan="5">No allocation generated.</td></tr></tbody></table></div></article>
-        </div>
-      </section>
-
-      <section class="pane" data-pane="outputs">
-        <div class="paneHead"><div><div class="eyebrow">Final checks</div><h2>Review, Save & Output</h2><p>Check completeness before printing or exporting operational lists.</p></div></div>
-        <div id="reviewSummary" class="reviewGrid"></div>
-        <article class="surface">
-          <h3>Outputs</h3><div class="buttonRow"><button id="printExam" class="button primary">Print Exam Timetable</button><button id="printDuties" class="button primary">Print Duty Lists</button><button id="downloadExamCsv" class="button">Download Exam CSV</button><button id="downloadDutyCsv" class="button">Download Duty CSV</button></div>
-        </article>
-        <article class="surface">
-          <div class="sectionTitle"><div><h3>Cloud Examination Workspaces</h3><p>Exam Managers submit drafts here. The Principal can return, approve and publish them.</p></div><button id="newDraft" class="button">New from Master</button></div>
-          <div id="draftList" class="draftList"></div>
-        </article>
-      </section>
-    </div>
-  </div>
+<section id="authGate" class="gateCard"><div class="eyebrow">Authorised workspace</div><h2>Checking Examination Department access…</h2><p id="gateMessage">Please wait while your delegated permission is verified.</p><button id="signInButton" class="button primary" hidden>Sign in with Google</button></section>
+<div id="examApp" class="appShell" hidden><aside class="sidebar"><div class="workspaceBadge"><span class="eyebrow">Working draft</span><strong id="sideName">New Examination Schedule</strong><small id="sideSource">Active master timetable</small></div><nav aria-label="Examination Department sections"><button class="navButton active" data-pane-target="setup"><span>1</span> Exam Setup</button><button class="navButton" data-pane-target="subjects"><span>2</span> Subjects</button><button class="navButton" data-pane-target="timetable"><span>3</span> Exam Timetable</button><button class="navButton" data-pane-target="staff"><span>4</span> Staff & Availability</button><button class="navButton" data-pane-target="duties"><span>5</span> Duties</button><button class="navButton" data-pane-target="outputs"><span>6</span> Review & Output</button></nav><div class="sideNote">This workspace reads the activated master timetable. It does not replace or edit the school timetable.</div></aside>
+<div class="workspace">
+<section class="pane active" data-pane="setup"><div class="paneHead"><div><div class="eyebrow">Configuration</div><h2>Exam Setup</h2><p>Set the examination window, cadence and session timings.</p></div></div><div id="workflowStatus" class="notice info">A cloud draft can be submitted to the Principal. It becomes visible to staff only after approval.</div><div class="summaryGrid"><article class="summaryCard master"><span class="eyebrow">Imported source</span><h3 id="masterName">Activated Schedule</h3><p id="masterMeta">Reading the active timetable…</p><div id="masterStats" class="chips"></div></article><article class="summaryCard"><span class="eyebrow">Draft identity</span><label>Examination / session name<input id="workspaceName" value="New Examination Schedule"></label><label>Notes<textarea id="workspaceDescription" rows="3" placeholder="Term, classes, instructions or internal reference"></textarea></label></article></div><article class="surface"><h3>Examination Dates</h3><div class="formGrid four"><label>Start date (dd/mm/yyyy)<input id="startDate" type="date"></label><label>End date (dd/mm/yyyy)<input id="endDate" type="date"></label><label>Exam pattern<select id="cadence"><option value="continuous">Continuous eligible days</option><option value="alternate">One calendar-day gap</option><option value="custom">Only selected dates</option></select></label><label>Maximum exams per class per day<input id="maxPerDay" type="number" min="1" max="4" value="1"></label></div><fieldset><legend>Do not conduct examinations on</legend><div id="weekdayChecks" class="inlineChecks"></div></fieldset><div class="formGrid two"><label>Excluded dates <small>advanced list · internal ISO tokens</small><input id="excludedDates" placeholder="2026-09-05, 2026-09-12"></label><label>Custom examination dates <small>advanced list used only for “Only selected dates”</small><input id="customDates" placeholder="2026-09-03, 2026-09-07"></label></div><div id="datePreview" class="notice info"></div></article><article class="surface"><div class="sectionTitle"><div><h3>Exam Sessions</h3><p>Each session has its own examination duration.</p></div><button id="addSession" class="button">+ Add Session</button></div><div id="sessionRows" class="sessionRows"></div></article></section>
+<section class="pane" data-pane="subjects"><div class="paneHead"><div><div class="eyebrow">Master timetable import</div><h2>Subjects for Examination</h2><p>All class-subject combinations are imported. Untick subjects for which no examination is conducted.</p></div></div><article class="surface"><div class="toolbar"><input id="paperSearch" type="search" placeholder="Search class or subject"><select id="paperClassFilter"><option value="">All classes</option></select><button id="includeVisible" class="button">Include Visible</button><button id="excludeVisible" class="button">Exclude Visible</button></div><div id="paperCounts" class="notice info"></div><div class="tableWrap"><table><thead><tr><th>Conduct Exam</th><th>Class</th><th>Subject</th><th>Teaching staff in master</th><th>Room / Venue</th><th>Fixed Date (optional)</th><th>Fixed Session</th></tr></thead><tbody id="paperRows"></tbody></table></div></article></section>
+<section class="pane" data-pane="timetable"><div class="paneHead"><div><div class="eyebrow">Automatic scheduler</div><h2>Generate Exam Timetable</h2><p>Common subjects are aligned where possible. Hard conflicts and unscheduled papers are reported.</p></div><button id="generateTimetable" class="button primary large">Generate Timetable</button></div><div id="timetableStatus" class="notice info">Complete Exam Setup and Subjects, then generate a draft timetable.</div><div id="timetableMetrics" class="metrics"></div><div class="tableWrap printBlock"><table id="examTable"><thead><tr><th>Date</th><th>Day</th><th>Session</th><th>Time</th><th>Class</th><th>Subject</th></tr></thead><tbody id="examRows"><tr><td colspan="6">No timetable generated.</td></tr></tbody></table></div><div id="unplacedBlock"></div></section>
+<section class="pane" data-pane="staff"><div class="paneHead"><div><div class="eyebrow">Master timetable import</div><h2>Invigilators & Availability</h2><p>Teachers are imported using their timetable short codes. Disable staff or list sessions when they are unavailable.</p></div></div><article class="surface"><div class="sectionTitle"><div><h3>Approved Leave Connection</h3><p>Approved Leave, Duty/OD and Special Assignment records inside the examination window are excluded automatically.</p></div><button id="refreshApprovedLeave" class="button">Refresh Approved Leave</button></div><div id="leaveSyncStatus" class="notice info">Approved leave will be checked before duty generation.</div><div class="notice info">Advanced availability tokens currently remain internal ISO format: <b>YYYY-MM-DD</b> blocks the full day; <b>YYYY-MM-DD|SESSION_1</b> blocks one session. Separate entries with commas.</div><div class="toolbar"><input id="teacherSearch" type="search" placeholder="Search teacher name or code"><button id="enableVisibleTeachers" class="button">Enable Visible</button><button id="disableVisibleTeachers" class="button">Disable Visible</button></div><div class="tableWrap"><table><thead><tr><th>Available for duty</th><th>Teacher</th><th>Code</th><th>Max invigilation duties</th><th>Max reliever duties</th><th>Unavailable dates / sessions</th></tr></thead><tbody id="teacherRows"></tbody></table></div></article></section>
+<section class="pane" data-pane="duties"><div class="paneHead"><div><div class="eyebrow">Duty allocation</div><h2>Invigilators & Relievers</h2><p>Generate a balanced allocation from teacher availability and the exam timetable.</p></div><button id="generateDuties" class="button primary large">Generate Duties</button></div><article class="surface"><div class="formGrid four"><label>Invigilators per examination room<input id="invigilatorsPerRoom" type="number" min="1" max="5" value="1"></label><label>Maximum invigilation sessions per teacher per day<input id="maxInvigPerDay" type="number" min="1" max="4" value="1"></label><label>Relievers per examination session<input id="relieversPerSession" type="number" min="0" max="20" value="1"></label><label class="checkLabel"><input id="avoidOwnSubject" type="checkbox"> Avoid a teacher's own subject</label><label>Relieving duty starts<input id="relieverStart" type="time" value="10:30"></label><label>Relieving duty ends<input id="relieverEnd" type="time" value="11:00"></label></div><div class="hardRule"><b>Hard rule:</b> a teacher assigned as an invigilator on a date cannot be assigned as a reliever anywhere on that same date.</div></article><div id="dutyStatus" class="notice info">Generate the exam timetable before allocating duties.</div><div id="dutyMetrics" class="metrics"></div><div class="outputGrid"><article class="surface"><h3>Invigilation Duty List</h3><p class="tableHint">Use the teacher selector for a day-of correction; hard-rule checks run immediately.</p><div class="tableWrap"><table><thead><tr><th>Date</th><th>Session</th><th>Room / Class</th><th>Assigned Teacher</th><th>Code</th></tr></thead><tbody id="invigilationRows"><tr><td colspan="5">No allocation generated.</td></tr></tbody></table></div></article><article class="surface"><h3>Reliever Duty List</h3><p class="tableHint">Use the teacher selector for a day-of correction; invigilators remain excluded from reliever duty on the same date.</p><div class="tableWrap"><table><thead><tr><th>Date</th><th>Session</th><th>Time</th><th>Assigned Teacher</th><th>Code</th></tr></thead><tbody id="relieverRows"><tr><td colspan="5">No allocation generated.</td></tr></tbody></table></div></article></div></section>
+<section class="pane" data-pane="outputs"><div class="paneHead"><div><div class="eyebrow">Final checks</div><h2>Review, Save & Output</h2><p>Check completeness before printing or exporting operational lists.</p></div></div><div id="reviewSummary" class="reviewGrid"></div><article class="surface"><h3>Outputs</h3><div class="buttonRow"><button id="printExam" class="button primary">Print Exam Timetable</button><button id="printDuties" class="button primary">Print Duty Lists</button><button id="downloadExamCsv" class="button">Download Exam CSV</button><button id="downloadDutyCsv" class="button">Download Duty CSV</button></div></article><article class="surface"><div class="sectionTitle"><div><h3>Cloud Examination Workspaces</h3><p>Exam Managers submit drafts here. The Principal can return, approve and publish them.</p></div><button id="newDraft" class="button">New from Master</button></div><div id="draftList" class="draftList"></div></article></section>
+</div></div>
 </main>
 <script type="module" src="exam-department.js?v=1.1.0"></script>
-<script type="module" src="vkv-exam-incharge-delegation.js?v=20260904-class-date-1"></script>
+<script type="module" src="vkv-exam-incharge-delegation.js?v=20260904-lean-1"></script>
 <script type="module" src="vkv-exam-major-workflow.js?v=20260904-1"></script>
 <script type="module" src="vkv-exam-major-conflict-fix.js?v=20260904-1"></script>
-<script src="vkv-exam-timetable-editor.js?v=20260904-2" defer></script>
 <script src="vkv-exam-printable-matrix-editor.js?v=20260904-1" defer></script>
+<script type="module" src="vkv-exam-saved-delete.js?v=20260904-1"></script>
 </body>
 </html>
