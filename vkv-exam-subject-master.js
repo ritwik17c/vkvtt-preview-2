@@ -13,6 +13,7 @@ const displaySubject=v=>String(v||'').trim().replace(/\s+/g,' ');
 const norm=v=>{let s=displaySubject(v).toLowerCase();if(/^information technology(?:\s*[-–(]?\s*(?:it|bb)\s*\)?)?$/.test(s)||/^it(?:\s*[-–(]?\s*(?:it|bb)\s*\)?)?$/.test(s))return'it';if(/^maths?(?:\s*[-–(]?\s*bb\s*\)?)?$/.test(s))return'maths';return s.replace(/[^a-z0-9]+/g,'')};
 const sortClasses=(a,b)=>a.localeCompare(b,undefined,{numeric:true,sensitivity:'base'});
 const sortSubjects=(a,b)=>a.localeCompare(b,undefined,{numeric:true,sensitivity:'base'});
+function subjectsForClass(c){const wanted=base(c).toLowerCase(),key=Object.keys(master.classes||{}).find(k=>base(k).toLowerCase()===wanted);return key?[...(master.classes[key]||[])]:[]}
 
 function seedFromVisible(){
   const classes={};
@@ -80,13 +81,17 @@ function ensurePane(){
 }
 
 async function syncClassFromMaster(c){
-  const subjects=[...(master.classes?.[c]||[])];if(!subjects.length)return false;
+  const subjects=subjectsForClass(c);if(!subjects.length){setStatus(`No saved examination subjects were found for Class ${c}.`,'warn');return false}
   for(let step=0;step<60&&!window.vkvExamWorkspace?.applySubjectMaster;step++)await wait(100);
   const apply=window.vkvExamWorkspace?.applySubjectMaster;
   if(!apply){setStatus(`Class ${c} could not be imported because the examination workspace is not ready. Please reload this page and try again.`,'warn');return false}
   const applied=apply(c,subjects);
   if(!applied){setStatus(`The saved examination subjects for Class ${c} could not be imported.`,'warn');return false}
-  setStatus(`Saved examination subjects imported for Class ${c}.`);return true
+  await wait(180);
+  const shown=[...document.querySelectorAll('[data-major-subject]')].filter(x=>base(x.dataset.majorSubjectClass).toLowerCase()===base(c).toLowerCase()).map(x=>displaySubject(x.dataset.majorSubject));
+  const expected=subjects.map(norm).sort(),actual=shown.map(norm).sort();
+  if(JSON.stringify(actual)!==JSON.stringify(expected)){setStatus(`Import verification failed for Class ${c}. The old timetable subjects are still visible; please reload and try once more.`,'warn');return false}
+  setStatus(`Saved examination subjects imported and verified for Class ${c}.`);return true
 }
 
 async function applyToSelected(silent=false){
@@ -102,6 +107,10 @@ function bind(){
   $('examSubjectMasterGrid')?.addEventListener('click',e=>{const a=e.target.closest('[data-master-add]'),ed=e.target.closest('[data-master-edit]'),del=e.target.closest('[data-master-delete]');if(a)return addSubject(base(a.dataset.masterAdd));if(ed)return editSubject(base(ed.dataset.masterEdit),Number(ed.dataset.masterIndex));if(del)return deleteSubject(base(del.dataset.masterDelete),Number(del.dataset.masterIndex))});
   const classPane=document.querySelector('[data-pane="majorClasses"] article.surface');if(classPane&&!$('applyExamSubjectMaster')){const bar=document.createElement('div');bar.className='notice info';bar.style.marginBottom='12px';bar.innerHTML='<b>Subjects come from Subject Setup.</b> Select a class and its saved examination subjects will be imported automatically. <button id="applyExamSubjectMaster" class="button" style="margin-left:8px">Apply Master to Selected Classes</button>';classPane.prepend(bar);$('applyExamSubjectMaster')?.addEventListener('click',applyToSelected)}
   document.addEventListener('change',e=>{const box=e.target.closest?.('[data-major-class]');if(box?.checked){const c=base(box.dataset.majorClass);setTimeout(()=>syncClassFromMaster(c),350)}},true)
+  document.addEventListener('click',e=>{
+    if(e.target.closest?.('[data-open-cloud],[data-revise-cloud],#newDraft,#goFreshExamSetup'))setTimeout(()=>applyToSelected(true),700);
+    if(e.target.closest?.('[data-pane-target="majorClasses"],[data-pane-target="subjects"]'))setTimeout(()=>applyToSelected(true),220)
+  },true)
 }
 
 async function boot(){
@@ -113,4 +122,4 @@ async function boot(){
   await applyToSelected(true);
 }
 onAuthStateChanged(auth,user=>{signedInUser=user||null;if(user)boot()});
-window.vkvExamSubjectMaster={get:()=>JSON.parse(JSON.stringify(master)),getSubjects:c=>[...(master.classes?.[base(c)]||[])],applyToSelected};
+window.vkvExamSubjectMaster={get:()=>JSON.parse(JSON.stringify(master)),getSubjects:subjectsForClass,applyToSelected};
