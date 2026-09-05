@@ -13,7 +13,9 @@ const displaySubject=v=>String(v||'').trim().replace(/\s+/g,' ');
 const norm=v=>{let s=displaySubject(v).toLowerCase();if(/^information technology(?:\s*[-–(]?\s*(?:it|bb)\s*\)?)?$/.test(s)||/^it(?:\s*[-–(]?\s*(?:it|bb)\s*\)?)?$/.test(s))return'it';if(/^maths?(?:\s*[-–(]?\s*bb\s*\)?)?$/.test(s))return'maths';return s.replace(/[^a-z0-9]+/g,'')};
 const sortClasses=(a,b)=>a.localeCompare(b,undefined,{numeric:true,sensitivity:'base'});
 const sortSubjects=(a,b)=>a.localeCompare(b,undefined,{numeric:true,sensitivity:'base'});
-function canonicalMaster(value){const classes={};for(const [raw,subjects] of Object.entries(value?.classes||{})){const c=base(raw);if(!c)continue;classes[c]=[...new Map([...(classes[c]||[]),...(subjects||[])].map(s=>[norm(s),displaySubject(s)])).values()].filter(Boolean).sort(sortSubjects)}return{classes}}
+function subjectParts(value){return displaySubject(value).split(/\s*(?:\/|&|,|\band\b)\s*/i).map(displaySubject).filter(Boolean)}
+function collapseCombinedSubjects(subjects){const unique=[...new Map((subjects||[]).map(s=>[norm(s),displaySubject(s)])).values()].filter(Boolean),components=new Set();for(const s of unique){const parts=subjectParts(s);if(parts.length>1)for(const part of parts)components.add(norm(part))}return unique.filter(s=>subjectParts(s).length>1||!components.has(norm(s))).sort(sortSubjects)}
+function canonicalMaster(value){const classes={};for(const [raw,subjects] of Object.entries(value?.classes||{})){const c=base(raw);if(!c)continue;classes[c]=collapseCombinedSubjects([...(classes[c]||[]),...(subjects||[])])}return{classes}}
 function subjectsForClass(c){const wanted=base(c).toLowerCase(),key=Object.keys(master.classes||{}).find(k=>base(k).toLowerCase()===wanted);return key?[...(master.classes[key]||[])]:[]}
 
 function seedFromVisible(){
@@ -45,7 +47,7 @@ async function saveMaster(){
   const btn=$('saveExamSubjectMaster');if(btn)btn.disabled=true;
   setStatus('Saving the examination-only Subject Master to the cloud…');
   try{
-    const clean={};for(const c of Object.keys(canonicalMaster(master).classes).sort(sortClasses)){const list=[...new Map((canonicalMaster(master).classes[c]||[]).map(s=>[norm(s),displaySubject(s)])).values()].filter(Boolean).sort(sortSubjects);if(list.length)clean[c]=list}
+    const canonical=canonicalMaster(master),clean={};for(const c of Object.keys(canonical.classes).sort(sortClasses)){const list=collapseCombinedSubjects(canonical.classes[c]);if(list.length)clean[c]=list}
     master={classes:clean};
     const target=doc(db,'examSchedules',CONFIG_ID),savedAtMs=Date.now();
     await setDoc(target,{schemaVersion:2,configOnly:true,name:'Examination Subject Master',status:'draft',ownerUid:user.uid,ownerEmail:user.email||'',subjectMaster:master,updatedByUid:user.uid,updatedByEmail:user.email||'',updatedAt:serverTimestamp(),updatedAtMs:savedAtMs});
