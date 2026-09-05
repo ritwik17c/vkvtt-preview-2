@@ -6,7 +6,7 @@ const cfg={apiKey:'AIzaSyDheZpyXghd1aQ9_RLhwpacVriG__wNZW4',authDomain:'vkv-nalb
 const app=getApps().length?getApp():initializeApp(cfg),auth=getAuth(app),db=getFirestore(app);
 const $=id=>document.getElementById(id),wait=ms=>new Promise(r=>setTimeout(r,ms));
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
-function baseClass(v){return String(v||'').trim().replace(/\s+/g,' ').replace(/(?:\s*[-–]\s*|\s+)(?:SECTION\s*)?[A-DV]$/i,'').replace(/\s*\((?:A|B|C|D|V)\)$/i,'').trim()}
+function baseClass(v){return String(v||'').trim().replace(/\s+/g,' ').replace(/^((?:XI|XII))\s*(?:[-–]\s*|\s+|\(\s*)(?:SCI(?:ENCE)?|ARTS?|HUMANITIES)\s*\)?$/i,(_,grade)=>grade.toUpperCase()).replace(/(?:\s*[-–]\s*|\s+)(?:SECTION\s*)?[A-DV]$/i,'').replace(/\s*\((?:A|B|C|D|V)\)$/i,'').trim()}
 function subjectName(v){let s=String(v||'').trim().replace(/\s+/g,' ');if(/^(?:as|assamese)$/i.test(s))return'Assamese';if(/^(?:eng|english)$/i.test(s))return'English';if(/^(?:sci|science)$/i.test(s))return'Science';if(/^(?:ssc|social science)$/i.test(s))return'Social Science';if(/^(?:sans|sanskrit)$/i.test(s))return'Sanskrit';if(/^information technology(?:\s*[-–(]?\s*(?:it|bb)\s*\)?)?$/i.test(s)||/^it(?:\s*[-–(]?\s*(?:it|bb)\s*\)?)?$/i.test(s))return'IT';if(/^maths?(?:\s*[-–(]?\s*bb\s*\)?)?$/i.test(s)||/^mathematics$/i.test(s))return'Maths';if(/^hindi$/i.test(s))return'Hindi';return s}
 const key=(c,s)=>baseClass(c).toLowerCase()+'|'+subjectName(s).toLowerCase();
 function uniquePattern(workspace){
