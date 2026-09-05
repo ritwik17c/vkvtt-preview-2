@@ -10,8 +10,8 @@
   const fallbacks=['English','Assamese','Hindi','Sanskrit','Mathematics','Environmental Studies','EVS','Science','Social Science','Physics','Chemistry','Biology','History','Geography','Political Science','Economics','Accountancy','Business Studies','Computer Science','Informatics Practices','Artificial Intelligence','Information Technology','Physical Education','Art Education','Work Experience','Value Education','General Knowledge','Music','Yoga'];
   const add=(set,v)=>{v=String(v||'').trim();if(v)set.add(v)};
   async function subjects(){
-    const [ms,cs]=await Promise.all([F.getDoc(F.doc(db,'master','current')),F.getDoc(F.doc(db,'qbConfig','current')).catch(()=>null)]);
-    const raw=ms.exists()?ms.data()||{}:{},m=raw.data&&typeof raw.data==='object'?{...raw,...raw.data}:raw,c=cs&&cs.exists()?cs.data()||{}:{},set=new Set();
+    const [ms,cs]=await Promise.all([F.getDoc(F.doc(db,'master','current')).catch(()=>null),F.getDoc(F.doc(db,'qbConfig','current')).catch(()=>null)]);
+    const raw=ms&&ms.exists()?ms.data()||{}:{},m=raw.data&&typeof raw.data==='object'?{...raw,...raw.data}:raw,c=cs&&cs.exists()?cs.data()||{}:{},set=new Set();
     (m.subjects||[]).forEach(x=>add(set,typeof x==='string'?x:(x.name||x.subject||x.subjectName)));
     (m.records||[]).forEach(x=>{add(set,x?.subject);add(set,x?.subjectName)});
     (m.assignmentCards||[]).forEach(x=>{add(set,x?.subject);add(set,x?.subjectName)});
