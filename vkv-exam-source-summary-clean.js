@@ -14,6 +14,59 @@
     }
   }
 
+  function romanValue(value){
+    const raw=String(value||'').trim().toUpperCase().replace(/^CLASS\s*/,'');
+    if(!/^[IVXLCDM]+$/.test(raw))return null;
+    const map={I:1,V:5,X:10,L:50,C:100,D:500,M:1000};let total=0,prev=0;
+    for(let i=raw.length-1;i>=0;i--){const n=map[raw[i]]||0;if(n<prev)total-=n;else{total+=n;prev=n}}
+    return total||null;
+  }
+
+  function classCompare(a,b){
+    const av=romanValue(a),bv=romanValue(b);
+    if(av!=null&&bv!=null)return av-bv;
+    if(av!=null)return -1;if(bv!=null)return 1;
+    return String(a||'').localeCompare(String(b||''),undefined,{numeric:true,sensitivity:'base'});
+  }
+
+  function reorderChildren(host,getName){
+    if(!host)return;
+    const items=[...host.children];if(items.length<2)return;
+    const sorted=[...items].sort((a,b)=>classCompare(getName(a),getName(b)));
+    if(sorted.every((node,i)=>node===items[i]))return;
+    for(const node of sorted)host.appendChild(node);
+  }
+
+  function reorderSelect(select){
+    if(!select)return;
+    const fixed=[...select.options].filter(o=>!o.value),movable=[...select.options].filter(o=>o.value);
+    const sorted=[...movable].sort((a,b)=>classCompare(a.value||a.textContent,b.value||b.textContent));
+    if(sorted.every((o,i)=>o===movable[i]))return;
+    for(const o of [...fixed,...sorted])select.appendChild(o);
+  }
+
+  function reorderClassColumns(table){
+    const head=table?.tHead?.rows?.[0];if(!head||head.cells.length<4)return;
+    const fixedCount=2,headers=[...head.cells].slice(fixedCount);
+    const order=headers.map((cell,index)=>({index,name:(cell.textContent||'').replace(/^Class[-\s]*/i,'').trim()})).sort((a,b)=>classCompare(a.name,b.name));
+    if(order.every((x,i)=>x.index===i))return;
+    const rows=[head,...(table.tBodies?.[0]?.rows||[])];
+    for(const row of rows){
+      const cells=[...row.cells],fixed=cells.slice(0,fixedCount),rest=cells.slice(fixedCount);
+      if(rest.length!==headers.length)continue;
+      for(const cell of fixed)row.appendChild(cell);
+      for(const x of order)row.appendChild(rest[x.index]);
+    }
+  }
+
+  function enforceClassOrder(){
+    reorderChildren($('majorClassGrid'),node=>node.querySelector('[data-major-class]')?.dataset.majorClass||node.textContent);
+    reorderChildren($('majorSubjectGrid'),node=>node.querySelector('h4')?.textContent||node.textContent);
+    reorderChildren($('examSubjectMasterGrid'),node=>node.dataset.subjectMasterClass||node.querySelector('h3')?.textContent||node.textContent);
+    reorderSelect($('paperClassFilter'));
+    for(const table of document.querySelectorAll('#printableMatrixHost table.majorMatrix,#majorFormattedPreview table.majorMatrix,#majorOfficialPrint table.majorMatrix'))reorderClassColumns(table);
+  }
+
   async function refreshImportedTimetable(){
     for(let i=0;i<60;i++){
       const panel=$('templatePatternQuickEdit');
@@ -29,6 +82,7 @@
         const strong=cards[1]?.querySelector('strong'),label=cards[1]?.querySelector('span');
         if(strong&&count)strong.textContent=String(count);
         if(label&&count)label.textContent='Imported timetable papers';
+        enforceClassOrder();
         panel.scrollIntoView({behavior:'smooth',block:'start'});
         return;
       }
@@ -51,8 +105,15 @@
     alert('The selected saved template could not be opened from the saved-template list. Please refresh and try again.');
   }
 
-  window.addEventListener('load',()=>{clean();setTimeout(clean,250);setTimeout(clean,900)});
+  let orderTimer=null;
+  function scheduleOrder(delay=40){if(orderTimer)clearTimeout(orderTimer);orderTimer=setTimeout(()=>{orderTimer=null;enforceClassOrder()},delay)}
+
+  window.vkvExamClassCompare=classCompare;
+  window.addEventListener('load',()=>{clean();enforceClassOrder();setTimeout(()=>{clean();enforceClassOrder()},250);setTimeout(()=>{clean();enforceClassOrder()},900)});
   document.addEventListener('click',e=>{
+    if(e.target.closest('[data-pane-target],[data-open-cloud],[data-real-open],[data-revise-cloud],[data-real-use-template],#generateTimetable,#refreshPrintableMatrix')){
+      scheduleOrder(80);setTimeout(enforceClassOrder,350);
+    }
     if(e.target.closest('[data-pane-target="setup"],[data-open-cloud],[data-real-open],[data-revise-cloud]')){
       setTimeout(clean,80);setTimeout(clean,350);
     }
@@ -62,4 +123,8 @@
       routeLegacyTemplateLoad();
     }
   },true);
+  document.addEventListener('vkv-exam-workspace-subjects-applied',()=>scheduleOrder(80));
+  document.addEventListener('vkv-exam-subject-master-applied',()=>scheduleOrder(80));
+  const root=$('examApp')||document.body;
+  new MutationObserver(()=>scheduleOrder(30)).observe(root,{childList:true,subtree:true});
 })();
