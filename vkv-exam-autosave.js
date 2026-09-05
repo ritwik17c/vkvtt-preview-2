@@ -6,14 +6,14 @@
 
   const changeSelectors=[
     '#workspaceName','#workspaceDescription','#startDate','#endDate','#cadence','#maxPerDay','#excludedDates','#customDates',
-    '[data-weekday]','[data-session-field]','[data-paper-field]','[data-major-class]','[data-major-subject]',
+    '[data-weekday]','[data-exam-date]','[data-session-field]','[data-paper-field]','[data-major-class]','[data-major-subject]',
     '[data-teacher-field]','#invigilatorsPerRoom','#maxInvigPerDay','#relieversPerSession','#avoidOwnSubject','#relieverStart','#relieverEnd',
     '#examFooterReporting','#examFooterBus','#examFooterDeparture','[data-matrix-class][data-matrix-date]','[data-template-pattern-date]'
   ].join(',');
 
   const clickSelectors=[
     '#majorAllClasses','#majorNoClasses','#includeVisible','#excludeVisible','#enableVisibleTeachers','#disableVisibleTeachers',
-    '#addSession','[data-remove-session]','#generateTimetable','#generateDuties','#applyTemplatePatternDates'
+    '#addSession','[data-remove-session]','#generateTimetable','#undoGeneratedTimetable','#generateDuties','#applyTemplatePatternDates'
   ].join(',');
 
   function canSave(){
