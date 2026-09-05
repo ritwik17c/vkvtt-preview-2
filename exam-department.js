@@ -10,6 +10,12 @@ const clone=value=>JSON.parse(JSON.stringify(value));
 const state={user:null,profile:null,isAdmin:false,master:null,workspace:null,dirty:false,visiblePapers:[],visibleTeachers:[],cloudId:'',cloudMeta:null,cloudItems:[],leaveSync:null};
 const WEEKDAYS=[['0','Sunday'],['1','Monday'],['2','Tuesday'],['3','Wednesday'],['4','Thursday'],['5','Friday'],['6','Saturday']];
 
+function createFreshExamWorkspace(master){
+  const workspace=createWorkspaceFromMaster(master);
+  for(const paper of workspace.papers||[])paper.included=false;
+  return workspace
+}
+
 function setSaveState(message,dirty=false){$('saveState').textContent=message;$('saveState').dataset.dirty=dirty?'true':'false'}
 function markDirty(message='Unsaved changes'){state.dirty=true;if(state.workspace)state.workspace.updatedAtMs=Date.now();setSaveState(message,true);renderReview();renderWorkflow()}
 function showNotice(id,message,kind='info'){const el=$(id);el.className='notice '+kind;el.innerHTML=message}
@@ -37,7 +43,7 @@ async function verifyAccess(user){
     if(!allowed){$('gateMessage').innerHTML='<b>Examination Department access is not enabled for this account.</b><br>Ask the Principal/Admin to delegate this workspace in User Access & Roles.';return}
     state.profile=profile;state.isAdmin=profile.role==='admin';
     const masterSnap=await getDoc(doc(db,'master','current'));if(!masterSnap.exists())throw new Error('The active master timetable was not found.');
-    state.master=masterSnap.data();state.workspace=createWorkspaceFromMaster(state.master);
+    state.master=masterSnap.data();state.workspace=createFreshExamWorkspace(state.master);
     $('authGate').hidden=true;$('examApp').hidden=false;renderAll();await Promise.all([renderDraftList(),refreshApprovedLeave(false)]);setSaveState('New unsaved cloud draft',true);state.dirty=true;renderWorkflow();
   }catch(error){$('gateMessage').textContent='Could not open the Examination Department: '+(error.message||error)}
 }
@@ -206,7 +212,7 @@ async function renderDraftList(){
   }catch(e){$('draftList').innerHTML='<div class="notice error">Cloud workspaces could not be loaded: '+safe(e.message||e)+'</div>'}
 }
 $('draftList').addEventListener('click',event=>{const open=event.target.closest('[data-open-cloud]'),revise=event.target.closest('[data-revise-cloud]'),id=open?.dataset.openCloud||revise?.dataset.reviseCloud;if(!id)return;const item=state.cloudItems.find(value=>value.id===id);if(!item?.workspace)return;if(state.dirty&&!confirm('Open this cloud workspace and discard the current unsaved changes?'))return;state.workspace=clone(item.workspace);state.cloudId=revise?'':item.id;state.cloudMeta=revise?{status:'draft',ownerUid:state.user.uid,ownerName:state.profile?.name||state.user.displayName||state.user.email,ownerEmail:state.user.email,revisionOf:item.id}:clone(item);state.dirty=!!revise;renderAll();setSaveState(revise?'New revision — save before submission':'Cloud workspace opened',!!revise);document.querySelector('[data-pane-target="setup"]').click()});
-$('newDraft').onclick=()=>{if(state.dirty&&!confirm('Start a new draft from the active master and discard current unsaved changes?'))return;state.workspace=createWorkspaceFromMaster(state.master);state.cloudId='';state.cloudMeta={status:'draft',ownerUid:state.user.uid,ownerName:state.profile?.name||state.user.displayName||state.user.email,ownerEmail:state.user.email};state.dirty=true;renderAll();setSaveState('New unsaved cloud draft',true);document.querySelector('[data-pane-target="setup"]').click()};
+$('newDraft').onclick=()=>{if(state.dirty&&!confirm('Start a new draft from the active master and discard current unsaved changes?'))return;state.workspace=createFreshExamWorkspace(state.master);state.cloudId='';state.cloudMeta={status:'draft',ownerUid:state.user.uid,ownerName:state.profile?.name||state.user.displayName||state.user.email,ownerEmail:state.user.email};state.dirty=true;renderAll();setSaveState('New unsaved cloud draft',true);document.querySelector('[data-pane-target="setup"]').click()};
 
 function csvCell(value){const text=String(value??'');return /[",\n]/.test(text)?'"'+text.replace(/"/g,'""')+'"':text}
 function download(name,rows){const csv='\ufeff'+rows.map(row=>row.map(csvCell).join(',')).join('\r\n'),blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=name;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
