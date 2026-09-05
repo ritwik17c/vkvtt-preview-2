@@ -8,11 +8,12 @@ const $=id=>document.getElementById(id),wait=ms=>new Promise(r=>setTimeout(r,ms)
 const CONFIG_ID='EXAM_SUBJECT_MASTER';
 let master={classes:{}},signedInUser=null,saving=false;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const base=v=>String(v||'').trim().replace(/\s+/g,' ').replace(/(?:\s*[-–]\s*|\s+)(?:SECTION\s*)?[A-DV]$/i,'').replace(/\s*\((?:A|B|C|D|V)\)$/i,'').trim();
+const base=v=>String(v||'').trim().replace(/\s+/g,' ').replace(/^((?:XI|XII))\s*(?:[-–]\s*|\s+|\(\s*)(?:SCI(?:ENCE)?|ARTS?|HUMANITIES)\s*\)?$/i,(_,grade)=>grade.toUpperCase()).replace(/(?:\s*[-–]\s*|\s+)(?:SECTION\s*)?[A-DV]$/i,'').replace(/\s*\((?:A|B|C|D|V)\)$/i,'').trim();
 const displaySubject=v=>String(v||'').trim().replace(/\s+/g,' ');
 const norm=v=>{let s=displaySubject(v).toLowerCase();if(/^information technology(?:\s*[-–(]?\s*(?:it|bb)\s*\)?)?$/.test(s)||/^it(?:\s*[-–(]?\s*(?:it|bb)\s*\)?)?$/.test(s))return'it';if(/^maths?(?:\s*[-–(]?\s*bb\s*\)?)?$/.test(s))return'maths';return s.replace(/[^a-z0-9]+/g,'')};
 const sortClasses=(a,b)=>a.localeCompare(b,undefined,{numeric:true,sensitivity:'base'});
 const sortSubjects=(a,b)=>a.localeCompare(b,undefined,{numeric:true,sensitivity:'base'});
+function canonicalMaster(value){const classes={};for(const [raw,subjects] of Object.entries(value?.classes||{})){const c=base(raw);if(!c)continue;classes[c]=[...new Map([...(classes[c]||[]),...(subjects||[])].map(s=>[norm(s),displaySubject(s)])).values()].filter(Boolean).sort(sortSubjects)}return{classes}}
 function subjectsForClass(c){const wanted=base(c).toLowerCase(),key=Object.keys(master.classes||{}).find(k=>base(k).toLowerCase()===wanted);return key?[...(master.classes[key]||[])]:[]}
 
 function seedFromVisible(){
@@ -26,13 +27,13 @@ function seedFromVisible(){
     }
   }
   for(const c of Object.keys(classes))classes[c]=[...new Map(classes[c].map(s=>[norm(s),s])).values()].sort(sortSubjects);
-  return{classes}
+  return canonicalMaster({classes})
 }
 
 async function loadMaster(){
   try{
     const snap=await getDoc(doc(db,'examSchedules',CONFIG_ID));
-    if(snap.exists()&&snap.data()?.subjectMaster?.classes){master=JSON.parse(JSON.stringify(snap.data().subjectMaster));setStatus('Cloud subject master loaded. This is the one-time source used when examination classes are selected.');renderMaster();return}
+    if(snap.exists()&&snap.data()?.subjectMaster?.classes){master=canonicalMaster(snap.data().subjectMaster);setStatus('Cloud subject master loaded. Stream subjects are combined under Classes XI and XII for examination planning.');renderMaster();return}
   }catch(e){setStatus('Cloud subject master could not be read. A temporary master has been prepared from the active timetable. '+(e.message||e),'warn')}
   master=seedFromVisible();renderMaster();setStatus('No saved examination subject master was found. Review this imported starting list, edit it once, then click Save Subject Master.','warn')
 }
@@ -44,7 +45,7 @@ async function saveMaster(){
   const btn=$('saveExamSubjectMaster');if(btn)btn.disabled=true;
   setStatus('Saving the examination-only Subject Master to the cloud…');
   try{
-    const clean={};for(const c of Object.keys(master.classes||{}).sort(sortClasses)){const list=[...new Map((master.classes[c]||[]).map(s=>[norm(s),displaySubject(s)])).values()].filter(Boolean).sort(sortSubjects);if(list.length)clean[c]=list}
+    const clean={};for(const c of Object.keys(canonicalMaster(master).classes).sort(sortClasses)){const list=[...new Map((canonicalMaster(master).classes[c]||[]).map(s=>[norm(s),displaySubject(s)])).values()].filter(Boolean).sort(sortSubjects);if(list.length)clean[c]=list}
     master={classes:clean};
     const target=doc(db,'examSchedules',CONFIG_ID),savedAtMs=Date.now();
     await setDoc(target,{schemaVersion:2,configOnly:true,name:'Examination Subject Master',status:'draft',ownerUid:user.uid,ownerEmail:user.email||'',subjectMaster:master,updatedByUid:user.uid,updatedByEmail:user.email||'',updatedAt:serverTimestamp(),updatedAtMs:savedAtMs});
