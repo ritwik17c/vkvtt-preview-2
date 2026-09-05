@@ -1,6 +1,6 @@
 (()=>{
   const $=id=>document.getElementById(id);
-  let bypass=false,syncing=false,regenerating=false;
+  let bypass=false,syncing=false;
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function cls(v){let s=String(v||'').trim().replace(/\s+/g,' ');s=s.replace(/^((?:XI|XII))\s*(?:[-–]\s*|\s+|\(\s*)(?:SCI(?:ENCE)?|ARTS?|HUMANITIES)\s*\)?$/i,(_,grade)=>grade.toUpperCase()).replace(/(?:\s*[-–]\s*|\s+)(?:SECTION\s*)?[A-DV]$/i,'').replace(/\s*\((?:A|B|C|D|V)\)$/i,'');return s.trim()||String(v||'').trim()}
   function subj(v){let s=String(v||'').trim().replace(/\s+/g,' ');if(/^information technology(?:\s*[-–(]?\s*(?:it|bb)\s*\)?)?$/i.test(s)||/^it(?:\s*[-–(]?\s*(?:it|bb)\s*\)?)?$/i.test(s))return'IT';if(/^maths?(?:\s*[-–(]?\s*bb\s*\)?)$/i.test(s))return'Maths';if(/^hindi$/i.test(s))return'Hindi';return s}
@@ -61,30 +61,18 @@
     return true;
   }
   function statusMessage(html,kind='info'){const el=$('printableMatrixMsg');if(!el)return;el.className='notice '+kind;el.innerHTML=html}
-  function commitMatrixToRealTimetable(){
-    if(regenerating)return false;
-    const button=$('generateTimetable');if(!button||button.disabled)return false;
-    regenerating=true;
-    try{button.click();return true}finally{setTimeout(()=>{regenerating=false},250)}
-  }
-  function watchActualSave(){const node=$('saveState');if(!node)return;const obs=new MutationObserver(()=>{const text=node.textContent||'';if(/Cloud draft saved/i.test(text)){obs.disconnect();statusMessage('<b>Cloud draft saved.</b> Manual timetable assignments were committed to the real timetable and saved. Reopen this same draft to verify the round-trip.','success')}});obs.observe(node,{childList:true,subtree:true,characterData:true});setTimeout(()=>obs.disconnect(),12000)}
-  document.addEventListener('change',e=>{
-    if(!e.target.closest?.('#printableMatrixHost [data-matrix-class][data-matrix-date]'))return;
-    setTimeout(()=>{if(commitMatrixToRealTimetable())statusMessage('<b>Manual edit committed.</b> The real examination timetable has been rebuilt from this matrix and is ready to save.','info')},0);
-  });
+  function watchActualSave(){const node=$('saveState');if(!node)return;const obs=new MutationObserver(()=>{const text=node.textContent||'';if(/Cloud draft saved/i.test(text)){obs.disconnect();statusMessage('<b>Cloud draft saved.</b> Manual timetable choices were synchronised without regenerating the timetable.','success')}});obs.observe(node,{childList:true,subtree:true,characterData:true});setTimeout(()=>obs.disconnect(),12000)}
   document.addEventListener('click',async e=>{
     const btn=e.target.closest('#saveDraft');if(!btn||bypass||syncing)return;
     const desired=desiredSelection();if(!desired)return;
     e.preventDefault();e.stopImmediatePropagation();syncing=true;btn.disabled=true;
     try{
-      statusMessage('<b>Preparing cloud save…</b> Synchronising the manual timetable with the actual examination workspace.');
+      statusMessage('<b>Preparing cloud save…</b> Synchronising the manual timetable choices only.');
       await syncMajorState();
-      commitMatrixToRealTimetable();
-      await new Promise(r=>setTimeout(r,280));
-      statusMessage('<b>Workspace synchronised.</b> Saving the cloud draft now.');
+      statusMessage('<b>Workspace synchronised.</b> Saving the cloud draft without regenerating the timetable.');
       watchActualSave();
       bypass=true;btn.disabled=false;btn.click();bypass=false;
     }catch(err){btn.disabled=false;statusMessage('<b>Save stopped before cloud write.</b> '+esc(err?.message||err),'error')}
-    finally{setTimeout(()=>{syncing=false;btn.disabled=false},700)}
+    finally{setTimeout(()=>{syncing=false;btn.disabled=false},600)}
   },true);
 })();
