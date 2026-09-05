@@ -1,7 +1,7 @@
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js';
 import {getAuth,GoogleAuthProvider,signInWithPopup,onAuthStateChanged,setPersistence,browserLocalPersistence} from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js';
 import {getFirestore,doc,getDoc,collection,getDocs,setDoc,serverTimestamp,writeBatch} from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore-lite.js';
-import {candidateExamDates,createWorkspaceFromMaster,dayName,displayDate,generateExamTimetable,generateDutyRoster,validateExamTimetable,validateDutyRoster} from './exam-scheduler-core.js?v=1.1.0';
+import {candidateExamDates,createWorkspaceFromMaster,dayName,displayDate,generateExamTimetable,generateDutyRoster,validateExamTimetable,validateDutyRoster} from './exam-scheduler-core.js?v=1.2.0-double-booking';
 
 const firebaseConfig={apiKey:'AIzaSyDheZpyXghd1aQ9_RLhwpacVriG__wNZW4',authDomain:'vkv-nalbari-timetable.firebaseapp.com',projectId:'vkv-nalbari-timetable',storageBucket:'vkv-nalbari-timetable.firebasestorage.app',messagingSenderId:'791432856951',appId:'1:791432856951:web:61324065a54bef30f98d72'};
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),provider=new GoogleAuthProvider();setPersistence(auth,browserLocalPersistence).catch(()=>{});
@@ -115,8 +115,9 @@ function renderMasterSummary(){
 
 function renderSetup(){
   const workspace=state.workspace,settings=workspace.settings;
+  if(!$('allowDoubleBooking')){const label=document.createElement('label');label.className='checkLabel';label.innerHTML='<input id="allowDoubleBooking" type="checkbox"> Allow double booking <small>Up to two alternative papers for one class on the same date/session</small>';$('maxPerDay').closest('label')?.after(label)}
   $('workspaceName').value=workspace.name;$('workspaceDescription').value=workspace.description||'';$('sideName').textContent=workspace.name;
-  $('startDate').value=settings.startDate||'';$('endDate').value=settings.endDate||'';$('cadence').value=settings.cadence||'continuous';$('maxPerDay').value=settings.maxExamsPerClassPerDay||1;
+  $('startDate').value=settings.startDate||'';$('endDate').value=settings.endDate||'';$('cadence').value=settings.cadence||'continuous';$('maxPerDay').value=settings.allowDoubleBooking?Math.max(2,settings.maxExamsPerClassPerDay||2):(settings.maxExamsPerClassPerDay||1);$('allowDoubleBooking').checked=settings.allowDoubleBooking===true;
   $('excludedDates').value=(settings.excludedDates||[]).join(', ');$('customDates').value=(settings.customDates||[]).join(', ');
   $('weekdayChecks').innerHTML=WEEKDAYS.map(([number,name])=>`<label><input type="checkbox" data-weekday="${number}" ${(settings.excludedWeekdays||[]).map(Number).includes(Number(number))?'checked':''}> ${name}</label>`).join('');
   renderDatePreview();
@@ -125,12 +126,12 @@ function renderSetup(){
 function syncSetup(){
   const workspace=state.workspace,settings=workspace.settings;
   workspace.name=$('workspaceName').value.trim()||'Untitled Examination Schedule';workspace.description=$('workspaceDescription').value.trim();$('sideName').textContent=workspace.name;
-  settings.startDate=$('startDate').value;settings.endDate=$('endDate').value;settings.cadence=$('cadence').value;settings.maxExamsPerClassPerDay=Math.max(1,Number($('maxPerDay').value)||1);
+  settings.startDate=$('startDate').value;settings.endDate=$('endDate').value;settings.cadence=$('cadence').value;settings.allowDoubleBooking=$('allowDoubleBooking')?.checked===true;settings.maxExamsPerClassPerDay=settings.allowDoubleBooking?Math.max(2,Number($('maxPerDay').value)||2):Math.max(1,Number($('maxPerDay').value)||1);if(settings.allowDoubleBooking)$('maxPerDay').value=settings.maxExamsPerClassPerDay;
   settings.excludedDates=listValues($('excludedDates').value);settings.customDates=listValues($('customDates').value);settings.excludedWeekdays=[...document.querySelectorAll('[data-weekday]:checked')].map(item=>Number(item.dataset.weekday));
   renderDatePreview();markDirty();
 }
 
-['workspaceName','workspaceDescription','startDate','endDate','cadence','maxPerDay','excludedDates','customDates'].forEach(id=>$(id).addEventListener('change',syncSetup));
+['workspaceName','workspaceDescription','startDate','endDate','cadence','maxPerDay','excludedDates','customDates'].forEach(id=>$(id).addEventListener('change',syncSetup));document.addEventListener('change',e=>{if(e.target.id==='allowDoubleBooking')syncSetup()});
 $('weekdayChecks').addEventListener('change',syncSetup);
 
 function renderDatePreview(){
