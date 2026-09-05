@@ -80,24 +80,19 @@ function ensurePane(){
 }
 
 async function syncClassFromMaster(c){
-  const subjects=[...(master.classes?.[c]||[])];const desired=new Set(subjects.map(norm));if(!desired.size)return;
-  if(window.vkvExamWorkspace?.applySubjectMaster){window.vkvExamWorkspace.applySubjectMaster(c,subjects);setStatus(`Saved examination subjects imported for Class ${c}.`);return}
-  for(let step=0;step<60;step++){
-    const boxes=[...document.querySelectorAll(`#majorSubjectGrid [data-major-subject-class="${CSS.escape(c)}"]`)];if(!boxes.length)break;
-    const mismatch=boxes.find(x=>x.checked!==desired.has(norm(x.dataset.majorSubject)));
-    if(!mismatch)break;
-    mismatch.checked=desired.has(norm(mismatch.dataset.majorSubject));mismatch.dispatchEvent(new Event('change',{bubbles:true}));await wait(120)
-  }
-  const represented=new Set([...document.querySelectorAll(`#majorSubjectGrid [data-major-subject-class="${CSS.escape(c)}"]`)].map(x=>norm(x.dataset.majorSubject)));
-  const custom=window.vkvExamCustomSubjects;
-  if(custom?.addSubject){for(const s of master.classes?.[c]||[]){if(!represented.has(norm(s))){custom.addSubject(c,s);await wait(80)}}}
-  document.dispatchEvent(new CustomEvent('vkv-exam-subject-master-applied',{detail:{className:c,subjects:[...(master.classes?.[c]||[])]}}))
+  const subjects=[...(master.classes?.[c]||[])];if(!subjects.length)return false;
+  for(let step=0;step<60&&!window.vkvExamWorkspace?.applySubjectMaster;step++)await wait(100);
+  const apply=window.vkvExamWorkspace?.applySubjectMaster;
+  if(!apply){setStatus(`Class ${c} could not be imported because the examination workspace is not ready. Please reload this page and try again.`,'warn');return false}
+  const applied=apply(c,subjects);
+  if(!applied){setStatus(`The saved examination subjects for Class ${c} could not be imported.`,'warn');return false}
+  setStatus(`Saved examination subjects imported for Class ${c}.`);return true
 }
 
-async function applyToSelected(){
-  const selected=[...document.querySelectorAll('[data-major-class]:checked')].map(x=>base(x.dataset.majorClass)).filter(Boolean);if(!selected.length){alert('Select the examination class or classes first.');return}
+async function applyToSelected(silent=false){
+  const selected=[...document.querySelectorAll('[data-major-class]:checked')].map(x=>base(x.dataset.majorClass)).filter(Boolean);if(!selected.length){if(!silent)alert('Select the examination class or classes first.');return false}
   const btn=$('applyExamSubjectMaster');if(btn)btn.disabled=true;
-  try{for(const c of selected)await syncClassFromMaster(c);setStatus(`Master subjects applied to ${selected.length} selected class(es).`)}finally{if(btn)btn.disabled=false}
+  try{let applied=0;for(const c of selected)if(await syncClassFromMaster(c))applied++;if(applied===selected.length)setStatus(`Master subjects applied to ${applied} selected class(es).`);return applied===selected.length}finally{if(btn)btn.disabled=false}
 }
 
 function bind(){
@@ -106,7 +101,7 @@ function bind(){
   $('resetExamSubjectMaster')?.addEventListener('click',()=>{if(!confirm('Replace the unsaved master on this screen with subjects currently available in the active timetable?'))return;master=seedFromVisible();renderMaster();setStatus('Active timetable subjects loaded as a starting point. Review them and click Save Subject Master.','warn')});
   $('examSubjectMasterGrid')?.addEventListener('click',e=>{const a=e.target.closest('[data-master-add]'),ed=e.target.closest('[data-master-edit]'),del=e.target.closest('[data-master-delete]');if(a)return addSubject(base(a.dataset.masterAdd));if(ed)return editSubject(base(ed.dataset.masterEdit),Number(ed.dataset.masterIndex));if(del)return deleteSubject(base(del.dataset.masterDelete),Number(del.dataset.masterIndex))});
   const classPane=document.querySelector('[data-pane="majorClasses"] article.surface');if(classPane&&!$('applyExamSubjectMaster')){const bar=document.createElement('div');bar.className='notice info';bar.style.marginBottom='12px';bar.innerHTML='<b>Subjects come from Subject Setup.</b> Select a class and its saved examination subjects will be imported automatically. <button id="applyExamSubjectMaster" class="button" style="margin-left:8px">Apply Master to Selected Classes</button>';classPane.prepend(bar);$('applyExamSubjectMaster')?.addEventListener('click',applyToSelected)}
-  document.addEventListener('change',e=>{const box=e.target.closest?.('[data-major-class]');if(box?.checked){const c=base(box.dataset.majorClass);setTimeout(()=>syncClassFromMaster(c),180)}},true)
+  document.addEventListener('change',e=>{const box=e.target.closest?.('[data-major-class]');if(box?.checked){const c=base(box.dataset.majorClass);setTimeout(()=>syncClassFromMaster(c),350)}},true)
 }
 
 async function boot(){
@@ -114,6 +109,8 @@ async function boot(){
   bind();
   for(let i=0;i<40&&!document.querySelector('#majorSubjectGrid [data-major-subject]');i++)await wait(150);
   await loadMaster();
+  await wait(250);
+  await applyToSelected(true);
 }
 onAuthStateChanged(auth,user=>{signedInUser=user||null;if(user)boot()});
 window.vkvExamSubjectMaster={get:()=>JSON.parse(JSON.stringify(master)),getSubjects:c=>[...(master.classes?.[base(c)]||[])],applyToSelected};
