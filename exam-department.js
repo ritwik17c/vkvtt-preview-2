@@ -71,6 +71,20 @@ function renderAll(){
   renderMasterSummary();renderSetup();renderSessions();renderPapers();renderTeachers();renderTimetable();renderDuties();renderReview();renderWorkflow();
 }
 
+function examBaseClass(value){return String(value||'').trim().replace(/\s+/g,' ').replace(/(?:\s*[-–]\s*|\s+)(?:SECTION\s*)?[A-DV]$/i,'').replace(/\s*\((?:A|B|C|D|V)\)$/i,'').trim()}
+function examSubjectKey(value){const s=String(value||'').trim().toLowerCase().replace(/\s+/g,' ');if(['as','assamese'].includes(s))return'assamese';if(['eng','english'].includes(s))return'english';if(['sci','science'].includes(s))return'science';if(['ssc','social science'].includes(s))return'socialscience';if(['sans','sanskrit'].includes(s))return'sanskrit';if(/^information technology/.test(s)||/^it(?:\s|$)/.test(s))return'it';if(/^maths?(?:\s|$)/.test(s)||s==='mathematics')return'maths';return s.replace(/[^a-z0-9]+/g,'')}
+function examPaperId(className,subject){const part=value=>String(value||'').toUpperCase().replace(/[^A-Z0-9]+/g,'_').replace(/^_|_$/g,'').slice(0,36)||'ITEM';return'EXAM_MASTER_'+part(className)+'_'+part(subject)}
+function relatedTeacherCodes(source,subject){const wanted=examSubjectKey(subject),combined=wanted==='science'?new Set(['science','physics','phy','chemistry','chem','biology','bio']):wanted==='socialscience'?new Set(['socialscience','history','hist','geography','geo','economics','eco','politicalscience','polsci']):new Set([wanted]);return[...new Set(source.filter(p=>combined.has(examSubjectKey(p.subject))).flatMap(p=>p.teacherCodes||[]))]}
+function applyExaminationSubjectMaster(className,subjects){
+  if(!state.workspace)return false;const cls=examBaseClass(className),names=[...new Map((subjects||[]).map(value=>String(value||'').trim()).filter(Boolean).map(value=>[examSubjectKey(value),value])).values()];if(!cls||!names.length)return false;
+  const papers=state.workspace.papers||[],source=papers.filter(p=>!p.examMasterOnly&&examBaseClass(p.className)===cls);for(const paper of source)paper.included=false;
+  state.workspace.papers=papers.filter(p=>!(p.examMasterOnly&&examBaseClass(p.className)===cls));
+  for(const subject of names)state.workspace.papers.push({id:examPaperId(cls,subject),className:cls,subject,teacherCodes:relatedTeacherCodes(source,subject),included:true,roomId:cls,fixedDate:'',fixedSlotId:'',examMasterOnly:true,examSubjectMaster:true});
+  if(!(state.workspace.classes||[]).includes(cls))state.workspace.classes.push(cls);
+  state.workspace.timetable={events:[],unplaced:[],dates:[],slots:[]};state.workspace.duties={invigilation:[],relievers:[],unfilled:[]};renderAll();markDirty('Examination Subject Master applied; regenerate the timetable');document.dispatchEvent(new CustomEvent('vkv-exam-workspace-subjects-applied',{detail:{className:cls,subjects:names}}));return true
+}
+window.vkvExamWorkspace={applySubjectMaster:applyExaminationSubjectMaster};
+
 function renderMasterSummary(){
   const master=state.master||{},data=master.data&&typeof master.data==='object'?{...master,...master.data}:master,source=state.workspace.sourceSchedule||{};
   $('masterName').textContent=source.name||master.activeTimetableVersionName||'Activated Schedule';
