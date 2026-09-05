@@ -2,7 +2,7 @@ const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
 let dirty=false;
 const pending=new Map();
-function cls(v){let s=String(v||'').trim().replace(/\s+/g,' ');s=s.replace(/(?:\s*[-–]\s*|\s+)(?:SECTION\s*)?[A-DV]$/i,'').replace(/\s*\((?:A|B|C|D|V)\)$/i,'');return s.trim()||String(v||'').trim()}
+function cls(v){let s=String(v||'').trim().replace(/\s+/g,' ');s=s.replace(/^((?:XI|XII))\s*(?:[-–]\s*|\s+|\(\s*)(?:SCI(?:ENCE)?|ARTS?|HUMANITIES)\s*\)?$/i,(_,grade)=>grade.toUpperCase()).replace(/(?:\s*[-–]\s*|\s+)(?:SECTION\s*)?[A-DV]$/i,'').replace(/\s*\((?:A|B|C|D|V)\)$/i,'');return s.trim()||String(v||'').trim()}
 function subj(v){let s=String(v||'').trim().replace(/\s+/g,' ');if(/^information technology(?:\s*[-–(]?\s*(?:it|bb)\s*\)?)?$/i.test(s)||/^it(?:\s*[-–(]?\s*(?:it|bb)\s*\)?)?$/i.test(s))return'IT';if(/^maths?(?:\s*[-–(]?\s*bb\s*\)?)$/i.test(s))return'Maths';if(/^hindi$/i.test(s))return'Hindi';return s}
 function keySub(v){return subj(v).toLocaleLowerCase()}
 function iso(v){const x=String(v||'').trim(),m=x.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);return m?`${m[3]}-${String(m[2]).padStart(2,'0')}-${String(m[1]).padStart(2,'0')}`:/^\d{4}-\d{2}-\d{2}$/.test(x)?x:''}
