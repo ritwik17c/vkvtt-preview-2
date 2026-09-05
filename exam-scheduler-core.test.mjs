@@ -51,4 +51,18 @@ impossible.timetable=generateExamTimetable(impossible);
 assert.ok(impossible.timetable.unplaced.length>0);
 assert.equal(validateExamTimetable(impossible).valid,false);
 
+const selectedDatesOnly=createWorkspaceFromMaster(master);
+Object.assign(selectedDatesOnly.settings,{startDate:'2026-09-01',endDate:'2026-09-07',cadence:'custom',customDates:['2026-09-02','2026-09-05'],excludedWeekdays:[0]});
+selectedDatesOnly.timetable=generateExamTimetable(selectedDatesOnly);
+assert.ok(selectedDatesOnly.timetable.events.every(item=>['2026-09-02','2026-09-05'].includes(item.date)));
+assert.deepEqual(selectedDatesOnly.timetable.dates,['2026-09-02','2026-09-05']);
+
+const doubleBooked=createWorkspaceFromMaster(master);
+Object.assign(doubleBooked.settings,{startDate:'2026-09-01',endDate:'2026-09-01',cadence:'custom',customDates:['2026-09-01'],excludedWeekdays:[],allowDoubleBooking:true,maxExamsPerClassPerDay:2});
+doubleBooked.timetable=generateExamTimetable(doubleBooked);
+assert.equal(doubleBooked.timetable.events.length,4);
+assert.equal(doubleBooked.timetable.unplaced.length,0);
+assert.equal(validateExamTimetable(doubleBooked).valid,true);
+assert.ok([...new Set(doubleBooked.timetable.events.map(item=>item.className+'|'+item.date+'|'+item.slotId))].length<doubleBooked.timetable.events.length);
+
 console.log('exam-scheduler-core: all tests passed');
