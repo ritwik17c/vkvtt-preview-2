@@ -5,11 +5,11 @@ import{getFirestore,doc,getDoc,setDoc,serverTimestamp}from'https://www.gstatic.c
 const cfg={apiKey:'AIzaSyDheZpyXghd1aQ9_RLhwpacVriG__wNZW4',authDomain:'vkv-nalbari-timetable.firebaseapp.com',projectId:'vkv-nalbari-timetable',storageBucket:'vkv-nalbari-timetable.firebasestorage.app',messagingSenderId:'791432856951',appId:'1:791432856951:web:61324065a54bef30f98d72'};
 const app=getApps().length?getApp():initializeApp(cfg),auth=getAuth(app),db=getFirestore(app);
 const $=id=>document.getElementById(id),wait=ms=>new Promise(r=>setTimeout(r,ms));
-const CONFIG_ID='EXAM_SUBJECT_MASTER';
+const CONFIG_ID='EXAM_SUBJECT_MASTER_V2';
 let master={classes:{}};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const base=v=>String(v||'').trim().replace(/\s+/g,' ').replace(/(?:\s*[-–]\s*|\s+)(?:SECTION\s*)?[A-DV]$/i,'').replace(/\s*\((?:A|B|C|D|V)\)$/i,'').trim();
-const displaySubject=v=>{let s=String(v||'').trim().replace(/\s+/g,' ');if(/^information technology(?:\s*[-–(]?\s*(?:it|bb)\s*\)?)?$/i.test(s)||/^it(?:\s*[-–(]?\s*(?:it|bb)\s*\)?)?$/i.test(s))return'IT';if(/^maths?(?:\s*[-–(]?\s*bb\s*\)?)$/i.test(s))return'Maths';if(/^hindi$/i.test(s))return'Hindi';return s};
+const displaySubject=v=>{let s=String(v||'').trim().replace(/\s+/g,' ');if(/^information technology(?:\s*[-–(]?\s*(?:it|bb)\s*\)?)?$/i.test(s)||/^it(?:\s*[-–(]?\s*(?:it|bb)\s*\)?)?$/i.test(s))return'IT';if(/^maths?(?:\s*[-–(]?\s*bb\s*\)?)$/i.test(s))return'Maths';if(/^hindi$/i.test(s))return'Hindi';if(/^as$/i.test(s)||/^assamese$/i.test(s))return'Assamese';return s};
 const norm=v=>displaySubject(v).toLowerCase().replace(/[^a-z0-9]+/g,'');
 const sortClasses=(a,b)=>a.localeCompare(b,undefined,{numeric:true,sensitivity:'base'});
 const sortSubjects=(a,b)=>a.localeCompare(b,undefined,{numeric:true,sensitivity:'base'});
@@ -42,8 +42,11 @@ async function saveMaster(){
   try{
     const clean={};for(const c of Object.keys(master.classes||{}).sort(sortClasses)){const list=[...new Map((master.classes[c]||[]).map(s=>[norm(s),displaySubject(s)])).values()].filter(Boolean).sort(sortSubjects);if(list.length)clean[c]=list}
     master={classes:clean};
-    await setDoc(doc(db,'examSchedules',CONFIG_ID),{schemaVersion:1,configOnly:true,name:'Examination Subject Master',status:'draft',ownerUid:user.uid,ownerEmail:user.email||'',subjectMaster:master,updatedByUid:user.uid,updatedByEmail:user.email||'',updatedAt:serverTimestamp(),updatedAtMs:Date.now()},{merge:true});
-    renderMaster();setStatus('Subject Master saved. Future class selections will import these examination subjects.');
+    const target=doc(db,'examSchedules',CONFIG_ID),savedAtMs=Date.now();
+    await setDoc(target,{schemaVersion:2,configOnly:true,name:'Examination Subject Master',status:'draft',ownerUid:user.uid,ownerEmail:user.email||'',subjectMaster:master,updatedByUid:user.uid,updatedByEmail:user.email||'',updatedAt:serverTimestamp(),updatedAtMs:savedAtMs});
+    const verify=await getDoc(target),saved=verify.exists()?verify.data():null;
+    if(!saved||saved.updatedAtMs!==savedAtMs||JSON.stringify(saved.subjectMaster)!==JSON.stringify(master))throw new Error('Cloud verification failed. The saved record did not match the subjects on this screen.');
+    master=JSON.parse(JSON.stringify(saved.subjectMaster));renderMaster();setStatus('Subject Master saved and verified in the cloud. Future class selections will import these examination subjects.');
   }catch(e){setStatus('Could not save Subject Master: '+(e.message||e),'warn')}
   finally{if(btn)btn.disabled=false}
 }
