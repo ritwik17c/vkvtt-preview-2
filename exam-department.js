@@ -89,7 +89,21 @@ function applyExaminationSubjectMaster(className,subjects){
   if(!(state.workspace.classes||[]).includes(cls))state.workspace.classes.push(cls);
   state.workspace.timetable={events:[],unplaced:[],dates:[],slots:[]};state.workspace.duties={invigilation:[],relievers:[],unfilled:[]};renderAll();markDirty('Examination Subject Master applied; regenerate the timetable');document.dispatchEvent(new CustomEvent('vkv-exam-workspace-subjects-applied',{detail:{className:cls,subjects:names}}));return true
 }
-window.vkvExamWorkspace={applySubjectMaster:applyExaminationSubjectMaster};
+function installExaminationSubjectCatalogue(classes){
+  if(!state.workspace||!classes||typeof classes!=='object')return false;
+  const existing=state.workspace.papers||[],selected=new Set(existing.filter(p=>p.included!==false).map(p=>examBaseClass(p.className)+'|'+examSubjectKey(p.subject)));
+  const catalogue=[];
+  for(const [className,subjects] of Object.entries(classes)){
+    const cls=examBaseClass(className),source=existing.filter(p=>examBaseClass(p.className)===cls);
+    for(const subject of subjects||[]){
+      const name=String(subject||'').trim();if(!cls||!name)continue;
+      catalogue.push({id:examPaperId(cls,name),className:cls,subject:name,teacherCodes:relatedTeacherCodes(source,name),included:selected.has(cls+'|'+examSubjectKey(name)),roomId:cls,fixedDate:'',fixedSlotId:'',examMasterOnly:true,examSubjectMaster:true})
+    }
+  }
+  state.workspace.classes=[...new Set(catalogue.map(p=>p.className))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+  state.workspace.papers=catalogue;state.workspace.timetable={events:[],unplaced:[],dates:[],slots:[]};state.workspace.duties={invigilation:[],relievers:[],unfilled:[]};renderAll();document.dispatchEvent(new CustomEvent('vkv-exam-workspace-subjects-applied',{detail:{catalogue:true}}));return true
+}
+window.vkvExamWorkspace={applySubjectMaster:applyExaminationSubjectMaster,installSubjectCatalogue:installExaminationSubjectCatalogue};
 
 function renderMasterSummary(){
   const master=state.master||{},data=master.data&&typeof master.data==='object'?{...master,...master.data}:master,source=state.workspace.sourceSchedule||{};
@@ -123,7 +137,12 @@ function renderDatePreview(){
   const dates=candidateExamDates(state.workspace.settings),settings=state.workspace.settings;
   const sample=dates.slice(0,7).map(value=>displayDate(value)+' '+dayName(value)).join(' · ');
   showNotice('datePreview',dates.length?`<b>${dates.length} eligible examination date(s).</b> ${safe(sample)}${dates.length>7?' …':''}`:'<b>No eligible examination dates.</b> Check the date range, cadence and exclusions.',dates.length?'info':'warn');
+  if(!$('examDateChecks')){const wrap=document.createElement('div');wrap.className='surface';wrap.style.marginTop='12px';wrap.innerHTML='<h4 style="margin-top:0">Select Examination Dates</h4><p class="small">After choosing the date range, untick any date on which no examination will be held.</p><div id="examDateChecks"></div>';$('datePreview').after(wrap)}
+  const choices=candidateExamDates({...settings,cadence:'continuous',customDates:[]}),chosen=new Set(settings.cadence==='custom'?(settings.customDates||[]):choices);
+  $('examDateChecks').innerHTML=choices.length?`<div class="inlineChecks">${choices.map(value=>`<label><input type="checkbox" data-exam-date="${safe(value)}" ${chosen.has(value)?'checked':''}> ${safe(displayDate(value))} · ${safe(dayName(value))}</label>`).join('')}</div>`:'<span class="small">Select a valid start and end date to see date options.</span>';
 }
+
+document.addEventListener('change',event=>{if(!event.target.matches?.('[data-exam-date]'))return;const settings=state.workspace.settings;settings.cadence='custom';settings.customDates=[...document.querySelectorAll('[data-exam-date]:checked')].map(x=>x.dataset.examDate);$('cadence').value='custom';renderDatePreview();markDirty('Examination dates selected')});
 
 function renderSessions(){
   const options=state.workspace.slots;
