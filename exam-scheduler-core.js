@@ -121,11 +121,11 @@ export function generateExamTimetable(workspace={}){
   const bySubject=new Map();
   for(const paper of papers){const subjectKey=key(paper.subject);if(!bySubject.has(subjectKey))bySubject.set(subjectKey,[]);bySubject.get(subjectKey).push(paper)}
   const groups=[...bySubject.values()].sort((a,b)=>b.length-a.length||a[0].subject.localeCompare(b[0].subject));
-  const events=[],unplaced=[],classCell=new Set(),classDateCount=new Map(),dateLoad=new Map();
-  const canPlace=(paper,cell)=>(allowDouble||!classCell.has(paper.className+'|'+cellKey(cell.date,cell.slotId)))&&(classDateCount.get(paper.className+'|'+cell.date)||0)<maxPerDay;
+  const events=[],unplaced=[],classCellCount=new Map(),classDateCount=new Map(),dateLoad=new Map();
+  const canPlace=(paper,cell)=>(classCellCount.get(paper.className+'|'+cellKey(cell.date,cell.slotId))||0)<(allowDouble?2:1)&&(classDateCount.get(paper.className+'|'+cell.date)||0)<maxPerDay;
   const place=(paper,cell)=>{
     const event={id:'EXAM_'+idPart(paper.className)+'_'+idPart(paper.subject),paperId:paper.id,className:paper.className,subject:paper.subject,date:cell.date,day:dayName(cell.date),slotId:cell.slotId,teacherCodes:clone(paper.teacherCodes||[]),roomId:text(paper.roomId)||''};
-    events.push(event);classCell.add(paper.className+'|'+cellKey(cell.date,cell.slotId));const classDate=paper.className+'|'+cell.date;classDateCount.set(classDate,(classDateCount.get(classDate)||0)+1);dateLoad.set(cellKey(cell.date,cell.slotId),(dateLoad.get(cellKey(cell.date,cell.slotId))||0)+1);
+    events.push(event);const classCell=paper.className+'|'+cellKey(cell.date,cell.slotId);classCellCount.set(classCell,(classCellCount.get(classCell)||0)+1);const classDate=paper.className+'|'+cell.date;classDateCount.set(classDate,(classDateCount.get(classDate)||0)+1);dateLoad.set(cellKey(cell.date,cell.slotId),(dateLoad.get(cellKey(cell.date,cell.slotId))||0)+1);
   };
   for(const group of groups){
     const remaining=[...group];
