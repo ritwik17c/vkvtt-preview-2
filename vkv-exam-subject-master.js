@@ -6,7 +6,7 @@ const cfg={apiKey:'AIzaSyDheZpyXghd1aQ9_RLhwpacVriG__wNZW4',authDomain:'vkv-nalb
 const app=getApps().length?getApp():initializeApp(cfg),auth=getAuth(app),db=getFirestore(app);
 const $=id=>document.getElementById(id),wait=ms=>new Promise(r=>setTimeout(r,ms));
 const CONFIG_ID='EXAM_SUBJECT_MASTER';
-let master={classes:{}},signedInUser=null,saving=false;
+let master={classes:{}},signedInUser=null,saving=false,reconciling=false;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const base=v=>String(v||'').trim().replace(/\s+/g,' ').replace(/^((?:XI|XII))\s*(?:[-–]\s*|\s+|\(\s*)(?:SCI(?:ENCE)?|ARTS?|HUMANITIES)\s*\)?$/i,(_,grade)=>grade.toUpperCase()).replace(/(?:\s*[-–]\s*|\s+)(?:SECTION\s*)?[A-DV]$/i,'').replace(/\s*\((?:A|B|C|D|V)\)$/i,'').trim();
 const displaySubject=v=>String(v||'').trim().replace(/\s+/g,' ');
@@ -54,8 +54,8 @@ async function saveMaster(){
     const verify=await getDoc(target),saved=verify.exists()?verify.data():null;
     if(!saved||saved.updatedAtMs!==savedAtMs||JSON.stringify(saved.subjectMaster)!==JSON.stringify(master))throw new Error('Cloud verification failed. The saved record did not match the subjects on this screen.');
     master=canonicalMaster(saved.subjectMaster);renderMaster();
-    const refreshed=await applyToSelected(true);
-    if(refreshed){setStatus('Subject Master saved and verified. The currently selected examination classes and dropdowns were refreshed from the new master.');document.dispatchEvent(new CustomEvent('vkv-exam-subject-master-applied'))}
+    const refreshed=await ensureAuthoritative(true);
+    if(refreshed){setStatus('Subject Master saved and verified. Classes and subject dropdowns were refreshed from the saved master.');document.dispatchEvent(new CustomEvent('vkv-exam-subject-master-applied'))}
     else setStatus('Subject Master saved and verified in the cloud. Future class selections will import these examination subjects.');
   }catch(e){setStatus('Could not save Subject Master: '+(e.message||e),'warn')}
   finally{saving=false;if(btn)btn.disabled=false}
@@ -86,6 +86,21 @@ function ensurePane(){
   return true
 }
 
+function visibleCatalogue(){
+  const classes={};
+  for(const box of document.querySelectorAll('#majorSubjectGrid [data-major-subject]')){
+    const c=base(box.dataset.majorSubjectClass),s=displaySubject(box.dataset.majorSubject);if(!c||!s)continue;(classes[c]||(classes[c]=[])).push(s)
+  }
+  for(const c of Object.keys(classes))classes[c]=collapseCombinedSubjects(classes[c]);
+  return classes
+}
+function catalogueMatchesMaster(){
+  const expected=canonicalMaster(master).classes,actual=visibleCatalogue(),expectedClasses=Object.keys(expected).sort(sortClasses),actualClasses=Object.keys(actual).sort(sortClasses);
+  if(JSON.stringify(expectedClasses)!==JSON.stringify(actualClasses))return false;
+  for(const c of expectedClasses){const e=(expected[c]||[]).map(norm).sort(),a=(actual[c]||[]).map(norm).sort();if(JSON.stringify(e)!==JSON.stringify(a))return false}
+  return true
+}
+
 async function syncClassFromMaster(c){
   const subjects=subjectsForClass(c);if(!subjects.length){setStatus(`No saved examination subjects were found for Class ${c}.`,'warn');return false}
   for(let step=0;step<60&&!window.vkvExamWorkspace?.applySubjectMaster;step++)await wait(100);
@@ -106,6 +121,20 @@ async function installCatalogue(){
   const ok=install(master.classes||{});if(ok)setStatus('Saved Examination Subject Master loaded as the only class and subject catalogue.');return ok
 }
 
+async function ensureAuthoritative(force=false){
+  if(reconciling||!Object.keys(master.classes||{}).length)return false;
+  if(!force&&catalogueMatchesMaster())return true;
+  reconciling=true;
+  try{
+    const ok=await installCatalogue();if(!ok)return false;
+    await wait(180);
+    const verified=catalogueMatchesMaster();
+    setStatus(verified?'Saved Examination Subject Master imported and verified as the authoritative catalogue.':'The Subject Master was loaded, but the class-wise subject cards have not refreshed yet. Please reopen Classes/Subjects. ',verified?'info':'warn');
+    if(verified)document.dispatchEvent(new CustomEvent('vkv-exam-subject-master-applied'));
+    return verified
+  }finally{reconciling=false}
+}
+
 async function applyToSelected(silent=false){
   const selected=[...document.querySelectorAll('[data-major-class]:checked')].map(x=>base(x.dataset.majorClass)).filter(Boolean);if(!selected.length){if(!silent)alert('Select the examination class or classes first.');return false}
   const btn=$('applyExamSubjectMaster');if(btn)btn.disabled=true;
@@ -120,7 +149,8 @@ function bind(){
   const classPane=document.querySelector('[data-pane="majorClasses"] article.surface');if(classPane&&!$('applyExamSubjectMaster')){const bar=document.createElement('div');bar.className='notice info';bar.style.marginBottom='12px';bar.innerHTML='<b>Subjects come from Subject Setup.</b> Select a class and its saved examination subjects will be imported automatically. <button id="applyExamSubjectMaster" class="button" style="margin-left:8px">Apply Master to Selected Classes</button>';classPane.prepend(bar);$('applyExamSubjectMaster')?.addEventListener('click',applyToSelected)}
   document.addEventListener('change',e=>{const box=e.target.closest?.('[data-major-class]');if(box?.checked){const c=base(box.dataset.majorClass);setTimeout(()=>syncClassFromMaster(c),350)}},true)
   document.addEventListener('click',e=>{
-    if(e.target.closest?.('#newDraft,#goFreshExamSetup'))setTimeout(()=>installCatalogue(),50)
+    if(e.target.closest?.('#newDraft,#goFreshExamSetup,[data-open-cloud],[data-revise-cloud]'))setTimeout(()=>ensureAuthoritative(true),450);
+    if(e.target.closest?.('[data-pane-target="majorClasses"],[data-pane-target="subjects"]'))setTimeout(()=>ensureAuthoritative(false),100)
   },true)
 }
 
@@ -130,7 +160,8 @@ async function boot(){
   for(let i=0;i<40&&!document.querySelector('#majorSubjectGrid [data-major-subject]');i++)await wait(150);
   await loadMaster();
   await wait(250);
-  await installCatalogue();
+  await ensureAuthoritative(true);
+  for(const delay of[500,1200,2200])setTimeout(()=>ensureAuthoritative(false),delay)
 }
 onAuthStateChanged(auth,user=>{signedInUser=user||null;if(user)boot()});
-window.vkvExamSubjectMaster={get:()=>JSON.parse(JSON.stringify(master)),getSubjects:subjectsForClass,applyToSelected,installCatalogue};
+window.vkvExamSubjectMaster={get:()=>JSON.parse(JSON.stringify(master)),getSubjects:subjectsForClass,applyToSelected,installCatalogue,ensureAuthoritative};
