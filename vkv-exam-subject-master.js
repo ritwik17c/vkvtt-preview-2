@@ -94,6 +94,12 @@ async function syncClassFromMaster(c){
   setStatus(`Saved examination subjects imported and verified for Class ${c}.`);return true
 }
 
+async function installCatalogue(){
+  for(let step=0;step<60&&!window.vkvExamWorkspace?.installSubjectCatalogue;step++)await wait(100);
+  const install=window.vkvExamWorkspace?.installSubjectCatalogue;if(!install){setStatus('The examination workspace is not ready to load the saved subject catalogue.','warn');return false}
+  const ok=install(master.classes||{});if(ok)setStatus('Saved Examination Subject Master loaded as the only class and subject catalogue.');return ok
+}
+
 async function applyToSelected(silent=false){
   const selected=[...document.querySelectorAll('[data-major-class]:checked')].map(x=>base(x.dataset.majorClass)).filter(Boolean);if(!selected.length){if(!silent)alert('Select the examination class or classes first.');return false}
   const btn=$('applyExamSubjectMaster');if(btn)btn.disabled=true;
@@ -108,8 +114,7 @@ function bind(){
   const classPane=document.querySelector('[data-pane="majorClasses"] article.surface');if(classPane&&!$('applyExamSubjectMaster')){const bar=document.createElement('div');bar.className='notice info';bar.style.marginBottom='12px';bar.innerHTML='<b>Subjects come from Subject Setup.</b> Select a class and its saved examination subjects will be imported automatically. <button id="applyExamSubjectMaster" class="button" style="margin-left:8px">Apply Master to Selected Classes</button>';classPane.prepend(bar);$('applyExamSubjectMaster')?.addEventListener('click',applyToSelected)}
   document.addEventListener('change',e=>{const box=e.target.closest?.('[data-major-class]');if(box?.checked){const c=base(box.dataset.majorClass);setTimeout(()=>syncClassFromMaster(c),350)}},true)
   document.addEventListener('click',e=>{
-    if(e.target.closest?.('[data-open-cloud],[data-revise-cloud],#newDraft,#goFreshExamSetup'))setTimeout(()=>applyToSelected(true),700);
-    if(e.target.closest?.('[data-pane-target="majorClasses"],[data-pane-target="subjects"]'))setTimeout(()=>applyToSelected(true),220)
+    if(e.target.closest?.('[data-open-cloud],[data-revise-cloud],#newDraft,#goFreshExamSetup'))setTimeout(()=>installCatalogue(),700)
   },true)
 }
 
@@ -119,7 +124,7 @@ async function boot(){
   for(let i=0;i<40&&!document.querySelector('#majorSubjectGrid [data-major-subject]');i++)await wait(150);
   await loadMaster();
   await wait(250);
-  await applyToSelected(true);
+  await installCatalogue();
 }
 onAuthStateChanged(auth,user=>{signedInUser=user||null;if(user)boot()});
 window.vkvExamSubjectMaster={get:()=>JSON.parse(JSON.stringify(master)),getSubjects:subjectsForClass,applyToSelected};
