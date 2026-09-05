@@ -167,11 +167,17 @@ $('includeVisible').onclick=()=>setVisiblePapers(true);$('excludeVisible').oncli
 
 function renderTimetable(){
   const result=state.workspace.timetable||{events:[],unplaced:[]},validation=validateExamTimetable(state.workspace),events=result.events||[];
+  ensureUndoTimetableButton();
   $('examRows').innerHTML=events.length?events.map(item=>{const slot=slotById(item.slotId);return `<tr><td>${displayDate(item.date)}</td><td>${safe(item.day)}</td><td>${safe(slot?.name||item.slotId)}</td><td>${safe(timeText(slot))}</td><td><b>${safe(item.className)}</b></td><td>${safe(item.subject)}</td></tr>`}).join(''):'<tr><td colspan="6">No timetable generated.</td></tr>';
   $('timetableMetrics').innerHTML=[['Eligible dates',(result.dates||[]).length],['Included papers',validation.total],['Scheduled',validation.scheduled],['Unplaced',validation.unplaced]].map(([label,value])=>`<div class="metric"><strong>${value}</strong><span>${label}</span></div>`).join('');
   if(events.length)showNotice('timetableStatus',validation.valid?'<b>Timetable passes the current hard-rule checks.</b> Continue to staff availability and duty allocation.':'<b>Timetable needs attention.</b> '+validation.issues.map(item=>safe(item.message)).join(' '),validation.valid?'success':'error');
   else showNotice('timetableStatus','Complete Exam Setup and Subjects, then generate a draft timetable.','info');
   $('unplacedBlock').innerHTML=(result.unplaced||[]).length?`<div class="notice error"><b>Unscheduled papers</b><ul class="issueList">${result.unplaced.map(item=>`<li>${safe(item.className)} · ${safe(item.subject)} — ${safe(item.reason)}</li>`).join('')}</ul></div>`:'';
+}
+
+function ensureUndoTimetableButton(){
+  let button=$('undoGeneratedTimetable');if(!button){button=document.createElement('button');button.id='undoGeneratedTimetable';button.type='button';button.className='button';button.textContent='Undo Generated Timetable';$('generateTimetable')?.before(button);button.onclick=()=>{const hasGenerated=!!(state.workspace?.timetable?.events?.length||state.workspace?.timetable?.unplaced?.length);if(!hasGenerated)return;if(!confirm('Undo the generated examination timetable?\n\nSelected dates, classes, subjects and sessions will be kept. The duty allocation will also be cleared because it depends on this timetable.'))return;state.workspace.timetable={events:[],unplaced:[],dates:[],slots:[]};state.workspace.duties={invigilation:[],relievers:[],unfilled:[]};renderTimetable();renderDuties();renderReview();markDirty('Generated timetable undone; selections preserved')}}
+  const hasGenerated=!!(state.workspace?.timetable?.events?.length||state.workspace?.timetable?.unplaced?.length);button.hidden=!hasGenerated
 }
 $('generateTimetable').onclick=()=>{syncSetup();state.workspace.timetable=generateExamTimetable(state.workspace);state.workspace.duties={invigilation:[],relievers:[],unfilled:[]};renderTimetable();renderDuties();markDirty('Exam timetable generated');document.querySelector('[data-pane="timetable"]').scrollIntoView({behavior:'smooth'})};
 
