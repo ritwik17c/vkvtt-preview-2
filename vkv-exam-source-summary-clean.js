@@ -22,8 +22,15 @@
     return total||null;
   }
 
+  function classRank(value){
+    const raw=String(value||'').trim().toUpperCase().replace(/^CLASS\s*/,'').replace(/\s+/g,'');
+    const b=raw.match(/^B(?:ALVATIKA)?[-_ ]?([123])$/i);if(b)return Number(b[1]);
+    const rv=romanValue(raw);if(rv!=null)return 3+rv;
+    return null;
+  }
+
   function classCompare(a,b){
-    const av=romanValue(a),bv=romanValue(b);
+    const av=classRank(a),bv=classRank(b);
     if(av!=null&&bv!=null)return av-bv;
     if(av!=null)return -1;if(bv!=null)return 1;
     return String(a||'').localeCompare(String(b||''),undefined,{numeric:true,sensitivity:'base'});
