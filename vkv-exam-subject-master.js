@@ -9,7 +9,7 @@ const CONFIG_ID='EXAM_SUBJECT_MASTER';
 let master={classes:{}},signedInUser=null,saving=false;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const base=v=>String(v||'').trim().replace(/\s+/g,' ').replace(/(?:\s*[-–]\s*|\s+)(?:SECTION\s*)?[A-DV]$/i,'').replace(/\s*\((?:A|B|C|D|V)\)$/i,'').trim();
-const displaySubject=v=>{let s=String(v||'').trim().replace(/\s+/g,' ');if(/^information technology(?:\s*[-–(]?\s*(?:it|bb)\s*\)?)?$/i.test(s)||/^it(?:\s*[-–(]?\s*(?:it|bb)\s*\)?)?$/i.test(s))return'IT';if(/^maths?(?:\s*[-–(]?\s*bb\s*\)?)$/i.test(s))return'Maths';if(/^hindi$/i.test(s))return'Hindi';if(/^as$/i.test(s)||/^assamese$/i.test(s))return'Assamese';return s};
+const displaySubject=v=>{let s=String(v||'').trim().replace(/\s+/g,' ');if(/^information technology(?:\s*[-–(]?\s*(?:it|bb)\s*\)?)?$/i.test(s)||/^it(?:\s*[-–(]?\s*(?:it|bb)\s*\)?)?$/i.test(s))return'IT';if(/^maths?(?:\s*[-–(]?\s*bb\s*\)?)$/i.test(s))return'Maths';if(/^hindi$/i.test(s))return'Hindi';if(/^as$/i.test(s))return'Assamese';return s};
 const norm=v=>displaySubject(v).toLowerCase().replace(/[^a-z0-9]+/g,'');
 const sortClasses=(a,b)=>a.localeCompare(b,undefined,{numeric:true,sensitivity:'base'});
 const sortSubjects=(a,b)=>a.localeCompare(b,undefined,{numeric:true,sensitivity:'base'});
