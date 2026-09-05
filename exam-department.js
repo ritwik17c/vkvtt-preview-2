@@ -103,7 +103,7 @@ function installExaminationSubjectCatalogue(classes){
   state.workspace.classes=[...new Set(catalogue.map(p=>p.className))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
   state.workspace.papers=catalogue;state.workspace.timetable={events:[],unplaced:[],dates:[],slots:[]};state.workspace.duties={invigilation:[],relievers:[],unfilled:[]};renderAll();document.dispatchEvent(new CustomEvent('vkv-exam-workspace-subjects-applied',{detail:{catalogue:true}}));return true
 }
-window.vkvExamWorkspace={applySubjectMaster:applyExaminationSubjectMaster,installSubjectCatalogue:installExaminationSubjectCatalogue};
+window.vkvExamWorkspace={applySubjectMaster:applyExaminationSubjectMaster,installSubjectCatalogue:installExaminationSubjectCatalogue,undoTimetable:undoGeneratedTimetable};
 
 function renderMasterSummary(){
   const master=state.master||{},data=master.data&&typeof master.data==='object'?{...master,...master.data}:master,source=state.workspace.sourceSchedule||{};
@@ -178,9 +178,10 @@ function renderTimetable(){
 }
 
 function ensureUndoTimetableButton(){
-  let button=$('undoGeneratedTimetable');if(!button){button=document.createElement('button');button.id='undoGeneratedTimetable';button.type='button';button.className='button';button.textContent='Undo Generated Timetable';$('generateTimetable')?.before(button);button.onclick=()=>{const hasGenerated=!!(state.workspace?.timetable?.events?.length||state.workspace?.timetable?.unplaced?.length);if(!hasGenerated)return;if(!confirm('Undo the generated examination timetable?\n\nSelected dates, classes, subjects and sessions will be kept. The duty allocation will also be cleared because it depends on this timetable.'))return;state.workspace.timetable={events:[],unplaced:[],dates:[],slots:[]};state.workspace.duties={invigilation:[],relievers:[],unfilled:[]};renderTimetable();renderDuties();renderReview();markDirty('Generated timetable undone; selections preserved')}}
-  const hasGenerated=!!(state.workspace?.timetable?.events?.length||state.workspace?.timetable?.unplaced?.length);button.hidden=!hasGenerated
+  let button=$('undoGeneratedTimetable');if(!button){button=document.createElement('button');button.id='undoGeneratedTimetable';button.type='button';button.className='button';button.textContent='Undo Generated Timetable';$('generateTimetable')?.before(button);button.onclick=()=>undoGeneratedTimetable()}
+  const hasGenerated=!!(state.workspace?.timetable?.events?.length||state.workspace?.timetable?.unplaced?.length||(state.workspace?.papers||[]).some(p=>p.fixedDate||p.fixedSlotId));button.hidden=!hasGenerated
 }
+function undoGeneratedTimetable({ask=true}={}){const hasGenerated=!!(state.workspace?.timetable?.events?.length||state.workspace?.timetable?.unplaced?.length),hasAssignments=(state.workspace?.papers||[]).some(p=>p.fixedDate||p.fixedSlotId);if(!hasGenerated&&!hasAssignments){document.dispatchEvent(new CustomEvent('vkv-exam-timetable-undone'));return false}if(ask&&!confirm('Undo the generated examination timetable and its printable assignments?\n\nSelected examination dates, classes, subjects and sessions will be kept. Dependent duty allocations will be cleared.'))return false;state.workspace.timetable={events:[],unplaced:[],dates:[],slots:[]};state.workspace.duties={invigilation:[],relievers:[],unfilled:[]};for(const paper of state.workspace.papers||[]){paper.fixedDate='';paper.fixedSlotId=''}document.dispatchEvent(new CustomEvent('vkv-exam-timetable-undone'));renderPapers();renderTimetable();renderDuties();renderReview();markDirty('Generated timetable and printable assignments undone; selections preserved');return true}
 $('generateTimetable').onclick=()=>{syncSetup();state.workspace.timetable=generateExamTimetable(state.workspace);state.workspace.duties={invigilation:[],relievers:[],unfilled:[]};renderTimetable();renderDuties();markDirty('Exam timetable generated');document.querySelector('[data-pane="timetable"]').scrollIntoView({behavior:'smooth'})};
 
 function normalDate(value){const textValue=String(value||'').trim();let match=textValue.match(/^(\d{4})-(\d{2})-(\d{2})/);if(match)return match[1]+'-'+match[2]+'-'+match[3];match=textValue.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);return match?match[3]+'-'+String(match[2]).padStart(2,'0')+'-'+String(match[1]).padStart(2,'0'):''}
