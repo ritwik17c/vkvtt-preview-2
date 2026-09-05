@@ -63,5 +63,6 @@
   },true);
 
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&pending)runAutosave()});
+  document.addEventListener('vkv-exam-subject-master-applied',()=>schedule(1200));
   window.addEventListener('pagehide',()=>{if(pending)runAutosave()});
 })();
