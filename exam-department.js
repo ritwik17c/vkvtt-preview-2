@@ -137,12 +137,13 @@ function renderDatePreview(){
   const dates=candidateExamDates(state.workspace.settings),settings=state.workspace.settings;
   const sample=dates.slice(0,7).map(value=>displayDate(value)+' '+dayName(value)).join(' · ');
   showNotice('datePreview',dates.length?`<b>${dates.length} eligible examination date(s).</b> ${safe(sample)}${dates.length>7?' …':''}`:'<b>No eligible examination dates.</b> Check the date range, cadence and exclusions.',dates.length?'info':'warn');
-  if(!$('examDateChecks')){const wrap=document.createElement('div');wrap.className='surface';wrap.style.marginTop='12px';wrap.innerHTML='<h4 style="margin-top:0">Select Examination Dates</h4><p class="small">After choosing the date range, untick any date on which no examination will be held.</p><div id="examDateChecks"></div>';$('datePreview').after(wrap)}
+  if(!$('examDateChecks')){const wrap=document.createElement('div');wrap.className='surface';wrap.style.marginTop='12px';wrap.innerHTML='<div class="sectionTitle"><div><h4 style="margin:0">Select Examination Dates</h4><p class="small">After choosing the date range, tick only the dates on which examinations will be held.</p></div><div class="buttonRow"><button type="button" class="button" id="selectAllExamDates">Select All</button><button type="button" class="button" id="clearAllExamDates">Clear All</button></div></div><div id="examDateChecks"></div>';$('datePreview').after(wrap)}
   const choices=candidateExamDates({...settings,cadence:'continuous',customDates:[]}),chosen=new Set(settings.cadence==='custom'?(settings.customDates||[]):choices);
   $('examDateChecks').innerHTML=choices.length?`<div class="inlineChecks">${choices.map(value=>`<label><input type="checkbox" data-exam-date="${safe(value)}" ${chosen.has(value)?'checked':''}> ${safe(displayDate(value))} · ${safe(dayName(value))}</label>`).join('')}</div>`:'<span class="small">Select a valid start and end date to see date options.</span>';
 }
 
 document.addEventListener('change',event=>{if(!event.target.matches?.('[data-exam-date]'))return;const settings=state.workspace.settings;settings.cadence='custom';settings.customDates=[...document.querySelectorAll('[data-exam-date]:checked')].map(x=>x.dataset.examDate);$('cadence').value='custom';renderDatePreview();markDirty('Examination dates selected')});
+document.addEventListener('click',event=>{const all=event.target.closest?.('#selectAllExamDates'),none=event.target.closest?.('#clearAllExamDates');if(!all&&!none)return;const settings=state.workspace.settings,boxes=[...document.querySelectorAll('[data-exam-date]')];settings.cadence='custom';settings.customDates=all?boxes.map(x=>x.dataset.examDate):[];$('cadence').value='custom';renderDatePreview();markDirty(all?'All eligible examination dates selected':'Examination dates cleared')});
 
 function renderSessions(){
   const options=state.workspace.slots;
