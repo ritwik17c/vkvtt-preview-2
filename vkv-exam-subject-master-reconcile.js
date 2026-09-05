@@ -12,6 +12,35 @@ function sameCatalogue(a,b){if(a.size!==b.size)return false;for(const [cls,subs]
 function captureSelected(){const out=new Map();for(const box of document.querySelectorAll('[data-major-subject]:checked')){const cls=baseClass(box.dataset.majorSubjectClass),sub=subjectText(box.dataset.majorSubject);if(!cls||!sub)continue;if(!out.has(cls))out.set(cls,[]);out.get(cls).push(sub)}return out}
 function wantedFromOld(masterSubject,oldSubjects){const wanted=subjectKeys(masterSubject);for(const old of oldSubjects||[]){const oldKeys=subjectKeys(old);for(const k of oldKeys)if(wanted.has(k))return true}return false}
 function selectedClasses(){return new Set([...document.querySelectorAll('[data-major-class]:checked')].map(b=>baseClass(b.dataset.majorClass)).filter(Boolean))}
+function dispatch(el,type='change'){el?.dispatchEvent(new Event(type,{bubbles:true}))}
+function allRawClasses(){return [...(document.getElementById('paperClassFilter')?.options||[])].map(o=>o.value).filter(Boolean)}
+function paperState(){
+  const filter=document.getElementById('paperClassFilter'),search=document.getElementById('paperSearch');if(!filter||!search)return[];
+  const oldF=filter.value,oldS=search.value,out=[];search.value='';dispatch(search,'input');
+  for(const raw of allRawClasses()){
+    filter.value=raw;dispatch(filter);
+    for(const tr of document.querySelectorAll('#paperRows tr[data-paper]'))out.push({className:baseClass(tr.cells?.[1]?.textContent||raw),subject:subjectText(tr.cells?.[2]?.textContent||''),fixedDate:tr.querySelector('[data-paper-field="fixedDate"]')?.value||'',fixedSlotId:tr.querySelector('[data-paper-field="fixedSlotId"]')?.value||'',roomId:tr.querySelector('[data-paper-field="roomId"]')?.value||''});
+  }
+  filter.value=oldF;dispatch(filter);search.value=oldS;dispatch(search,'input');return out
+}
+function findOldAssignment(oldList,className,subject){const candidates=oldList.filter(x=>x.className===className),wanted=subjectKeys(subject);let exact=candidates.find(x=>subjectKey(x.subject)===subjectKey(subject));if(exact)return exact;return candidates.find(x=>{const keys=subjectKeys(x.subject);for(const k of keys)if(wanted.has(k))return true;return false})||null}
+async function restorePaperState(oldList){
+  if(!oldList?.length)return 0;const filter=document.getElementById('paperClassFilter'),search=document.getElementById('paperSearch');if(!filter||!search)return 0;
+  const oldF=filter.value,oldS=search.value;let restored=0;search.value='';dispatch(search,'input');
+  for(const raw of allRawClasses()){
+    filter.value=raw;dispatch(filter);
+    for(const tr of [...document.querySelectorAll('#paperRows tr[data-paper]')]){
+      const className=baseClass(tr.cells?.[1]?.textContent||raw),subject=subjectText(tr.cells?.[2]?.textContent||''),old=findOldAssignment(oldList,className,subject);if(!old)continue;
+      const room=tr.querySelector('[data-paper-field="roomId"]'),date=tr.querySelector('[data-paper-field="fixedDate"]'),slot=tr.querySelector('[data-paper-field="fixedSlotId"]');let changed=false;
+      if(room&&old.roomId&&room.value!==old.roomId){room.value=old.roomId;dispatch(room);changed=true}
+      if(date&&old.fixedDate&&date.value!==old.fixedDate){date.value=old.fixedDate;dispatch(date);changed=true}
+      const current=document.querySelector(`#paperRows tr[data-paper="${CSS.escape(tr.dataset.paper)}"]`)||tr,currentSlot=current.querySelector('[data-paper-field="fixedSlotId"]')||slot;
+      if(currentSlot&&old.fixedSlotId&&currentSlot.value!==old.fixedSlotId){currentSlot.value=old.fixedSlotId;dispatch(currentSlot);changed=true}
+      if(changed)restored++;
+    }
+  }
+  filter.value=oldF;dispatch(filter);search.value=oldS;dispatch(search,'input');return restored
+}
 function autoSelectCombinedForSelectedClasses(){
   const classes=selectedClasses();let changed=0;
   for(const box of document.querySelectorAll('[data-major-subject]:not(:checked)')){
@@ -24,18 +53,21 @@ function autoSelectCombinedForSelectedClasses(){
 async function migrateRestoredWorkspace(){
   for(let i=0;i<30&&(!window.vkvExamSubjectMaster?.installCatalogue||!document.querySelector('[data-major-subject]'));i++)await wait(50);
   const master=masterCatalogue();if(!master.size)return;
-  const current=visibleCatalogue(),alreadyCurrent=sameCatalogue(master,current),selected=captureSelected();
+  const current=visibleCatalogue(),alreadyCurrent=sameCatalogue(master,current),selected=captureSelected(),assignments=paperState();
+  let restoredAssignments=0;
   if(!alreadyCurrent){
     const ok=await window.vkvExamSubjectMaster.installCatalogue();if(!ok)return;
-    await wait(100);
+    await wait(120);
     for(const box of document.querySelectorAll('[data-major-subject]')){
       const cls=baseClass(box.dataset.majorSubjectClass),sub=subjectText(box.dataset.majorSubject),old=selected.get(cls)||[];
       const should=old.length?wantedFromOld(sub,old):false;
       if(box.checked!==should){box.checked=should;box.dispatchEvent(new Event('change',{bubbles:true}))}
     }
+    await wait(120);restoredAssignments=await restorePaperState(assignments);
   }
   const combinedFixed=autoSelectCombinedForSelectedClasses();
-  const status=document.getElementById('examSubjectMasterStatus');if(status){status.className='notice info';status.textContent=combinedFixed?'Saved Examination Subject Master imported. Combined subjects were selected automatically for the selected classes.':'Saved draft subjects match the current Examination Subject Master.'}
+  const status=document.getElementById('examSubjectMasterStatus');if(status){status.className='notice info';status.textContent=restoredAssignments?`Saved Examination Subject Master imported. ${restoredAssignments} saved timetable assignment(s), including date/session slots, were restored.`:combinedFixed?'Saved Examination Subject Master imported. Combined subjects were selected automatically for the selected classes.':'Saved draft subjects match the current Examination Subject Master.'}
+  if(restoredAssignments)document.dispatchEvent(new CustomEvent('vkv-exam-saved-slots-restored',{detail:{count:restoredAssignments}}));
   document.dispatchEvent(new CustomEvent('vkv-exam-subject-master-applied'));
 }
 
