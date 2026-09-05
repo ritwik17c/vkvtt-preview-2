@@ -6,7 +6,7 @@ const cfg={apiKey:'AIzaSyDheZpyXghd1aQ9_RLhwpacVriG__wNZW4',authDomain:'vkv-nalb
 const app=getApps().length?getApp():initializeApp(cfg),auth=getAuth(app),db=getFirestore(app);
 const $=id=>document.getElementById(id),wait=ms=>new Promise(r=>setTimeout(r,ms));
 const CONFIG_ID='EXAM_SUBJECT_MASTER_V2';
-let master={classes:{}};
+let master={classes:{}},signedInUser=null,saving=false;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const base=v=>String(v||'').trim().replace(/\s+/g,' ').replace(/(?:\s*[-–]\s*|\s+)(?:SECTION\s*)?[A-DV]$/i,'').replace(/\s*\((?:A|B|C|D|V)\)$/i,'').trim();
 const displaySubject=v=>{let s=String(v||'').trim().replace(/\s+/g,' ');if(/^information technology(?:\s*[-–(]?\s*(?:it|bb)\s*\)?)?$/i.test(s)||/^it(?:\s*[-–(]?\s*(?:it|bb)\s*\)?)?$/i.test(s))return'IT';if(/^maths?(?:\s*[-–(]?\s*bb\s*\)?)$/i.test(s))return'Maths';if(/^hindi$/i.test(s))return'Hindi';if(/^as$/i.test(s)||/^assamese$/i.test(s))return'Assamese';return s};
@@ -37,8 +37,11 @@ async function loadMaster(){
 }
 
 async function saveMaster(){
-  const user=auth.currentUser;if(!user)return;
+  const user=signedInUser||auth.currentUser;
+  if(!user){setStatus('Your sign-in session is not available. Please reopen the Examination Module and sign in again.','warn');return}
+  if(saving)return;saving=true;
   const btn=$('saveExamSubjectMaster');if(btn)btn.disabled=true;
+  setStatus('Saving the examination-only Subject Master to the cloud…');
   try{
     const clean={};for(const c of Object.keys(master.classes||{}).sort(sortClasses)){const list=[...new Map((master.classes[c]||[]).map(s=>[norm(s),displaySubject(s)])).values()].filter(Boolean).sort(sortSubjects);if(list.length)clean[c]=list}
     master={classes:clean};
@@ -48,7 +51,7 @@ async function saveMaster(){
     if(!saved||saved.updatedAtMs!==savedAtMs||JSON.stringify(saved.subjectMaster)!==JSON.stringify(master))throw new Error('Cloud verification failed. The saved record did not match the subjects on this screen.');
     master=JSON.parse(JSON.stringify(saved.subjectMaster));renderMaster();setStatus('Subject Master saved and verified in the cloud. Future class selections will import these examination subjects.');
   }catch(e){setStatus('Could not save Subject Master: '+(e.message||e),'warn')}
-  finally{if(btn)btn.disabled=false}
+  finally{saving=false;if(btn)btn.disabled=false}
 }
 
 function setStatus(text,type='info'){const el=$('examSubjectMasterStatus');if(!el)return;el.className='notice '+(type==='warn'?'warn':'info');el.textContent=text}
@@ -69,7 +72,7 @@ function ensurePane(){
   let b=nav.querySelector('[data-pane-target="examSubjectMaster"]');
   if(!b){b=document.createElement('button');b.className='navButton';b.dataset.paneTarget='examSubjectMaster';b.innerHTML='<span>2</span> Subject Setup';classNav.before(b)}
   let pane=workspace.querySelector('[data-pane="examSubjectMaster"]');
-  if(!pane){pane=document.createElement('section');pane.className='pane';pane.dataset.pane='examSubjectMaster';pane.innerHTML=`<div class="paneHead"><div><div class="eyebrow">One-time examination master</div><h2>Subject Setup</h2><p>Add, edit or delete the examination subjects for each class here. This master is independent of the school timetable.</p></div><button id="saveExamSubjectMaster" class="button primary large">Save Subject Master</button></div><div id="examSubjectMasterStatus" class="notice info">Loading examination subject master…</div><article class="surface"><div class="sectionTitle"><div><h3>Class-wise Examination Subjects</h3><p>Do this setup once. When a class is selected for an examination, its subjects will be imported from this master.</p></div><button id="resetExamSubjectMaster" class="button">Reload from Active Timetable</button></div><div class="notice info"><b>Important:</b> deleting a subject here removes only that one master subject. It does not trigger deletion of any other subject.</div><div id="examSubjectMasterGrid"></div></article>`;const classPane=workspace.querySelector('[data-pane="majorClasses"]');classPane.before(pane)}
+  if(!pane){pane=document.createElement('section');pane.className='pane';pane.dataset.pane='examSubjectMaster';pane.innerHTML=`<div class="paneHead"><div><div class="eyebrow">One-time examination master</div><h2>Subject Setup</h2><p>Add, edit or delete the examination subjects for each class here. This examination-only master is independent of the school timetable and never changes the activated Master Timetable.</p></div><button id="saveExamSubjectMaster" class="button primary large">Save Subject Master</button></div><div id="examSubjectMasterStatus" class="notice info">Loading examination subject master…</div><article class="surface"><div class="sectionTitle"><div><h3>Class-wise Examination Subjects</h3><p>Do this setup once. When a class is selected for an examination, its subjects will be imported from this master.</p></div><button id="resetExamSubjectMaster" class="button">Reload from Active Timetable</button></div><div class="notice info"><b>Important:</b> deleting a subject here removes only that one master subject. It does not trigger deletion of any other subject.</div><div id="examSubjectMasterGrid"></div></article>`;const classPane=workspace.querySelector('[data-pane="majorClasses"]');classPane.before(pane)}
   const oldSubjects=nav.querySelector('[data-pane-target="subjects"]');if(oldSubjects){const span=oldSubjects.querySelector('span');oldSubjects.childNodes.forEach(n=>{if(n.nodeType===Node.TEXT_NODE)n.nodeValue=' Imported Subjects'});if(span)span.textContent=span.textContent}
   [...nav.querySelectorAll('.navButton')].forEach((x,i)=>{const n=x.querySelector('span');if(n)n.textContent=String(i+1)});
   if(!$('examSubjectMasterHideOldAdd')){const st=document.createElement('style');st.id='examSubjectMasterHideOldAdd';st.textContent='[data-exam-subject-add-box]{display:none!important}';document.head.appendChild(st)}
@@ -97,7 +100,8 @@ async function applyToSelected(){
 }
 
 function bind(){
-  $('saveExamSubjectMaster')?.addEventListener('click',saveMaster);
+  const saveBtn=$('saveExamSubjectMaster');
+  if(saveBtn){saveBtn.type='button';saveBtn.onclick=e=>{e.preventDefault();saveMaster()}}
   $('resetExamSubjectMaster')?.addEventListener('click',()=>{if(!confirm('Replace the unsaved master on this screen with subjects currently available in the active timetable?'))return;master=seedFromVisible();renderMaster();setStatus('Active timetable subjects loaded as a starting point. Review them and click Save Subject Master.','warn')});
   $('examSubjectMasterGrid')?.addEventListener('click',e=>{const a=e.target.closest('[data-master-add]'),ed=e.target.closest('[data-master-edit]'),del=e.target.closest('[data-master-delete]');if(a)return addSubject(base(a.dataset.masterAdd));if(ed)return editSubject(base(ed.dataset.masterEdit),Number(ed.dataset.masterIndex));if(del)return deleteSubject(base(del.dataset.masterDelete),Number(del.dataset.masterIndex))});
   const classPane=document.querySelector('[data-pane="majorClasses"] article.surface');if(classPane&&!$('applyExamSubjectMaster')){const bar=document.createElement('div');bar.className='notice info';bar.style.marginBottom='12px';bar.innerHTML='<b>Subjects come from Subject Setup.</b> Select a class and its saved examination subjects will be imported automatically. <button id="applyExamSubjectMaster" class="button" style="margin-left:8px">Apply Master to Selected Classes</button>';classPane.prepend(bar);$('applyExamSubjectMaster')?.addEventListener('click',applyToSelected)}
@@ -111,5 +115,5 @@ async function boot(){
   await loadMaster();
   document.addEventListener('click',e=>{if(e.target.closest('[data-pane-target="outputs"]'))setTimeout(()=>{document.querySelector(`[data-open-cloud="${CONFIG_ID}"]`)?.closest('.draftCard,article,div')?.setAttribute('hidden','')},120)},true)
 }
-onAuthStateChanged(auth,user=>{if(user)boot()});
+onAuthStateChanged(auth,user=>{signedInUser=user||null;if(user)boot()});
 window.vkvExamSubjectMaster={get:()=>JSON.parse(JSON.stringify(master)),getSubjects:c=>[...(master.classes?.[base(c)]||[])],applyToSelected};
