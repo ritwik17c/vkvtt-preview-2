@@ -114,7 +114,7 @@ function bind(){
   const classPane=document.querySelector('[data-pane="majorClasses"] article.surface');if(classPane&&!$('applyExamSubjectMaster')){const bar=document.createElement('div');bar.className='notice info';bar.style.marginBottom='12px';bar.innerHTML='<b>Subjects come from Subject Setup.</b> Select a class and its saved examination subjects will be imported automatically. <button id="applyExamSubjectMaster" class="button" style="margin-left:8px">Apply Master to Selected Classes</button>';classPane.prepend(bar);$('applyExamSubjectMaster')?.addEventListener('click',applyToSelected)}
   document.addEventListener('change',e=>{const box=e.target.closest?.('[data-major-class]');if(box?.checked){const c=base(box.dataset.majorClass);setTimeout(()=>syncClassFromMaster(c),350)}},true)
   document.addEventListener('click',e=>{
-    if(e.target.closest?.('[data-open-cloud],[data-revise-cloud],#newDraft,#goFreshExamSetup'))setTimeout(()=>installCatalogue(),700)
+    if(e.target.closest?.('#newDraft,#goFreshExamSetup'))setTimeout(()=>installCatalogue(),50)
   },true)
 }
 
@@ -127,4 +127,4 @@ async function boot(){
   await installCatalogue();
 }
 onAuthStateChanged(auth,user=>{signedInUser=user||null;if(user)boot()});
-window.vkvExamSubjectMaster={get:()=>JSON.parse(JSON.stringify(master)),getSubjects:subjectsForClass,applyToSelected};
+window.vkvExamSubjectMaster={get:()=>JSON.parse(JSON.stringify(master)),getSubjects:subjectsForClass,applyToSelected,installCatalogue};
