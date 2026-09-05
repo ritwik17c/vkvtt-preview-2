@@ -51,7 +51,10 @@ async function saveMaster(){
     await setDoc(target,{schemaVersion:2,configOnly:true,name:'Examination Subject Master',status:'draft',ownerUid:user.uid,ownerEmail:user.email||'',subjectMaster:master,updatedByUid:user.uid,updatedByEmail:user.email||'',updatedAt:serverTimestamp(),updatedAtMs:savedAtMs});
     const verify=await getDoc(target),saved=verify.exists()?verify.data():null;
     if(!saved||saved.updatedAtMs!==savedAtMs||JSON.stringify(saved.subjectMaster)!==JSON.stringify(master))throw new Error('Cloud verification failed. The saved record did not match the subjects on this screen.');
-    master=JSON.parse(JSON.stringify(saved.subjectMaster));renderMaster();setStatus('Subject Master saved and verified in the cloud. Future class selections will import these examination subjects.');
+    master=canonicalMaster(saved.subjectMaster);renderMaster();
+    const refreshed=await applyToSelected(true);
+    if(refreshed){setStatus('Subject Master saved and verified. The currently selected examination classes and dropdowns were refreshed from the new master.');document.dispatchEvent(new CustomEvent('vkv-exam-subject-master-applied'))}
+    else setStatus('Subject Master saved and verified in the cloud. Future class selections will import these examination subjects.');
   }catch(e){setStatus('Could not save Subject Master: '+(e.message||e),'warn')}
   finally{saving=false;if(btn)btn.disabled=false}
 }
