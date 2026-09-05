@@ -113,7 +113,6 @@ async function boot(){
   bind();
   for(let i=0;i<40&&!document.querySelector('#majorSubjectGrid [data-major-subject]');i++)await wait(150);
   await loadMaster();
-  document.addEventListener('click',e=>{if(e.target.closest('[data-pane-target="outputs"]'))setTimeout(()=>{document.querySelector(`[data-open-cloud="${CONFIG_ID}"]`)?.closest('.draftCard,article,div')?.setAttribute('hidden','')},120)},true)
 }
 onAuthStateChanged(auth,user=>{signedInUser=user||null;if(user)boot()});
 window.vkvExamSubjectMaster={get:()=>JSON.parse(JSON.stringify(master)),getSubjects:c=>[...(master.classes?.[base(c)]||[])],applyToSelected};
