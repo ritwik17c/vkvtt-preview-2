@@ -117,12 +117,12 @@ export function generateExamTimetable(workspace={}){
   const papers=(workspace.papers||[]).filter(item=>item.included!==false).map(clone);
   const dates=candidateExamDates(workspace.settings||{}),slots=normalizedSlots(workspace);
   const cells=dates.flatMap(date=>slots.map(slot=>({date,slotId:slot.id})));
-  const maxPerDay=Math.max(1,Number(workspace.settings?.maxExamsPerClassPerDay)||1);
+  const allowDouble=workspace.settings?.allowDoubleBooking===true,maxPerDay=allowDouble?Math.max(2,Number(workspace.settings?.maxExamsPerClassPerDay)||2):Math.max(1,Number(workspace.settings?.maxExamsPerClassPerDay)||1);
   const bySubject=new Map();
   for(const paper of papers){const subjectKey=key(paper.subject);if(!bySubject.has(subjectKey))bySubject.set(subjectKey,[]);bySubject.get(subjectKey).push(paper)}
   const groups=[...bySubject.values()].sort((a,b)=>b.length-a.length||a[0].subject.localeCompare(b[0].subject));
   const events=[],unplaced=[],classCell=new Set(),classDateCount=new Map(),dateLoad=new Map();
-  const canPlace=(paper,cell)=>!classCell.has(paper.className+'|'+cellKey(cell.date,cell.slotId))&&(classDateCount.get(paper.className+'|'+cell.date)||0)<maxPerDay;
+  const canPlace=(paper,cell)=>(allowDouble||!classCell.has(paper.className+'|'+cellKey(cell.date,cell.slotId)))&&(classDateCount.get(paper.className+'|'+cell.date)||0)<maxPerDay;
   const place=(paper,cell)=>{
     const event={id:'EXAM_'+idPart(paper.className)+'_'+idPart(paper.subject),paperId:paper.id,className:paper.className,subject:paper.subject,date:cell.date,day:dayName(cell.date),slotId:cell.slotId,teacherCodes:clone(paper.teacherCodes||[]),roomId:text(paper.roomId)||''};
     events.push(event);classCell.add(paper.className+'|'+cellKey(cell.date,cell.slotId));const classDate=paper.className+'|'+cell.date;classDateCount.set(classDate,(classDateCount.get(classDate)||0)+1);dateLoad.set(cellKey(cell.date,cell.slotId),(dateLoad.get(cellKey(cell.date,cell.slotId))||0)+1);
@@ -151,7 +151,7 @@ export function validateExamTimetable(workspace={}){
     eventByPaper.set(event.paperId,event);
   }
   for(const paper of included)if(!eventByPaper.has(paper.id))issues.push({level:'error',code:'UNPLACED_PAPER',message:paper.className+' · '+paper.subject+' is not scheduled.'});
-  const maxPerDay=Math.max(1,Number(workspace.settings?.maxExamsPerClassPerDay)||1),counts=new Map();
+  const maxPerDay=workspace.settings?.allowDoubleBooking===true?Math.max(2,Number(workspace.settings?.maxExamsPerClassPerDay)||2):Math.max(1,Number(workspace.settings?.maxExamsPerClassPerDay)||1),counts=new Map();
   for(const event of result.events||[]){const k=event.className+'|'+event.date;counts.set(k,(counts.get(k)||0)+1)}
   for(const [k,count] of counts)if(count>maxPerDay)issues.push({level:'error',code:'CLASS_DAILY_LIMIT',message:k.replace('|',' on ')+' has '+count+' examinations; the limit is '+maxPerDay+'.'});
   if(!candidateExamDates(workspace.settings||{}).length)issues.push({level:'error',code:'NO_DATES',message:'No eligible examination dates are available in the selected range.'});
@@ -236,6 +236,6 @@ export function validateDutyRoster(workspace={}){
 export function createWorkspaceFromMaster(master={}){
   const model=deriveExamModel(master),today=new Date(),end=new Date(today);end.setDate(end.getDate()+20);
   return {schemaVersion:1,name:'New Examination Schedule',description:'',sourceSchedule:model.schedule,classes:model.classes,papers:model.papers,teachers:model.teachers,
-    settings:{startDate:dateKey(today),endDate:dateKey(end),cadence:'continuous',excludedWeekdays:[0],excludedDates:[],customDates:[],maxExamsPerClassPerDay:1,groupSameSubject:true,invigilatorsPerRoom:1,maxInvigilationPerDay:1,relieversPerSession:1,relieverStartTime:'10:30',relieverEndTime:'11:00',avoidOwnSubject:false},
+    settings:{startDate:dateKey(today),endDate:dateKey(end),cadence:'continuous',excludedWeekdays:[0],excludedDates:[],customDates:[],maxExamsPerClassPerDay:1,allowDoubleBooking:false,groupSameSubject:true,invigilatorsPerRoom:1,maxInvigilationPerDay:1,relieversPerSession:1,relieverStartTime:'10:30',relieverEndTime:'11:00',avoidOwnSubject:false},
     slots:[{id:'SESSION_1',name:'Morning',startTime:'09:00',endTime:'12:00',durationMinutes:180}],timetable:{events:[],unplaced:[],dates:[],slots:[]},duties:{invigilation:[],relievers:[],unfilled:[]},updatedAtMs:Date.now()};
 }
