@@ -80,7 +80,8 @@ function ensurePane(){
 }
 
 async function syncClassFromMaster(c){
-  const desired=new Set((master.classes?.[c]||[]).map(norm));if(!desired.size)return;
+  const subjects=[...(master.classes?.[c]||[])];const desired=new Set(subjects.map(norm));if(!desired.size)return;
+  if(window.vkvExamWorkspace?.applySubjectMaster){window.vkvExamWorkspace.applySubjectMaster(c,subjects);setStatus(`Saved examination subjects imported for Class ${c}.`);return}
   for(let step=0;step<60;step++){
     const boxes=[...document.querySelectorAll(`#majorSubjectGrid [data-major-subject-class="${CSS.escape(c)}"]`)];if(!boxes.length)break;
     const mismatch=boxes.find(x=>x.checked!==desired.has(norm(x.dataset.majorSubject)));
