@@ -16,7 +16,7 @@
     const map=new Map();
     for(const sel of document.querySelectorAll('#printableMatrixHost [data-matrix-class][data-matrix-date]')){
       const c=cls(sel.dataset.matrixClass),s=subj(sel.value||''),d=String(sel.dataset.matrixDate||'').trim();
-      if(c&&s&&d)map.set(key(c,s),d);
+      if(c&&s&&d)map.set(key(c,s),{date:d});
     }
     return map;
   }
@@ -34,33 +34,42 @@
     f.value=oldF;dispatch(f,'change');search.value=oldS;dispatch(search,'input');
     return out;
   }
-  function updateOne(target,wantIncluded,wantDate){
+  function soleSlotId(){
+    const ids=new Set();
+    for(const opt of document.querySelectorAll('#paperRows [data-paper-field="fixedSlotId"] option'))if(opt.value)ids.add(opt.value);
+    return ids.size===1?[...ids][0]:'';
+  }
+  function updateOne(target,wantIncluded,wantAssignment,defaultSlotId){
     setFilter(target.raw);
     let tr=findRow(target.id);if(!tr)return;
     let box=tr.querySelector('[data-paper-field="included"]');
     if(box&&box.checked!==wantIncluded){box.checked=wantIncluded;dispatch(box,'change');tr=findRow(target.id)}
     if(!tr)return;
-    const date=tr.querySelector('[data-paper-field="fixedDate"]'),next=wantIncluded?(wantDate||''):'';
-    if(date&&date.value!==next){date.value=next;dispatch(date,'change')}
+    const wantDate=wantIncluded?(wantAssignment?.date||''):'';
+    const date=tr.querySelector('[data-paper-field="fixedDate"]');
+    if(date&&date.value!==wantDate){date.value=wantDate;dispatch(date,'change');tr=findRow(target.id)||tr}
+    const slot=tr.querySelector('[data-paper-field="fixedSlotId"]');
+    const wantSlot=wantIncluded&&wantDate?(slot?.value||defaultSlotId||''):'';
+    if(slot&&slot.value!==wantSlot){slot.value=wantSlot;dispatch(slot,'change')}
   }
   async function syncMajorState(){
     const desired=desiredSelection();if(!desired)return false;
-    const assignments=matrixAssignments(),f=$('paperClassFilter'),search=$('paperSearch'),oldF=f?.value||'',oldS=search?.value||'';
+    const assignments=matrixAssignments(),f=$('paperClassFilter'),search=$('paperSearch'),oldF=f?.value||'',oldS=search?.value||'',defaultSlotId=soleSlotId();
     const targets=collectTargets();
-    for(const t of targets){const included=desired.classes.has(t.className)&&desired.subjects.has(key(t.className,t.subject));updateOne(t,included,included?(assignments.get(key(t.className,t.subject))||''):'')}
+    for(const t of targets){const included=desired.classes.has(t.className)&&desired.subjects.has(key(t.className,t.subject));updateOne(t,included,included?assignments.get(key(t.className,t.subject)):null,defaultSlotId)}
     if(f){f.value=oldF;dispatch(f,'change')}if(search){search.value=oldS;dispatch(search,'input')}
     return true;
   }
   function statusMessage(html,kind='info'){const el=$('printableMatrixMsg');if(!el)return;el.className='notice '+kind;el.innerHTML=html}
-  function watchActualSave(){const node=$('saveState');if(!node)return;const obs=new MutationObserver(()=>{const text=node.textContent||'';if(/Cloud draft saved/i.test(text)){obs.disconnect();statusMessage('<b>Cloud draft saved.</b> Classes, subjects and current timetable date choices were written to the workspace. Reopen the draft to verify the round-trip.','success')}});obs.observe(node,{childList:true,subtree:true,characterData:true});setTimeout(()=>obs.disconnect(),12000)}
+  function watchActualSave(){const node=$('saveState');if(!node)return;const obs=new MutationObserver(()=>{const text=node.textContent||'';if(/Cloud draft saved/i.test(text)){obs.disconnect();statusMessage('<b>Cloud draft saved.</b> Manual timetable assignments were synchronised to the workspace before saving. Reopen this same draft to verify the round-trip.','success')}});obs.observe(node,{childList:true,subtree:true,characterData:true});setTimeout(()=>obs.disconnect(),12000)}
   document.addEventListener('click',async e=>{
     const btn=e.target.closest('#saveDraft');if(!btn||bypass||syncing)return;
     const desired=desiredSelection();if(!desired)return;
     e.preventDefault();e.stopImmediatePropagation();syncing=true;btn.disabled=true;
     try{
-      statusMessage('<b>Preparing cloud save…</b> Synchronising selected classes, selected subjects and timetable slots with the actual examination workspace.');
+      statusMessage('<b>Preparing cloud save…</b> Synchronising the manual timetable with the actual examination workspace.');
       await syncMajorState();
-      statusMessage('<b>Workspace synchronised.</b> Saving the actual cloud draft now.');
+      statusMessage('<b>Workspace synchronised.</b> Saving the cloud draft now.');
       watchActualSave();
       bypass=true;btn.disabled=false;btn.click();bypass=false;
     }catch(err){btn.disabled=false;statusMessage('<b>Save stopped before cloud write.</b> '+esc(err?.message||err),'error')}
