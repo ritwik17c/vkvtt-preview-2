@@ -142,8 +142,9 @@ function renderDatePreview(){
   $('examDateChecks').innerHTML=choices.length?`<div class="inlineChecks">${choices.map(value=>`<label><input type="checkbox" data-exam-date="${safe(value)}" ${chosen.has(value)?'checked':''}> ${safe(displayDate(value))} · ${safe(dayName(value))}</label>`).join('')}</div>`:'<span class="small">Select a valid start and end date to see date options.</span>';
 }
 
-document.addEventListener('change',event=>{if(!event.target.matches?.('[data-exam-date]'))return;const settings=state.workspace.settings;settings.cadence='custom';settings.customDates=[...document.querySelectorAll('[data-exam-date]:checked')].map(x=>x.dataset.examDate);$('cadence').value='custom';renderDatePreview();markDirty('Examination dates selected')});
-document.addEventListener('click',event=>{const all=event.target.closest?.('#selectAllExamDates'),none=event.target.closest?.('#clearAllExamDates');if(!all&&!none)return;const settings=state.workspace.settings,boxes=[...document.querySelectorAll('[data-exam-date]')];settings.cadence='custom';settings.customDates=all?boxes.map(x=>x.dataset.examDate):[];$('cadence').value='custom';renderDatePreview();markDirty(all?'All eligible examination dates selected':'Examination dates cleared')});
+function setSelectedExamDates(dates,message){const settings=state.workspace.settings;settings.cadence='custom';settings.customDates=[...new Set(dates)].sort();$('cadence').value='custom';$('customDates').value=settings.customDates.join(', ');renderDatePreview();markDirty(message)}
+document.addEventListener('change',event=>{if(!event.target.matches?.('[data-exam-date]'))return;setSelectedExamDates([...document.querySelectorAll('[data-exam-date]:checked')].map(x=>x.dataset.examDate),'Examination dates selected')});
+document.addEventListener('click',event=>{const all=event.target.closest?.('#selectAllExamDates'),none=event.target.closest?.('#clearAllExamDates');if(!all&&!none)return;const boxes=[...document.querySelectorAll('[data-exam-date]')];setSelectedExamDates(all?boxes.map(x=>x.dataset.examDate):[],all?'All eligible examination dates selected':'Examination dates cleared')});
 
 function renderSessions(){
   const options=state.workspace.slots;
