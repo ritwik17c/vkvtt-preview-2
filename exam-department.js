@@ -77,7 +77,7 @@ function renderAll(){
   renderMasterSummary();renderSetup();renderSessions();renderPapers();renderTeachers();renderTimetable();renderDuties();renderReview();renderWorkflow();
 }
 
-function examBaseClass(value){return String(value||'').trim().replace(/\s+/g,' ').replace(/(?:\s*[-–]\s*|\s+)(?:SECTION\s*)?[A-DV]$/i,'').replace(/\s*\((?:A|B|C|D|V)\)$/i,'').trim()}
+function examBaseClass(value){return String(value||'').trim().replace(/\s+/g,' ').replace(/^((?:XI|XII))\s*(?:[-–]\s*|\s+|\(\s*)(?:SCI(?:ENCE)?|ARTS?|HUMANITIES)\s*\)?$/i,(_,grade)=>grade.toUpperCase()).replace(/(?:\s*[-–]\s*|\s+)(?:SECTION\s*)?[A-DV]$/i,'').replace(/\s*\((?:A|B|C|D|V)\)$/i,'').trim()}
 function examSubjectKey(value){const s=String(value||'').trim().toLowerCase().replace(/\s+/g,' ');if(['as','assamese'].includes(s))return'assamese';if(['eng','english'].includes(s))return'english';if(['sci','science'].includes(s))return'science';if(['ssc','social science'].includes(s))return'socialscience';if(['sans','sanskrit'].includes(s))return'sanskrit';if(/^information technology/.test(s)||/^it(?:\s|$)/.test(s))return'it';if(/^maths?(?:\s|$)/.test(s)||s==='mathematics')return'maths';return s.replace(/[^a-z0-9]+/g,'')}
 function examPaperId(className,subject){const part=value=>String(value||'').toUpperCase().replace(/[^A-Z0-9]+/g,'_').replace(/^_|_$/g,'').slice(0,36)||'ITEM';return'EXAM_MASTER_'+part(className)+'_'+part(subject)}
 function relatedTeacherCodes(source,subject){const wanted=examSubjectKey(subject),combined=wanted==='science'?new Set(['science','physics','phy','chemistry','chem','biology','bio']):wanted==='socialscience'?new Set(['socialscience','history','hist','geography','geo','economics','eco','politicalscience','polsci']):new Set([wanted]);return[...new Set(source.filter(p=>combined.has(examSubjectKey(p.subject))).flatMap(p=>p.teacherCodes||[]))]}
@@ -92,11 +92,11 @@ function applyExaminationSubjectMaster(className,subjects){
 function installExaminationSubjectCatalogue(classes){
   if(!state.workspace||!classes||typeof classes!=='object')return false;
   const existing=state.workspace.papers||[],selected=new Set(existing.filter(p=>p.included!==false).map(p=>examBaseClass(p.className)+'|'+examSubjectKey(p.subject)));
+  const logicalClasses=new Map();for(const [className,subjects] of Object.entries(classes)){const cls=examBaseClass(className);if(!cls)continue;if(!logicalClasses.has(cls))logicalClasses.set(cls,new Map());for(const subject of subjects||[]){const name=String(subject||'').trim();if(name)logicalClasses.get(cls).set(examSubjectKey(name),name)}}
   const catalogue=[];
-  for(const [className,subjects] of Object.entries(classes)){
-    const cls=examBaseClass(className),source=existing.filter(p=>examBaseClass(p.className)===cls);
-    for(const subject of subjects||[]){
-      const name=String(subject||'').trim();if(!cls||!name)continue;
+  for(const [cls,subjects] of logicalClasses){
+    const source=existing.filter(p=>examBaseClass(p.className)===cls);
+    for(const name of subjects.values()){
       catalogue.push({id:examPaperId(cls,name),className:cls,subject:name,teacherCodes:relatedTeacherCodes(source,name),included:selected.has(cls+'|'+examSubjectKey(name)),roomId:cls,fixedDate:'',fixedSlotId:'',examMasterOnly:true,examSubjectMaster:true})
     }
   }
