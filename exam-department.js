@@ -1,7 +1,7 @@
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js';
 import {getAuth,GoogleAuthProvider,signInWithPopup,onAuthStateChanged,setPersistence,browserLocalPersistence} from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js';
 import {getFirestore,doc,getDoc,collection,getDocs,setDoc,serverTimestamp,writeBatch} from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore-lite.js';
-import {candidateExamDates,createWorkspaceFromMaster,dayName,displayDate,generateExamTimetable,generateDutyRoster,validateExamTimetable,validateDutyRoster} from './exam-scheduler-core.js?v=1.2.0-double-booking';
+import {candidateExamDates,createWorkspaceFromMaster,dayName,displayDate,generateExamTimetable,generateDutyRoster,validateExamTimetable,validateDutyRoster} from './exam-scheduler-core.js?v=1.2.1-double-slot';
 
 const firebaseConfig={apiKey:'AIzaSyDheZpyXghd1aQ9_RLhwpacVriG__wNZW4',authDomain:'vkv-nalbari-timetable.firebaseapp.com',projectId:'vkv-nalbari-timetable',storageBucket:'vkv-nalbari-timetable.firebasestorage.app',messagingSenderId:'791432856951',appId:'1:791432856951:web:61324065a54bef30f98d72'};
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),provider=new GoogleAuthProvider();setPersistence(auth,browserLocalPersistence).catch(()=>{});
