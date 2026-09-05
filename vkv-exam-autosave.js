@@ -5,7 +5,7 @@
   const $=id=>document.getElementById(id);
 
   const changeSelectors=[
-    '#workspaceName','#workspaceDescription','#startDate','#endDate','#cadence','#maxPerDay','#excludedDates','#customDates',
+    '#workspaceName','#workspaceDescription','#startDate','#endDate','#cadence','#maxPerDay','#allowDoubleBooking','#excludedDates','#customDates',
     '[data-weekday]','[data-exam-date]','[data-session-field]','[data-paper-field]','[data-major-class]','[data-major-subject]',
     '[data-teacher-field]','#invigilatorsPerRoom','#maxInvigPerDay','#relieversPerSession','#avoidOwnSubject','#relieverStart','#relieverEnd',
     '#examFooterReporting','#examFooterBus','#examFooterDeparture','[data-matrix-class][data-matrix-date]','[data-template-pattern-date]'
