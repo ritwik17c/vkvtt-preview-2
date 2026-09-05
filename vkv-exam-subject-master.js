@@ -6,7 +6,7 @@ const cfg={apiKey:'AIzaSyDheZpyXghd1aQ9_RLhwpacVriG__wNZW4',authDomain:'vkv-nalb
 const app=getApps().length?getApp():initializeApp(cfg),auth=getAuth(app),db=getFirestore(app);
 const $=id=>document.getElementById(id),wait=ms=>new Promise(r=>setTimeout(r,ms));
 const CONFIG_ID='EXAM_SUBJECT_MASTER';
-let master={classes:{}},signedInUser=null,saving=false,importQueue=Promise.resolve();
+let master={classes:{}},signedInUser=null,saving=false;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const base=v=>String(v||'').trim().replace(/\s+/g,' ').replace(/(?:\s*[-–]\s*|\s+)(?:SECTION\s*)?[A-DV]$/i,'').replace(/\s*\((?:A|B|C|D|V)\)$/i,'').trim();
 const displaySubject=v=>String(v||'').trim().replace(/\s+/g,' ');
@@ -100,17 +100,17 @@ async function applyToSelected(silent=false){
   try{let applied=0;for(const c of selected)if(await syncClassFromMaster(c))applied++;if(applied===selected.length)setStatus(`Master subjects applied to ${applied} selected class(es).`);return applied===selected.length}finally{if(btn)btn.disabled=false}
 }
 
-function queueClassImport(c,delay=0){
-  importQueue=importQueue.then(async()=>{if(delay)await wait(delay);return syncClassFromMaster(c)}).catch(e=>setStatus(`Could not import subjects for Class ${c}: `+(e.message||e),'warn'))
-}
-
 function bind(){
   const saveBtn=$('saveExamSubjectMaster');
   if(saveBtn){saveBtn.type='button';saveBtn.onclick=e=>{e.preventDefault();saveMaster()}}
   $('resetExamSubjectMaster')?.addEventListener('click',()=>{if(!confirm('Replace the unsaved master on this screen with subjects currently available in the active timetable?'))return;master=seedFromVisible();renderMaster();setStatus('Active timetable subjects loaded as a starting point. Review them and click Save Subject Master.','warn')});
   $('examSubjectMasterGrid')?.addEventListener('click',e=>{const a=e.target.closest('[data-master-add]'),ed=e.target.closest('[data-master-edit]'),del=e.target.closest('[data-master-delete]');if(a)return addSubject(base(a.dataset.masterAdd));if(ed)return editSubject(base(ed.dataset.masterEdit),Number(ed.dataset.masterIndex));if(del)return deleteSubject(base(del.dataset.masterDelete),Number(del.dataset.masterIndex))});
-  const classPane=document.querySelector('[data-pane="majorClasses"] article.surface');if(classPane&&!$('applyExamSubjectMaster')){const bar=document.createElement('div');bar.className='notice info';bar.style.marginBottom='12px';bar.innerHTML='<b>Subjects come from Subject Setup.</b> Select a class and its saved examination subjects will be imported automatically. <button id="applyExamSubjectMaster" class="button" style="margin-left:8px">Apply Master to Selected Classes</button>';classPane.prepend(bar);$('applyExamSubjectMaster')?.addEventListener('click',()=>applyToSelected(false))}
-  document.addEventListener('change',e=>{const box=e.target.closest?.('[data-major-class]');if(box?.checked)queueClassImport(base(box.dataset.majorClass),350)},true)
+  const classPane=document.querySelector('[data-pane="majorClasses"] article.surface');if(classPane&&!$('applyExamSubjectMaster')){const bar=document.createElement('div');bar.className='notice info';bar.style.marginBottom='12px';bar.innerHTML='<b>Subjects come from Subject Setup.</b> Select a class and its saved examination subjects will be imported automatically. <button id="applyExamSubjectMaster" class="button" style="margin-left:8px">Apply Master to Selected Classes</button>';classPane.prepend(bar);$('applyExamSubjectMaster')?.addEventListener('click',applyToSelected)}
+  document.addEventListener('change',e=>{const box=e.target.closest?.('[data-major-class]');if(box?.checked){const c=base(box.dataset.majorClass);setTimeout(()=>syncClassFromMaster(c),350)}},true)
+  document.addEventListener('click',e=>{
+    if(e.target.closest?.('[data-open-cloud],[data-revise-cloud],#newDraft,#goFreshExamSetup'))setTimeout(()=>applyToSelected(true),700);
+    if(e.target.closest?.('[data-pane-target="majorClasses"],[data-pane-target="subjects"]'))setTimeout(()=>applyToSelected(true),220)
+  },true)
 }
 
 async function boot(){
@@ -118,6 +118,8 @@ async function boot(){
   bind();
   for(let i=0;i<40&&!document.querySelector('#majorSubjectGrid [data-major-subject]');i++)await wait(150);
   await loadMaster();
+  await wait(250);
+  await applyToSelected(true);
 }
 onAuthStateChanged(auth,user=>{signedInUser=user||null;if(user)boot()});
 window.vkvExamSubjectMaster={get:()=>JSON.parse(JSON.stringify(master)),getSubjects:subjectsForClass,applyToSelected};
