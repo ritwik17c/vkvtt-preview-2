@@ -42,9 +42,9 @@
     if(data.sourceScheduleId){try{const s=await api.getDoc(api.doc(api.db,'examSchedules',data.sourceScheduleId));if(s.exists())source=s.data()||{}}catch{}}
     return{data,template:mergeTemplate(data,source),name:data.name||'Saved Template'};
   }
-  async function waitControls(){for(let i=0;i<70;i++){if($('paperClassFilter')?.options?.length>1&&$('paperRows')&&$('sessionRows'))return true;await wait(100)}return false}
+  async function waitControls(){for(let i=0;i<70;i++){if($('paperClassFilter')?.options?.length>1&&$('paperRows')&&$('sessionRows')&&window.vkvExamWorkspace)return true;await wait(100)}return false}
   async function applySubjects(t){
-    if(window.vkvExamSubjectMaster?.installCatalogue)try{await window.vkvExamSubjectMaster.installCatalogue()}catch{}
+    if(window.vkvExamWorkspace?.installSubjectCatalogue){window.vkvExamWorkspace.installSubjectCatalogue(t.subjects||{});await wait(180)}
     const wanted=new Set();for(const [c,subs] of Object.entries(t.subjects||{}))for(const s of subs||[])wanted.add(key(c,s));
     const f=$('paperClassFilter'),search=$('paperSearch');if(!f||!search)return 0;const oldF=f.value,oldS=search.value;search.value='';dispatch(search,'input');
     let selected=0;
