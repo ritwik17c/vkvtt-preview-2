@@ -52,8 +52,8 @@
   async function applySubjects(t){
     if(window.vkvExamWorkspace?.installSubjectCatalogue){window.vkvExamWorkspace.installSubjectCatalogue(t.subjects||{});await wait(220)}
     const wanted=new Set();for(const [c,subs] of Object.entries(t.subjects||{}))for(const s of subs||[])wanted.add(key(c,s));
-    const f=$('paperClassFilter'),search=$('paperSearch');if(!f||!search)return 0;const oldF=f.value,oldS=search.value;search.value='';dispatch(search,'input');
-    let selected=0;
+    const f=$('paperClassFilter'),search=$('paperSearch');if(!f||!search)return 0;
+    const oldF=f.value,oldS=search.value;search.value='';dispatch(search,'input');let selected=0;
     for(const raw of [...f.options].map(o=>o.value).filter(Boolean)){
       f.value=raw;dispatch(f);await wait(12);
       for(const row of [...document.querySelectorAll('#paperRows tr[data-paper]')]){
@@ -72,31 +72,20 @@
   }
 
   function applyReusableSettings(t){
-    const s=t.settings||{};
-    const max=$('maxPerDay');if(max&&s.maxExamsPerClassPerDay){max.value=String(s.maxExamsPerClassPerDay);dispatch(max)}
+    const s=t.settings||{},max=$('maxPerDay');if(max&&s.maxExamsPerClassPerDay){max.value=String(s.maxExamsPerClassPerDay);dispatch(max)}
     if(Array.isArray(s.excludedWeekdays))for(const b of document.querySelectorAll('[data-weekday]')){const on=s.excludedWeekdays.map(Number).includes(Number(b.dataset.weekday));if(b.checked!==on){b.checked=on;dispatch(b)}}
   }
 
   function resetFreshDates(){
     for(const id of['startDate','endDate','excludedDates','customDates']){const el=$(id);if(el){el.value='';dispatch(el,'input');dispatch(el)}}
     const cadence=$('cadence');if(cadence){cadence.value='custom';dispatch(cadence,'input');dispatch(cadence)}
-    for(const b of document.querySelectorAll('[data-exam-date]')){if(b.checked){b.checked=false;dispatch(b)}}
+    for(const b of document.querySelectorAll('[data-exam-date]'))if(b.checked){b.checked=false;dispatch(b)}
   }
 
   function applyPrintDetails(t){const p=t.printDetails||{};for(const [id,v] of [['examFooterReporting',p.reporting],['examFooterBus',p.bus],['examFooterDeparture',p.departure]]){const el=$(id);if(el&&v){el.value=v;dispatch(el)}}}
-
-  function forceSetup(){
-    document.querySelectorAll('.navButton').forEach(b=>b.classList.toggle('active',b.dataset.paneTarget==='setup'));
-    document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('active',p.dataset.pane==='setup'));
-    document.querySelector('[data-pane-target="setup"]')?.click();
-  }
-
-  function goSetup(name,count){
-    forceSetup();
-    [80,220,500,900].forEach(ms=>setTimeout(()=>{forceSetup();resetFreshDates()},ms));
-    setTimeout(()=>$('startDate')?.parentElement?.scrollIntoView({behavior:'smooth',block:'center'}),180);
-    const m=$('majorTemplateMsg');if(m){m.className='notice success';m.innerHTML=`<b>${name}</b> loaded. ${count} subject selection(s), sessions and reusable settings were imported. Choose a fresh date range and tick the required examination dates. Previous dates were not imported.`}
-  }
+  function setTitle(value){const el=$('workspaceName');if(!el)return;el.value=value;dispatch(el,'input');dispatch(el)}
+  function forceSetup(){document.querySelectorAll('.navButton').forEach(b=>b.classList.toggle('active',b.dataset.paneTarget==='setup'));document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('active',p.dataset.pane==='setup'));document.querySelector('[data-pane-target="setup"]')?.click()}
+  function goSetup(name,count){forceSetup();[80,220,500,900].forEach(ms=>setTimeout(()=>{forceSetup();resetFreshDates()},ms));setTimeout(()=>$('startDate')?.parentElement?.scrollIntoView({behavior:'smooth',block:'center'}),180);const m=$('majorTemplateMsg');if(m){m.className='notice success';m.innerHTML=`<b>${name}</b> loaded. ${count} subject selection(s), sessions and reusable settings were imported. Choose a fresh date range and tick the required examination dates. Previous dates were not imported.`}}
 
   async function use(id){
     if(busy)return;busy=true;
@@ -105,16 +94,17 @@
       if(!confirm(`Create a new editable timetable from “${name}”?\n\nClasses, subjects, sessions and reusable settings will be imported.\n\nPrevious examination dates will NOT be imported. You will start again from Step 1.`))return;
       $('newDraft')?.click();if(!await waitControls())throw new Error('Examination controls are not ready.');
       const suggested=String(name).replace(/\s+Template$/i,'').trim()||'New Examination Schedule',entered=prompt('Name for the new examination draft:',suggested);if(entered===null)return;
-      if($('workspaceName')){$('workspaceName').value=entered.trim()||suggested;dispatch($('workspaceName'),'input');dispatch($('workspaceName'))}
+      const finalName=entered.trim()||suggested;
       await applySessions(template);
       const count=await applySubjects(template);
-      applyReusableSettings(template);
-      applyPrintDetails(template);
-      resetFreshDates();
-      goSetup(name,count);
-      await wait(180);
-      resetFreshDates();
+      applyReusableSettings(template);applyPrintDetails(template);resetFreshDates();goSetup(name,count);
+      await wait(220);
+      resetFreshDates();setTitle(finalName);
+      await wait(120);setTitle(finalName);
       $('saveDraft')?.click();
+      setTimeout(()=>setTitle(finalName),350);
+      setTimeout(()=>{setTitle(finalName);$('saveDraft')?.click()},950);
+      document.dispatchEvent(new CustomEvent('vkv-exam-template-fresh-draft',{detail:{name:finalName}}));
     }catch(e){alert('Could not start from template: '+(e.message||e))}finally{busy=false}
   }
 
