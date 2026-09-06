@@ -5,13 +5,7 @@
 
   function clean(){
     const meta=$('masterMeta');
-    if(meta)meta.textContent='Read-only source';
-    const stats=$('masterStats');
-    if(stats){
-      for(const chip of stats.querySelectorAll('.chip')){
-        if(/\bteachers\b/i.test(chip.textContent||''))chip.textContent='40 teachers';
-      }
-    }
+    if(meta&&meta.textContent!=='Read-only source')meta.textContent='Read-only source';
   }
 
   function romanValue(value){
@@ -130,8 +124,8 @@
       routeLegacyTemplateLoad();
     }
   },true);
-  document.addEventListener('vkv-exam-workspace-subjects-applied',()=>scheduleOrder(80));
-  document.addEventListener('vkv-exam-subject-master-applied',()=>scheduleOrder(80));
+  document.addEventListener('vkv-exam-workspace-subjects-applied',()=>{clean();scheduleOrder(80)});
+  document.addEventListener('vkv-exam-subject-master-applied',()=>{clean();scheduleOrder(80)});
   const root=$('examApp')||document.body;
-  new MutationObserver(()=>scheduleOrder(30)).observe(root,{childList:true,subtree:true});
+  new MutationObserver(()=>{clean();scheduleOrder(30)}).observe(root,{childList:true,subtree:true});
 })();
