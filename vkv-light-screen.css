@@ -1,0 +1,106 @@
+/* VKVTT selectable light screen theme. Presentation only; print remains formal white/black. */
+@media screen{
+  html[data-vkv-theme="light"]{color-scheme:light}
+  html[data-vkv-theme="light"] body,
+  html[data-vkv-theme="light"].v66-ui body{
+    background:#edf6f1!important;
+    color:#17364f!important;
+  }
+  html[data-vkv-theme="light"] .accountbar{background:#f7faf8!important;color:#17364f!important;border-color:#d6e4dd!important}
+  html[data-vkv-theme="light"] body>header,
+  html[data-vkv-theme="light"].v66-ui body>header:not(.topbar),
+  html[data-vkv-theme="light"] .topbar{
+    background:linear-gradient(135deg,rgba(24,85,123,.94),rgba(35,109,153,.88)),url('./vkv-campus-header.jpg?v=20260908-theme1') center 48%/cover no-repeat!important;
+    color:#fff!important;
+    border-color:#b9ced9!important;
+    box-shadow:0 8px 24px rgba(23,54,79,.16)!important;
+  }
+  html[data-vkv-theme="light"] body h1,
+  html[data-vkv-theme="light"] body h2,
+  html[data-vkv-theme="light"] body h3,
+  html[data-vkv-theme="light"] body h4,
+  html[data-vkv-theme="light"] body h5,
+  html[data-vkv-theme="light"] body h6,
+  html[data-vkv-theme="light"] body legend,
+  html[data-vkv-theme="light"] body strong{color:#17364f!important}
+  html[data-vkv-theme="light"] body>header h1,
+  html[data-vkv-theme="light"] body>header h2,
+  html[data-vkv-theme="light"] body>header strong,
+  html[data-vkv-theme="light"] .topbar h1,
+  html[data-vkv-theme="light"] .topbar strong{color:#fff!important}
+  html[data-vkv-theme="light"] body p{color:#526d7d!important}
+  html[data-vkv-theme="light"] body .card,
+  html[data-vkv-theme="light"] body .panel,
+  html[data-vkv-theme="light"] body .view,
+  html[data-vkv-theme="light"] body .surface,
+  html[data-vkv-theme="light"] body .gateCard,
+  html[data-vkv-theme="light"] body .workspaceBadge,
+  html[data-vkv-theme="light"] body .summaryCard,
+  html[data-vkv-theme="light"] body .metric,
+  html[data-vkv-theme="light"] body .tile,
+  html[data-vkv-theme="light"] body .qcard,
+  html[data-vkv-theme="light"] body .currentBox,
+  html[data-vkv-theme="light"] body .replacementItem,
+  html[data-vkv-theme="light"] body .historyItem,
+  html[data-vkv-theme="light"] body .resultbox,
+  html[data-vkv-theme="light"] body .draftCard,
+  html[data-vkv-theme="light"] body .outputCard,
+  html[data-vkv-theme="light"] body .reviewCard{
+    background:#fff!important;
+    color:#17364f!important;
+    border-color:#cbdce5!important;
+    box-shadow:0 5px 18px rgba(23,54,79,.07)!important;
+  }
+  html[data-vkv-theme="light"] body .help,
+  html[data-vkv-theme="light"] body .small,
+  html[data-vkv-theme="light"] body .sub,
+  html[data-vkv-theme="light"] body .subtitle,
+  html[data-vkv-theme="light"] body .lab,
+  html[data-vkv-theme="light"] body label{color:#617685!important}
+  html[data-vkv-theme="light"] body button,
+  html[data-vkv-theme="light"] body .btn,
+  html[data-vkv-theme="light"] body a.btn,
+  html[data-vkv-theme="light"] body .button,
+  html[data-vkv-theme="light"] body .navButton{
+    background:#eef7fb!important;
+    color:#17364f!important;
+    border-color:#bad0db!important;
+  }
+  html[data-vkv-theme="light"] body button.primary,
+  html[data-vkv-theme="light"] body .primary,
+  html[data-vkv-theme="light"] body .button.primary,
+  html[data-vkv-theme="light"] body .tabs button.active,
+  html[data-vkv-theme="light"] body .navButton.active,
+  html[data-vkv-theme="light"] body [aria-pressed="true"]{
+    background:#236d99!important;
+    color:#fff!important;
+    border-color:#236d99!important;
+  }
+  html[data-vkv-theme="light"] body input,
+  html[data-vkv-theme="light"] body select,
+  html[data-vkv-theme="light"] body textarea{
+    background:#fff!important;
+    color:#17364f!important;
+    border-color:#c7d5de!important;
+  }
+  html[data-vkv-theme="light"] body table{background:#fff!important;color:#17364f!important}
+  html[data-vkv-theme="light"] body th{background:#edf5f9!important;color:#17364f!important;border-color:#d7e4ea!important}
+  html[data-vkv-theme="light"] body td{background:#fff!important;color:#263d4e!important;border-color:#e0e9ee!important}
+  html[data-vkv-theme="light"] body .notice,
+  html[data-vkv-theme="light"] body .status{background:#fff!important;color:#17364f!important;border-color:#cbdce5!important}
+  html[data-vkv-theme="light"] body .schedule{background:#fff7dd!important;color:#604b0d!important;border-color:#dfbf62!important}
+  html[data-vkv-theme="light"] body .ok{background:#e7f6ea!important;color:#245c34!important;border-color:#a9d4b2!important}
+  html[data-vkv-theme="light"] body .error{background:#fdecec!important;color:#8b2d2d!important;border-color:#e5b7b7!important}
+  html[data-vkv-theme="light"] body .eyebrow,
+  html[data-vkv-theme="light"] body .v66-eyebrow,
+  html[data-vkv-theme="light"] body .noticeHead{color:#9b6f00!important}
+  html[data-vkv-theme="light"] #periodReminderControl{background:#fff!important;color:#17364f!important;border-color:#cbdce5!important}
+  html[data-vkv-theme="light"] #periodReminderControl #prNext{background:#eef7fb!important;color:#17364f!important;border-color:#bfd8e5!important}
+  html[data-vkv-theme="light"] #periodReminderControl #prNext b{color:#1d638e!important}
+}
+
+/* Print is independent of the selected screen theme. */
+@media print{
+  html[data-vkv-theme="light"],html[data-vkv-theme="black-gold"]{color-scheme:light!important}
+  #vkvThemeSwitch{display:none!important}
+}
