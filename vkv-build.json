@@ -1,6 +1,6 @@
 {
-  "build": "2026.09.08.13",
+  "build": "2026.09.08.14",
   "channel": "preview-2-production-hardening",
   "updated": "2026-09-08",
-  "notes": "Hourly hardening pass 1: theme controller now propagates to every navigated root app page through the service worker, theme choice syncs across tabs, campus header is rendered as a real image layer rather than CSS background only, and Light-theme contrast safeguards are broadened while print-only surfaces remain protected."
+  "notes": "Hourly hardening: Light and Black & Gold are now mutually exclusive instead of competing; all duplicate theme stylesheet links are disabled according to the selected theme; theme choice syncs across tabs and is injected into navigated app pages; Home loads the current controller explicitly; campus header uses a real image layer; print/semantic leave surfaces remain protected."
 }
