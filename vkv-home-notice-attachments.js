@@ -11,10 +11,21 @@ if(app){
   const cleanTitle=s=>String(s||'').replace(/^📌\s*/,'').trim();
   let timer=null,busy=false;
 
+  function removeLegacyExamLink(host){
+    for(const a of host.querySelectorAll('a[href*="exam-timetable.html"]'))a.remove();
+    for(const body of host.querySelectorAll('.noticeBody')){
+      body.normalize();
+      if(/Principal-approved examination timetable, invigilation and reliever duties are available\.?\s*$/i.test(body.textContent||'')){
+        body.textContent='Principal-approved examination timetable, invigilation and reliever duties are available.';
+      }
+    }
+  }
+
   async function apply(){
     if(busy||!auth.currentUser)return;
     const host=document.getElementById('notice');
     if(!host)return;
+    removeLegacyExamLink(host);
     busy=true;
     try{
       const snap=await getDoc(doc(db,'master','current'));
@@ -48,6 +59,6 @@ if(app){
 
   function schedule(){if(timer)clearTimeout(timer);timer=setTimeout(apply,120)}
   onAuthStateChanged(auth,u=>{if(u){schedule();setTimeout(apply,700)}});
-  const start=()=>{const host=document.getElementById('notice');if(!host)return setTimeout(start,150);new MutationObserver(schedule).observe(host,{childList:true,subtree:true});schedule()};
+  const start=()=>{const host=document.getElementById('notice');if(!host)return setTimeout(start,150);removeLegacyExamLink(host);new MutationObserver(()=>{removeLegacyExamLink(host);schedule()}).observe(host,{childList:true,subtree:true});schedule()};
   start();
 }
