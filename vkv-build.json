@@ -1,6 +1,6 @@
 {
-  "build": "2026.09.08.7",
+  "build": "2026.09.08.8",
   "channel": "preview-2-production-hardening",
   "updated": "2026-09-08",
-  "notes": "Central browser freshness token. Bump this value for every production release that changes HTML, JS or CSS."
+  "notes": "Shared black-gold screen theme across major modules; printable output remains formal white/black."
 }
