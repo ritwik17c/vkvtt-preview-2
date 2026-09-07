@@ -1,6 +1,6 @@
 {
-  "build": "2026.09.08.11",
+  "build": "2026.09.08.12",
   "channel": "preview-2-production-hardening",
   "updated": "2026-09-08",
-  "notes": "Production presentation hardening: campus header cache refreshed, finalised Proxy shown as a white print-preview with Principal signature space, and selectable Light / Black & Gold theme foundation added without changing operational logic or print outputs."
+  "notes": "Theme hardening pass: campus header visibility forced with cache-busted local asset, Light-theme contrast safeguards strengthened, Proxy print-preview and print-safe separation retained."
 }
