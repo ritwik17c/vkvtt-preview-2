@@ -1,3 +1,10 @@
+if(!document.querySelector('link[data-vkv-black-gold-theme]')){
+  const theme=document.createElement('link');
+  theme.rel='stylesheet';
+  theme.href='vkv-black-gold-screen.css?v=20260908-theme-1';
+  theme.dataset.vkvBlackGoldTheme='1';
+  document.head.appendChild(theme);
+}
 import './qb-module-v3.js?v=20260831-authstall-fixed-1';
 import './vkv-qb-dictation.js?v=20260831-correction-preview-4';
 import './vkv-qb-history-enhancement.js?v=20260830-unverified-2';
