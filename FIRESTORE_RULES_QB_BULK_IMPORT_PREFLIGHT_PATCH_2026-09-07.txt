@@ -1,0 +1,37 @@
+// VKVTT Question Bank — teacher bulk-import preflight permission fix
+// Date: 07/09/2026
+//
+// WHY THIS IS NEEDED
+// vkv-qb-teacher-bulk-import.js uses a deterministic ID (QBTI-<28 hex chars>)
+// and calls getDoc() before create so that an already-imported question can be
+// skipped safely. For a NEW ID, there is no resource.data yet, so the normal
+// owner-based qbQuestions `allow get` cannot authorize that read. Firestore
+// therefore returns "Missing or insufficient permissions" before the permitted
+// create is even attempted.
+//
+// SECURITY GOAL
+// Do NOT make all unverified QB questions readable. Permit only the non-existent
+// deterministic bulk-import ID probe. If a document exists, the ordinary Admin /
+// owner / approved-bank / Subject-Coordinator rules continue to decide access.
+//
+// In the ACTIVE Firestore rules, inside:
+//   match /qbQuestions/{questionId} {
+// replace ONLY the current `allow get:` block with the block below.
+
+allow get: if (canReadSchool()
+               && questionId.matches('^QBTI-[0-9a-f]{28}$')
+               && !exists(/databases/$(database)/documents/qbQuestions/$(questionId)))
+           || isAdmin()
+           || qbQuestionOwner(resource.data)
+           || (canReadSchool() && resource.data.status == 'approved')
+           || qbCoordinator(resource.data.subject);
+
+// Keep the existing `allow list`, `allow create`, `allow update`, and
+// `allow delete` rules unchanged.
+//
+// Expected result after publishing:
+// - Teacher bulk import can test a brand-new QBTI ID and then create it.
+// - Existing own imported questions are still readable and skipped as duplicates.
+// - Existing questions owned by somebody else do NOT become readable.
+// - Approved questions and Subject-Coordinator access are unchanged.
+// - Verified/approved-question edit protection is unchanged.
