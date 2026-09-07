@@ -1,7 +1,47 @@
-<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><title>VKVTT · Proxy Manager</title><style>*{box-sizing:border-box}body{margin:0;font-family:system-ui,Segoe UI,Arial;background:#edf6f1;color:#17364f}header{height:66px;background:#1f678f;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 18px;gap:12px}h1{font-size:1.25rem;margin:0}.btn{font-weight:800;text-decoration:none;color:#17364f;background:#eef7fb;border:1px solid #bad0db;border-radius:10px;padding:9px 12px}iframe{display:block;width:100%;height:calc(100vh - 66px);border:0;background:#edf6f1}#msg{position:fixed;left:50%;top:78px;transform:translateX(-50%);background:#fff7dd;border:1px solid #dfbf62;border-radius:10px;padding:9px 12px;z-index:10}</style></head><body><header><h1>👥 Proxy Manager</h1><div><a class="btn" href="./?v=66.0">🏠 Home</a></div></header><div id="msg">Loading the proven Proxy Manager workspace…</div><iframe id="frame" src="./proxy-manager-core.html?proxy-manager=1&v=20260904-proxy-corefix-3"></iframe><script>
+<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><title>VKVTT · Proxy Manager</title><style>*{box-sizing:border-box}body{margin:0;font-family:system-ui,Segoe UI,Arial;background:#edf6f1;color:#17364f}header{height:66px;background:#1f678f;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 18px;gap:12px}h1{font-size:1.25rem;margin:0}.btn{font-weight:800;text-decoration:none;color:#17364f;background:#eef7fb;border:1px solid #bad0db;border-radius:10px;padding:9px 12px}iframe{display:block;width:100%;height:calc(100vh - 66px);border:0;background:#edf6f1}#msg{position:fixed;left:50%;top:78px;transform:translateX(-50%);background:#fff7dd;border:1px solid #dfbf62;border-radius:10px;padding:9px 12px;z-index:10}</style><script src="./vkv-theme.js?v=20260908-theme1"></script></head><body><header><h1>👥 Proxy Manager</h1><div><a class="btn" href="./?v=66.0">🏠 Home</a></div></header><div id="msg">Loading the proven Proxy Manager workspace…</div><iframe id="frame" src="./proxy-manager-core.html?proxy-manager=1&v=20260908-theme-print-1"></iframe><script>
 const f=document.getElementById('frame'),m=document.getElementById('msg');
 function dpbRecord(t){const code=String(t&&t.code||'').trim().toUpperCase(),name=String(t&&t.name||'').trim().toLowerCase();return code==='DPB'||name==='dhruba prasad baruah'}
 function safe(s){return String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+function installFinalisedPrintPreview(){
+ try{
+  const w=f.contentWindow,d=f.contentDocument;if(!w||!d)return false;
+  if(window.VKVTheme)window.VKVTheme.applyToDocument(d,window.VKVTheme.get());
+  if(!d.getElementById('vkvProxyFinalPrintPreviewStyle')){
+   const st=d.createElement('style');st.id='vkvProxyFinalPrintPreviewStyle';st.textContent=`
+    .vkv-final-proxy-paper{background:#fff!important;color:#111!important;border:1px solid #c9c9c9!important;border-radius:10px!important;padding:22px!important;box-shadow:0 8px 28px rgba(0,0,0,.18)!important;margin-top:14px!important}
+    .vkv-final-proxy-paper h1,.vkv-final-proxy-paper h2,.vkv-final-proxy-paper h3,.vkv-final-proxy-paper h4,.vkv-final-proxy-paper strong,.vkv-final-proxy-paper b,.vkv-final-proxy-paper p,.vkv-final-proxy-paper div,.vkv-final-proxy-paper span,.vkv-final-proxy-paper label{color:#111!important}
+    .vkv-final-proxy-paper table{width:100%!important;border-collapse:collapse!important;background:#fff!important;color:#111!important}
+    .vkv-final-proxy-paper th{background:#f1f1f1!important;color:#111!important;border:1px solid #777!important;padding:7px!important}
+    .vkv-final-proxy-paper td{background:#fff!important;color:#111!important;border:1px solid #999!important;padding:7px!important}
+    .vkv-final-proxy-paper input,.vkv-final-proxy-paper select{background:#fff!important;color:#111!important;border:1px solid #777!important}
+    .vkv-final-proxy-paper .vkv-principal-signature{margin-top:48px!important;padding-top:18px!important;display:flex!important;justify-content:flex-end!important;page-break-inside:avoid!important;color:#111!important;font-weight:700!important}
+    .vkv-final-proxy-paper .vkv-principal-signature span{display:inline-block!important;min-width:300px!important;border-top:1px solid #111!important;padding-top:7px!important;text-align:center!important}
+    .vkv-final-proxy-paper .vkv-print-proxy-btn{margin:0 0 14px auto!important;display:block!important;background:#171817!important;color:#fff!important;border:1px solid #444!important;border-radius:8px!important;padding:8px 12px!important;font-weight:800!important}
+    @media print{
+      body.vkv-print-final-proxy *{visibility:hidden!important}
+      body.vkv-print-final-proxy .vkv-final-proxy-paper,body.vkv-print-final-proxy .vkv-final-proxy-paper *{visibility:visible!important}
+      body.vkv-print-final-proxy .vkv-final-proxy-paper{position:absolute!important;left:0!important;top:0!important;width:100%!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;background:#fff!important;color:#000!important}
+      body.vkv-print-final-proxy .vkv-print-proxy-btn{display:none!important}
+      body.vkv-print-final-proxy .vkv-final-proxy-paper th,body.vkv-print-final-proxy .vkv-final-proxy-paper td{color:#000!important;border-color:#000!important}
+    }
+   `;d.head.appendChild(st);
+  }
+  const headings=[...d.querySelectorAll('h1,h2,h3,h4,h5,strong,b')];
+  const heading=headings.find(x=>/Finalised\s+Proxy\s+Allotment/i.test(x.textContent||''));
+  if(!heading)return false;
+  let paper=heading.parentElement;
+  while(paper&&paper!==d.body){if(paper.querySelector&&paper.querySelector('table'))break;paper=paper.parentElement}
+  if(!paper||paper===d.body)return false;
+  paper.classList.add('vkv-final-proxy-paper');
+  if(!paper.querySelector('.vkv-print-proxy-btn')){
+   const b=d.createElement('button');b.type='button';b.className='vkv-print-proxy-btn';b.textContent='🖨 Print / Save as PDF';b.onclick=()=>{d.body.classList.add('vkv-print-final-proxy');w.focus();w.print();setTimeout(()=>d.body.classList.remove('vkv-print-final-proxy'),800)};paper.insertBefore(b,paper.firstChild);
+  }
+  if(!/Principal'?s?\s+Signature/i.test(paper.textContent||'')){
+   const sig=d.createElement('div');sig.className='vkv-principal-signature';sig.innerHTML='<span>Principal\'s Signature</span>';paper.appendChild(sig);
+  }
+  return true;
+ }catch(e){console.warn('Proxy finalised print preview:',e);return false}
+}
 function installCoreOverrides(){
  try{
   const w=f.contentWindow,d=f.contentDocument;if(!w||!d)return false;
@@ -24,9 +64,11 @@ function installCoreOverrides(){
   const input=d.getElementById('proxyWorkDate'),hint=input?.parentElement?.querySelector('.small');if(hint)hint.textContent='Today and at least the next three school days are available normally. Sundays are skipped. An earlier date requires Principal authorisation.';
   w.renderTodayProxyStatusSummary();
   if(typeof w.renderProxyPeriod==='function')w.renderProxyPeriod();
+  installFinalisedPrintPreview();
   return true;
  }catch(e){console.warn('Proxy compatibility fix:',e);return false}
 }
 function focusProxy(){try{const w=f.contentWindow;if(typeof w.show==='function'){w.show('allot');m.style.display='none';return true}}catch(_){ }return false}
-f.addEventListener('load',()=>{let tries=0;const t=setInterval(()=>{const ok=installCoreOverrides();focusProxy();if(ok||++tries>30)clearInterval(t)},250);try{const d=f.contentDocument;d.addEventListener('change',e=>{if(e.target&&e.target.id==='proxyWorkDate')setTimeout(()=>{installCoreOverrides();const w=f.contentWindow;if(typeof w.renderTodayProxyStatusSummary==='function')w.renderTodayProxyStatusSummary();if(typeof w.renderProxyPeriod==='function')w.renderProxyPeriod()},80)},true)}catch(_){}});
+f.addEventListener('load',()=>{let tries=0;const t=setInterval(()=>{const ok=installCoreOverrides();focusProxy();installFinalisedPrintPreview();if(ok||++tries>30)clearInterval(t)},250);try{const d=f.contentDocument;new MutationObserver(()=>installFinalisedPrintPreview()).observe(d.body,{childList:true,subtree:true});d.addEventListener('change',e=>{if(e.target&&e.target.id==='proxyWorkDate')setTimeout(()=>{installCoreOverrides();const w=f.contentWindow;if(typeof w.renderTodayProxyStatusSummary==='function')w.renderTodayProxyStatusSummary();if(typeof w.renderProxyPeriod==='function')w.renderProxyPeriod();installFinalisedPrintPreview()},80)},true)}catch(_){}});
+window.addEventListener('vkv-theme-change',()=>{try{if(window.VKVTheme&&f.contentDocument)window.VKVTheme.applyToDocument(f.contentDocument,window.VKVTheme.get())}catch(_){}});
 </script></body></html>
