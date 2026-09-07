@@ -1,5 +1,12 @@
 (()=>{
   'use strict';
+  if(!document.querySelector('link[data-vkv-black-gold-theme]')){
+    const theme=document.createElement('link');
+    theme.rel='stylesheet';
+    theme.href='vkv-black-gold-screen.css?v=20260908-theme-1';
+    theme.dataset.vkvBlackGoldTheme='1';
+    document.head.appendChild(theme);
+  }
   if(!document.querySelector('script[data-template-scope-fix]')){
     const s=document.createElement('script');s.src='vkv-exam-template-class-scope-fix.js?v=20260907-scope-repair-1';s.dataset.templateScopeFix='1';document.head.appendChild(s);
   }
