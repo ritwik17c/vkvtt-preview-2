@@ -14,8 +14,8 @@
     return l;
   }
   function allThemeLinks(doc=document){
-    const bg=ensureCss(doc,'vkvBlackGoldThemeCss','./vkv-black-gold-screen.css?v=20260908-theme4');
-    const lt=ensureCss(doc,'vkvLightThemeCss','./vkv-light-screen.css?v=20260908-theme4');
+    const bg=ensureCss(doc,'vkvBlackGoldThemeCss','./vkv-black-gold-screen.css?v=20260908-theme5');
+    const lt=ensureCss(doc,'vkvLightThemeCss','./vkv-light-screen.css?v=20260908-theme5');
     return{
       bg:[...new Set([bg,...doc.querySelectorAll('link[href*="vkv-black-gold-screen.css"]')])],
       lt:[...new Set([lt,...doc.querySelectorAll('link[href*="vkv-light-screen.css"]')])]
@@ -33,6 +33,8 @@
       html[data-vkv-theme="light"] body input,html[data-vkv-theme="light"] body select,html[data-vkv-theme="light"] body textarea{background:#fff!important;color:#17364f!important;border-color:#c7d5de!important}
       html[data-vkv-theme="black-gold"] body input,html[data-vkv-theme="black-gold"] body select,html[data-vkv-theme="black-gold"] body textarea{background:#161716!important;color:#f6f2e8!important;border-color:#514d41!important}
       html[data-vkv-theme="light"] #periodReminderControl #prNext .small,html[data-vkv-theme="light"] #periodReminderControl #prStatus{color:#526d7d!important}
+      #vkvCampusHeaderImage{display:block!important;visibility:visible!important;opacity:.94!important}
+      body>header>.head{position:relative!important;z-index:3!important}
       @media print{.vkv-screen-only,#vkvThemeSwitch,#vkvCampusHeaderImage,#vkvCampusHeaderOverlay{display:none!important}html[data-vkv-theme] body *{text-shadow:none!important}}
     `;doc.head.appendChild(st);
   }
@@ -44,14 +46,14 @@
     let img=doc.getElementById('vkvCampusHeaderImage');
     if(!img){
       img=doc.createElement('img');img.id='vkvCampusHeaderImage';img.className='vkv-screen-only';img.alt='VKV Nalbari campus';
-      img.src='./vkv-campus-header.jpg?v=20260908-theme4';
-      img.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 48%;z-index:0;opacity:.94;pointer-events:none;display:block;';
+      img.src='./vkv-campus-header.jpg?v=20260908-theme5';
+      img.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 48%;z-index:0;opacity:.94;pointer-events:none;display:block;visibility:visible;';
       header.insertBefore(img,header.firstChild);
     }
     let overlay=doc.getElementById('vkvCampusHeaderOverlay');
     if(!overlay){overlay=doc.createElement('div');overlay.id='vkvCampusHeaderOverlay';overlay.className='vkv-screen-only';overlay.style.cssText='position:absolute;inset:0;z-index:1;pointer-events:none;';header.insertBefore(overlay,img.nextSibling)}
-    overlay.style.background=theme==='light'?'linear-gradient(90deg,rgba(18,74,109,.54),rgba(29,100,143,.26),rgba(8,35,52,.10))':'linear-gradient(90deg,rgba(5,6,6,.66),rgba(7,8,8,.38),rgba(7,8,8,.20),rgba(10,9,5,.32))';
-    const head=header.querySelector('.head');if(head){head.style.position='relative';head.style.zIndex='2'}
+    overlay.style.background=theme==='light'?'linear-gradient(90deg,rgba(18,74,109,.44),rgba(29,100,143,.20),rgba(8,35,52,.06))':'linear-gradient(90deg,rgba(5,6,6,.56),rgba(7,8,8,.30),rgba(7,8,8,.12),rgba(10,9,5,.24))';
+    const head=header.querySelector('.head');if(head){head.style.position='relative';head.style.zIndex='3'}
     img.onerror=()=>console.warn('[VKVTT theme] Campus header image failed to load:',img.src);
   }
   function apply(next,doc=document,persist=doc===document){
@@ -71,7 +73,7 @@
   }
   function registerThemeShell(){
     if(!('serviceWorker' in navigator)||location.protocol==='file:')return;
-    navigator.serviceWorker.register('./sw.js?v=20260908-theme4',{scope:'./'}).catch(e=>console.info('[VKVTT theme] shell registration skipped:',e?.message||e));
+    navigator.serviceWorker.register('./sw.js?v=20260908-theme5',{scope:'./'}).catch(e=>console.info('[VKVTT theme] shell registration skipped:',e?.message||e));
   }
   function mount(){
     if(EXEMPT)return;
