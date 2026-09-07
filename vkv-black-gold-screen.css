@@ -146,4 +146,10 @@
   a,a:visited{color:#000!important;text-decoration:none!important}
   header::before,header::after,.tile::before,.tile::after,.adminWorkspaceHero::before{display:none!important}
   .printSheet .principalSignature{display:block!important;min-height:16mm!important;margin-top:12mm!important;padding-top:3mm!important;text-align:right!important;color:#000!important;font-weight:700!important;page-break-inside:avoid!important}
+
+  /* Class Observation official signatures: teacher left, observer right. */
+  .printSign{display:flex!important;width:100%!important;justify-content:space-between!important;align-items:flex-start!important;gap:24mm!important;margin-top:18mm!important;page-break-inside:avoid!important}
+  .printSign span{display:block!important;flex:0 0 40%!important;width:40%!important;max-width:40%!important;border-top:1px solid #000!important;padding-top:3mm!important;white-space:nowrap!important}
+  .printSign span:first-child{margin-right:auto!important;text-align:left!important}
+  .printSign span:last-child{margin-left:auto!important;text-align:right!important}
 }
