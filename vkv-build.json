@@ -1,6 +1,6 @@
 {
-  "build": "2026.09.08.15",
+  "build": "2026.09.08.16",
   "channel": "preview-2-production-hardening",
   "updated": "2026-09-08",
-  "notes": "Added Principal/Admin Class Observation module based on the VKV Nalbari 20-criterion rubric, secure teacher-visible final feedback page, Admin/teacher navigation bridges, print-safe observation layout, and a narrow Firestore rules patch for classObservations."
+  "notes": "Class Observation navigation made directly visible from Home: teacher feedback tile is loaded directly in the teaching section, Principal/Admin gets a direct Class Observation tile in delegated responsibilities, while Admin Dashboard bridge remains available for dashboard integration."
 }
