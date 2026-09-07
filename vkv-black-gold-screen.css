@@ -10,6 +10,9 @@
   --vkv-screen-gold2:#d9a91c;
   --vkv-screen-cream:#f6f2e8;
   --vkv-screen-muted:#aaa79f;
+  --vkv-card-gold:#e8bd3d;
+  --vkv-card-gold-soft:#f0cf69;
+  --vkv-card-ink:#17130b;
 }
 
 @media screen{
@@ -78,6 +81,43 @@
   body .myGrid>button.active,body .nav>button.active,body .opsGrid>button.active{background:#211d10!important;color:#fffaf0!important;border-color:var(--vkv-screen-gold)!important}
   body.adminDashboardPage #dashboardHome{border-top-color:var(--vkv-screen-gold)!important}
   body .adminWorkspaceArt{filter:sepia(.4) brightness(1.35);opacity:.55!important}
+
+  /* Admin dashboard launcher cards: deliberate warm gold with dark readable copy. */
+  body.adminDashboardPage .tile,
+  body.adminDashboardPage .premiumTile,
+  body.adminDashboardPage .tiles>.tile{
+    background:linear-gradient(145deg,var(--vkv-card-gold-soft),var(--vkv-card-gold))!important;
+    border-color:#b78d13!important;
+    border-left-color:#7e5f08!important;
+    color:var(--vkv-card-ink)!important;
+    box-shadow:0 8px 20px rgba(0,0,0,.18)!important;
+  }
+  body.adminDashboardPage .tile b,body.adminDashboardPage .tile strong,
+  body.adminDashboardPage .premiumTile b,body.adminDashboardPage .premiumTile strong{color:#17130b!important}
+  body.adminDashboardPage .tile span,body.adminDashboardPage .tile p,
+  body.adminDashboardPage .premiumTile span,body.adminDashboardPage .premiumTile p{color:#3c3218!important}
+  body.adminDashboardPage .tile:hover,body.adminDashboardPage .premiumTile:hover{
+    background:linear-gradient(145deg,#f4d77a,#e8bd3d)!important;
+    border-color:#d2a51f!important;
+  }
+  body.adminDashboardPage .tile::after,body.adminDashboardPage .premiumTile::after{opacity:.18!important}
+
+  /* Common contrast repairs for pale semantic pills/cards created by legacy modules. */
+  body .statusChip,body .status-chip,body .categoryBadge,body .category-badge,
+  body .pill.light,body .badge.light,body .tag.light{
+    color:#19160d!important;
+  }
+  body .timeItem,body .periodCard,body .period-card{
+    background:#181817!important;color:#f6f2e8!important;border-color:#5a5133!important;
+  }
+  body .timeItem label,body .periodCard label,body .period-card label{color:#cfc8b8!important}
+  body .timeItem input,body .periodCard input,body .period-card input{background:#0f1010!important;color:#fff!important;border-color:#655820!important}
+
+  /* If a legacy module deliberately keeps a pale/gold card, its text must turn dark. */
+  body .goldCard,body .gold-card,body .warmCard,body .warm-card{
+    background:linear-gradient(145deg,#f0cf69,#e8bd3d)!important;color:#17130b!important;border-color:#b78d13!important;
+  }
+  body .goldCard *,body .gold-card *,body .warmCard *,body .warm-card *{color:#17130b!important}
 
   /* Finalisation preview deliberately resembles the actual printed sheet. */
   body .printSheet{
