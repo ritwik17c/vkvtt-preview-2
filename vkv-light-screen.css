@@ -103,4 +103,10 @@
 @media print{
   html[data-vkv-theme="light"],html[data-vkv-theme="black-gold"]{color-scheme:light!important}
   #vkvThemeSwitch{display:none!important}
+
+  /* Class Observation official signatures: teacher left, observer right. */
+  .printSign{display:flex!important;width:100%!important;justify-content:space-between!important;align-items:flex-start!important;gap:24mm!important;margin-top:18mm!important;page-break-inside:avoid!important}
+  .printSign span{display:block!important;flex:0 0 40%!important;width:40%!important;max-width:40%!important;border-top:1px solid #000!important;padding-top:3mm!important;white-space:nowrap!important;color:#000!important}
+  .printSign span:first-child{margin-right:auto!important;text-align:left!important}
+  .printSign span:last-child{margin-left:auto!important;text-align:right!important}
 }
