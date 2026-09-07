@@ -13,10 +13,12 @@
     if(!l){l=doc.createElement('link');l.id=id;l.rel='stylesheet';l.href=href;doc.head.appendChild(l)}
     return l;
   }
-  function themeLinks(doc=document){
+  function allThemeLinks(doc=document){
+    const bg=ensureCss(doc,'vkvBlackGoldThemeCss','./vkv-black-gold-screen.css?v=20260908-theme4');
+    const lt=ensureCss(doc,'vkvLightThemeCss','./vkv-light-screen.css?v=20260908-theme4');
     return{
-      bg:ensureCss(doc,'vkvBlackGoldThemeCss','./vkv-black-gold-screen.css?v=20260908-theme4'),
-      lt:ensureCss(doc,'vkvLightThemeCss','./vkv-light-screen.css?v=20260908-theme4')
+      bg:[...new Set([bg,...doc.querySelectorAll('link[href*="vkv-black-gold-screen.css"]')])],
+      lt:[...new Set([lt,...doc.querySelectorAll('link[href*="vkv-light-screen.css"]')])]
     };
   }
   function ensureThemeSafetyStyle(doc=document){
@@ -55,10 +57,10 @@
   function apply(next,doc=document,persist=doc===document){
     if(!VALID.has(next))next='black-gold';
     if(EXEMPT&&doc===document){doc.documentElement.dataset.vkvTheme='semantic';return}
-    const{bg,lt}=themeLinks(doc);ensureThemeSafetyStyle(doc);
+    const links=allThemeLinks(doc);ensureThemeSafetyStyle(doc);
     doc.documentElement.dataset.vkvTheme=next;
-    bg.disabled=next!=='black-gold';
-    lt.disabled=next!=='light';
+    links.bg.forEach(l=>l.disabled=next!=='black-gold');
+    links.lt.forEach(l=>l.disabled=next!=='light');
     if(doc===document)theme=next;
     if(persist){try{localStorage.setItem(KEY,next)}catch(_){} }
     if(doc===document){
@@ -67,19 +69,24 @@
       window.dispatchEvent(new CustomEvent('vkv-theme-change',{detail:{theme:next}}));
     }
   }
+  function registerThemeShell(){
+    if(!('serviceWorker' in navigator)||location.protocol==='file:')return;
+    navigator.serviceWorker.register('./sw.js?v=20260908-theme4',{scope:'./'}).catch(e=>console.info('[VKVTT theme] shell registration skipped:',e?.message||e));
+  }
   function mount(){
     if(EXEMPT)return;
     installCampusHeader();
-    if(document.getElementById('vkvThemeSwitch')){apply(theme);return}
-    const box=document.createElement('div');box.id='vkvThemeSwitch';box.className='vkv-screen-only';box.setAttribute('aria-label','Appearance');
-    box.innerHTML='<span>Appearance</span><button type="button" data-vkv-theme-choice="light">☀ Light</button><button type="button" data-vkv-theme-choice="black-gold">● Black & Gold</button>';
-    const st=document.createElement('style');st.textContent=`#vkvThemeSwitch{display:inline-flex;align-items:center;gap:5px;padding:4px;border:1px solid #5b5130;border-radius:12px;background:rgba(12,13,13,.88);font:600 12px/1.2 system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:#d9d3c4;white-space:nowrap;position:relative;z-index:20}#vkvThemeSwitch>span{padding:0 4px}#vkvThemeSwitch button{padding:6px 8px!important;border-radius:8px!important;font-size:12px!important;line-height:1!important;min-height:0!important}#vkvThemeSwitch button[aria-pressed="true"]{background:#f2c335!important;color:#17130b!important;border-color:#f2c335!important}@media(max-width:650px){#vkvThemeSwitch>span{display:none}#vkvThemeSwitch button{padding:6px!important}}@media print{#vkvThemeSwitch{display:none!important}}`;document.head.appendChild(st);
-    const host=document.querySelector('.account,.actions,.head,.bar,.top')||document.body;host.appendChild(box);
-    box.addEventListener('click',e=>{const b=e.target.closest('[data-vkv-theme-choice]');if(b)apply(b.dataset.vkvThemeChoice)});
-    apply(theme);
+    if(!document.getElementById('vkvThemeSwitch')){
+      const box=document.createElement('div');box.id='vkvThemeSwitch';box.className='vkv-screen-only';box.setAttribute('aria-label','Appearance');
+      box.innerHTML='<span>Appearance</span><button type="button" data-vkv-theme-choice="light">☀ Light</button><button type="button" data-vkv-theme-choice="black-gold">● Black & Gold</button>';
+      const st=document.createElement('style');st.textContent=`#vkvThemeSwitch{display:inline-flex;align-items:center;gap:5px;padding:4px;border:1px solid #5b5130;border-radius:12px;background:rgba(12,13,13,.88);font:600 12px/1.2 system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:#d9d3c4;white-space:nowrap;position:relative;z-index:20}#vkvThemeSwitch>span{padding:0 4px}#vkvThemeSwitch button{padding:6px 8px!important;border-radius:8px!important;font-size:12px!important;line-height:1!important;min-height:0!important}#vkvThemeSwitch button[aria-pressed="true"]{background:#f2c335!important;color:#17130b!important;border-color:#f2c335!important}@media(max-width:650px){#vkvThemeSwitch>span{display:none}#vkvThemeSwitch button{padding:6px!important}}@media print{#vkvThemeSwitch{display:none!important}}`;document.head.appendChild(st);
+      const host=document.querySelector('.account,.actions,.head,.bar,.top')||document.body;host.appendChild(box);
+      box.addEventListener('click',e=>{const b=e.target.closest('[data-vkv-theme-choice]');if(b)apply(b.dataset.vkvThemeChoice)});
+    }
+    apply(theme);registerThemeShell();
   }
 
-  if(!EXEMPT){themeLinks();ensureThemeSafetyStyle();apply(theme,document,false)}
+  if(!EXEMPT){allThemeLinks();ensureThemeSafetyStyle();apply(theme,document,false)}
   window.addEventListener('storage',e=>{if(e.key===KEY&&VALID.has(e.newValue)&&e.newValue!==theme)apply(e.newValue,document,false)});
   try{const bc=new BroadcastChannel('vkvtt-theme');bc.onmessage=e=>{if(VALID.has(e.data)&&e.data!==theme)apply(e.data,document,false)};window.addEventListener('vkv-theme-change',e=>{if(VALID.has(e.detail?.theme))bc.postMessage(e.detail.theme)})}catch(_){}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
