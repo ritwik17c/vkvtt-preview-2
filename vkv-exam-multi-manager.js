@@ -2,7 +2,7 @@
   'use strict';
   let apiReady=null,profile=null,profiles=[],rendering=false;
   const $=id=>document.getElementById(id);
-  const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
 
   async function api(){
     if(apiReady)return apiReady;
@@ -66,14 +66,14 @@
             permissions:{...(p.permissions||{}),examDepartment:true},examInCharge:true,
             examInChargeFor:examName(),examDelegationSource:'exam_module',examInChargeAssignedByUid:user.uid,examInChargeAssignedAt:now
           },{merge:true});
-        }else if(was&&p.examDelegationSource==='exam_module'){
+        }else if(was){
           batch.set(a.doc(a.db,'authorizedUsers',p.id),{
             permissions:{...(p.permissions||{}),examDepartment:false},examInCharge:false,examInChargeFor:'',examDelegationSource:'',examInChargeClearedAt:now
           },{merge:true});
         }
       }
       await batch.commit();
-      if(msg){msg.className='notice success';msg.innerHTML=`<b>${selected.size} Exam Manager${selected.size===1?'':'s'} saved.</b> Each selected staff member now has independent Examination Department access.`}
+      if(msg){msg.className='notice success';msg.innerHTML=`<b>${selected.size} Exam Manager${selected.size===1?'':'s'} saved.</b> The same Examination Department delegation is reflected in User Access & Roles.`}
       await render();
     }catch(e){if(msg){msg.className='notice error';msg.textContent='Could not save Exam Managers: '+(e?.message||e)}}finally{if(button)button.disabled=false}
   }
