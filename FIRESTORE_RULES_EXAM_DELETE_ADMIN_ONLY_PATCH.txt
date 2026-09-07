@@ -1,0 +1,38 @@
+// VKVTT Examination Module — Admin-only deletion patch
+// Date: 07/09/2026
+//
+// PURPOSE
+// Protect BOTH saved examination timetables and saved examination templates
+// from deletion by Exam In-charge / Exam Manager accounts.
+// All of these records are stored in /examSchedules/{scheduleId}.
+//
+// In FIRESTORE_RULES_V66_REPLACE_ALL.txt, find the existing
+// match /examSchedules/{scheduleId} block and replace ONLY its current
+// `allow delete:` condition with the line below.
+//
+// OLD behaviour allowed the owner/Exam Manager to delete draft/returned items.
+// NEW behaviour: only an active authorised user whose role is exactly `admin`
+// may delete any examSchedules document.
+
+allow delete: if isAdmin();
+
+// The complete intended block is:
+//
+// match /examSchedules/{scheduleId} {
+//   allow read: if canUseExamDepartment();
+//   allow create: if canUseExamDepartment()
+//                 && request.resource.data.ownerUid == request.auth.uid
+//                 && request.resource.data.status == 'draft';
+//   allow update: if isAdmin()
+//                 || (canUseExamDepartment()
+//                     && resource.data.ownerUid == request.auth.uid
+//                     && request.resource.data.ownerUid == resource.data.ownerUid
+//                     && resource.data.status in ['draft', 'returned']
+//                     && request.resource.data.status in ['draft', 'submitted']);
+//   allow delete: if isAdmin();
+// }
+//
+// IMPORTANT
+// Publish the updated Firestore Rules after applying this patch.
+// No changes are required to create/update permissions: Exam In-charge / Manager
+// can still prepare, save and submit their own permitted examination work.
