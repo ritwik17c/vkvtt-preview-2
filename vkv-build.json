@@ -1,6 +1,6 @@
 {
-  "build": "2026.09.08.10",
+  "build": "2026.09.08.11",
   "channel": "preview-2-production-hardening",
   "updated": "2026-09-08",
-  "notes": "Exact VKV campus header photo stored locally; black-gold theme extended across remaining admin tools with contrast refinements; Approved Leave & Duty Register retains its leave-specific colour system."
+  "notes": "Production presentation hardening: campus header cache refreshed, finalised Proxy shown as a white print-preview with Principal signature space, and selectable Light / Black & Gold theme foundation added without changing operational logic or print outputs."
 }
