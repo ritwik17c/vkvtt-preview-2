@@ -1,4 +1,5 @@
 /* Preview2 QB: populate complete school classes and subjects from master + safe fallbacks. */
+import'./vkv-cache-bootstrap.js?v=20260908-production-cache-1';
 (async()=>{'use strict';
 const $=id=>document.getElementById(id),safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const A=await import('https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js'),F=await import('https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore-lite.js');const cfg={apiKey:'AIzaSyDheZpyXghd1aQ9_RLhwpacVriG__wNZW4',authDomain:'vkv-nalbari-timetable.firebaseapp.com',projectId:'vkv-nalbari-timetable',storageBucket:'vkv-nalbari-timetable.firebasestorage.app',messagingSenderId:'791432856951',appId:'1:791432856951:web:61324065a54bef30f98d72'},app=A.getApps().length?A.getApp():A.initializeApp(cfg),db=F.getFirestore(app);
