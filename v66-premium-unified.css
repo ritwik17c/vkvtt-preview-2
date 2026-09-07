@@ -1,3 +1,4 @@
+@import url("vkv-black-gold-screen.css?v=20260908-theme-1");
 
 /* VKVTT v66.2 unified premium shell */
 html.v66-ui body > header:not(.topbar){background:linear-gradient(112deg,#0b2b42,#164e70)!important;border-bottom:3px solid #c88a18!important;box-shadow:0 6px 24px rgba(11,43,66,.13)!important}
