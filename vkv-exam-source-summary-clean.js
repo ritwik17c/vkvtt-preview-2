@@ -4,8 +4,13 @@
     const s=document.createElement('script');s.src='vkv-exam-template-class-scope-fix.js?v=20260907-scope-repair-1';s.dataset.templateScopeFix='1';document.head.appendChild(s);
   }
   if(!document.querySelector('script[data-vkv-template-delete-loader]')){
-    const s=document.createElement('script');s.src='vkv-exam-template-delete.js?v=20260907-safe-template-delete-1';s.dataset.vkvTemplateDeleteLoader='1';document.head.appendChild(s);
+    const s=document.createElement('script');s.src='vkv-exam-template-delete.js?v=20260907-admin-delete-auth-2';s.dataset.vkvTemplateDeleteLoader='1';document.head.appendChild(s);
   }
+  const loadOnce=(key,src)=>{if(document.querySelector(`script[data-${key}]`))return;const s=document.createElement('script');s.src=src;s.dataset[key]='1';document.head.appendChild(s)};
+  loadOnce('vkvExamMultiManager','vkv-exam-multi-manager.js?v=20260907-multi-manager-1');
+  loadOnce('vkvExamCalendarGuard','vkv-exam-calendar-date-guard.js?v=20260907-calendar-guard-1');
+  loadOnce('vkvExamDatewiseDuty','vkv-exam-datewise-duty-planner.js?v=20260907-datewise-duty-1');
+  loadOnce('vkvExamApprovedOutput','vkv-exam-approved-output-access.js?v=20260907-approved-output-1');
   const $=id=>document.getElementById(id);
   const wait=ms=>new Promise(r=>setTimeout(r,ms));
 
