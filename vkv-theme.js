@@ -9,13 +9,30 @@
   function ensureLightCss(doc=document){
     if(doc.getElementById('vkvLightThemeCss'))return;
     const l=doc.createElement('link');
-    l.id='vkvLightThemeCss';l.rel='stylesheet';l.href='./vkv-light-screen.css?v=20260908-theme1';
+    l.id='vkvLightThemeCss';l.rel='stylesheet';l.href='./vkv-light-screen.css?v=20260908-theme2';
     doc.head.appendChild(l);
+  }
+  function ensureThemeSafetyStyle(doc=document){
+    if(doc.getElementById('vkvThemeSafetyStyle'))return;
+    const st=doc.createElement('style');st.id='vkvThemeSafetyStyle';
+    const page=(doc.location?.pathname||'').split('/').pop()||'index.html';
+    st.textContent=`
+      html[data-vkv-theme="light"] body .noticeTitle,html[data-vkv-theme="light"] body .section h2,html[data-vkv-theme="light"] body .panel h3,html[data-vkv-theme="light"] body .tile,html[data-vkv-theme="light"] body .tile *{color:#17364f!important}
+      html[data-vkv-theme="light"] body .noticeBody,html[data-vkv-theme="light"] body .resultbox,html[data-vkv-theme="light"] body .resultbox *,html[data-vkv-theme="light"] body .tag{color:#526d7d!important}
+      html[data-vkv-theme="light"] #periodReminderControl #prNext .small,html[data-vkv-theme="light"] #periodReminderControl #prStatus{color:#526d7d!important}
+      html[data-vkv-theme="light"] body .pill,html[data-vkv-theme="light"] body .badge,html[data-vkv-theme="light"] body .chip{color:#17364f!important}
+      @media print{html[data-vkv-theme="light"] body *,html[data-vkv-theme="black-gold"] body *{text-shadow:none!important}}
+    `;
+    if(/^index\.html?$/i.test(page)||page==='')st.textContent+=`
+      body>header{background-image:linear-gradient(90deg,rgba(5,6,6,.78) 0%,rgba(7,8,8,.58) 42%,rgba(7,8,8,.42) 70%,rgba(10,9,5,.56) 100%),linear-gradient(180deg,rgba(0,0,0,.06),rgba(0,0,0,.28)),url('./vkv-campus-header.jpg?v=20260908-theme2')!important;background-position:center 48%!important;background-size:cover!important;background-repeat:no-repeat!important}
+      html[data-vkv-theme="light"] body>header{background-image:linear-gradient(90deg,rgba(22,83,121,.72),rgba(31,102,145,.50)),linear-gradient(180deg,rgba(255,255,255,.02),rgba(0,0,0,.20)),url('./vkv-campus-header.jpg?v=20260908-theme2')!important}
+    `;
+    doc.head.appendChild(st);
   }
   function apply(next,doc=document){
     if(!VALID.has(next))next='black-gold';
     theme=next;
-    ensureLightCss(doc);
+    ensureLightCss(doc);ensureThemeSafetyStyle(doc);
     doc.documentElement.dataset.vkvTheme=next;
     try{localStorage.setItem(KEY,next)}catch(_){}
     if(doc===document){
@@ -40,8 +57,8 @@
     box.addEventListener('click',e=>{const b=e.target.closest('[data-vkv-theme-choice]');if(b)apply(b.dataset.vkvThemeChoice)});
     apply(theme);
   }
-  ensureLightCss();
+  ensureLightCss();ensureThemeSafetyStyle();
   document.documentElement.dataset.vkvTheme=theme;
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
-  window.VKVTheme={get:()=>theme,set:t=>apply(t),applyToDocument:(doc,t=theme)=>{ensureLightCss(doc);doc.documentElement.dataset.vkvTheme=t;}};
+  window.VKVTheme={get:()=>theme,set:t=>apply(t),applyToDocument:(doc,t=theme)=>{ensureLightCss(doc);ensureThemeSafetyStyle(doc);doc.documentElement.dataset.vkvTheme=t;}};
 })();
