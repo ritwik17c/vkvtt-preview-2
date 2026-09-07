@@ -1,0 +1,123 @@
+(()=>{
+  'use strict';
+  let apiReady=null,user=null,profile=null,records=[];
+  const $=id=>document.getElementById(id);
+  const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const fmtMs=v=>v?new Date(Number(v)).toLocaleString('en-GB'):'';
+  const clone=v=>JSON.parse(JSON.stringify(v));
+
+  async function api(){
+    if(apiReady)return apiReady;
+    apiReady=(async()=>{
+      const [{getApps,getApp},{getAuth,onAuthStateChanged},{getFirestore,getDoc,getDocs,collection,doc}]=await Promise.all([
+        import('https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js'),
+        import('https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js'),
+        import('https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore-lite.js')
+      ]);
+      const app=getApps().length?getApp():null;if(!app)throw new Error('Firebase is not ready.');
+      return{auth:getAuth(app),db:getFirestore(app),onAuthStateChanged,getDoc,getDocs,collection,doc};
+    })();
+    return apiReady;
+  }
+
+  const permitted=()=>profile?.active===true&&(profile.role==='admin'||profile.permissions?.examDepartment===true);
+  const isTemplate=x=>x?.templateOnly===true||/^TEMPLATE_/i.test(String(x?.id||''));
+  const isSchedule=x=>!isTemplate(x)&&x?.configOnly!==true&&x?.workspace;
+
+  function installSharedSchedulePanel(){
+    const pane=document.querySelector('[data-pane="outputs"]');if(!pane)return null;
+    let box=$('examManagerSharedSchedules');
+    if(box)return box;
+    box=document.createElement('article');box.id='examManagerSharedSchedules';box.className='surface';
+    box.innerHTML=`<div class="sectionTitle"><div><h3>Exam Manager · Shared Saved Timetables</h3><p>All saved examination timetables are visible to every authorised Exam Manager. Ownership is shown only for reference.</p></div><button class="button" id="refreshExamManagerSharedLibrary">Refresh</button></div><div id="examManagerSharedScheduleList" class="draftList"><div class="notice info">Loading saved timetables…</div></div>`;
+    const approved=$('approvedExamManagerOutputs');if(approved)approved.before(box);else pane.appendChild(box);
+    return box;
+  }
+
+  function installSharedTemplateNotice(){
+    const box=$('majorTemplateBox');if(!box)return;
+    let n=$('examManagerSharedTemplateNote');if(n)return;
+    n=document.createElement('div');n.id='examManagerSharedTemplateNote';n.className='notice info';n.style.marginTop='10px';
+    n.innerHTML='<b>Shared template library:</b> templates saved by any authorised Exam Manager are available in the selector above.';
+    box.appendChild(n);
+  }
+
+  function renderSchedules(){
+    const host=$('examManagerSharedScheduleList');if(!host)return;
+    const list=records.filter(isSchedule).sort((a,b)=>Number(b.updatedAtMs||b.createdAtMs||0)-Number(a.updatedAtMs||a.createdAtMs||0));
+    host.innerHTML=list.length?list.map(x=>{
+      const status=String(x.status||'draft'),own=x.ownerUid===user?.uid;
+      return `<div class="draftCard"><h4>${safe(x.name||'Untitled Examination Schedule')}</h4><p><span class="workflowPill ${safe(status)}">${safe(status==='published'?'Published':status==='submitted'?'Submitted':status==='returned'?'Returned':'Draft')}</span>${safe(fmtMs(x.updatedAtMs||x.createdAtMs))}</p><p>${x.workspace?.timetable?.events?.length||0} papers · ${x.workspace?.duties?.invigilation?.length||0} invigilation duties</p><p><small>Prepared by: ${safe(x.ownerName||x.ownerEmail||'Exam Manager')}${own?' · Your timetable':''}</small></p><div class="buttonRow">${own?`<button class="button" data-shared-open-own="${safe(x.id)}">Open</button>`:`<button class="button" data-shared-view="${safe(x.id)}">View / Print</button>`}</div></div>`
+    }).join(''):'<div class="notice info">No saved examination timetable found.</div>';
+  }
+
+  function renderTemplates(){
+    const sel=$('majorTemplateSelect');if(!sel)return;
+    const selected=sel.value;
+    const list=records.filter(isTemplate).sort((a,b)=>String(a.name||'').localeCompare(String(b.name||'')));
+    sel.innerHTML='<option value="">Select saved template…</option>'+list.map(t=>`<option value="${safe(t.id)}">${safe(t.name||t.id)}${t.ownerUid===user?.uid?'':' · Shared'}</option>`).join('');
+    if(list.some(x=>x.id===selected))sel.value=selected;
+    installSharedTemplateNotice();
+  }
+
+  async function load(){
+    if(!user||!permitted())return;
+    try{
+      const a=await api(),snap=await a.getDocs(a.collection(a.db,'examSchedules'));
+      records=snap.docs.map(d=>({id:d.id,...d.data()}));
+      installSharedSchedulePanel();renderSchedules();renderTemplates();
+    }catch(e){
+      installSharedSchedulePanel();
+      const host=$('examManagerSharedScheduleList');if(host)host.innerHTML='<div class="notice error">Could not load shared examination library: '+safe(e?.message||e)+'</div>';
+      const msg=$('majorTemplateMsg');if(msg)msg.textContent='Could not load shared templates: '+(e?.message||e);
+    }
+  }
+
+  function applySharedTemplate(item){
+    if(!item)return;
+    const desired=item.template||{},classes=desired.classes||Object.keys(desired.subjects||{});
+    if(!classes.length){alert('This template does not contain class/subject selections.');return}
+    const title=$('workspaceName');if(title){title.value=item.name||'Examination Template';title.dispatchEvent(new Event('input',{bubbles:true}));title.dispatchEvent(new Event('change',{bubbles:true}))}
+    try{$('majorNoClasses')?.click()}catch{}
+    setTimeout(()=>{
+      for(const cls of classes){
+        const subs=desired.subjects?.[cls]||[];
+        if(subs.length)window.vkvExamWorkspace?.applySubjectMaster?.(cls,clone(subs));
+      }
+      document.dispatchEvent(new CustomEvent('vkv-exam-template-fresh-draft',{detail:{name:item.name||'Examination Template',sharedTemplateId:item.id}}));
+      const msg=$('majorTemplateMsg');if(msg){msg.className='notice success';msg.innerHTML=`<b>${safe(item.name||'Template')}</b> loaded from the shared Exam Manager library. Select the examination dates for this new timetable.`}
+    },120);
+  }
+
+  function viewPrint(item){
+    const ws=item?.workspace;if(!ws)return;
+    const events=[...(ws.timetable?.events||[])].sort((a,b)=>String(a.date).localeCompare(String(b.date))||String(a.slotId).localeCompare(String(b.slotId))||String(a.className).localeCompare(String(b.className),undefined,{numeric:true}));
+    const rows=events.map(e=>`<tr><td>${safe(e.date||'')}</td><td>${safe(e.day||'')}</td><td>${safe(e.className||'')}</td><td>${safe(e.subject||'')}</td><td>${safe(e.roomId||'')}</td></tr>`).join('');
+    const w=open('','_blank');if(!w){alert('Allow pop-ups to view this saved timetable.');return}
+    w.document.write(`<!doctype html><html><head><title>${safe(item.name||'Saved Examination Timetable')}</title><style>body{font-family:Arial,sans-serif;margin:24px;color:#111}h1,h2{text-align:center}table{width:100%;border-collapse:collapse;margin-top:18px}th,td{border:1px solid #222;padding:7px;text-align:left}button{padding:9px 14px;margin:0 0 14px}</style></head><body><button onclick="window.print()">Print</button><h1>VIVEKANANDA KENDRA VIDYALAYA, NALBARI</h1><h2>${safe(item.name||'Saved Examination Timetable')}</h2><p><b>Status:</b> ${safe(item.status||'draft')} &nbsp; <b>Prepared by:</b> ${safe(item.ownerName||item.ownerEmail||'Exam Manager')}</p><table><thead><tr><th>Date</th><th>Day</th><th>Class</th><th>Subject</th><th>Room / Venue</th></tr></thead><tbody>${rows||'<tr><td colspan="5">No generated timetable rows are stored in this workspace.</td></tr>'}</tbody></table></body></html>`);w.document.close();
+  }
+
+  document.addEventListener('click',e=>{
+    if(e.target.closest?.('#refreshExamManagerSharedLibrary')){load();return}
+    const own=e.target.closest?.('[data-shared-open-own]');if(own){
+      const id=own.dataset.sharedOpenOwn,existing=document.querySelector(`[data-open-cloud="${CSS.escape(id)}"]`);
+      if(existing){existing.click();return}
+      alert('This timetable is saved under your account but the core list has not refreshed yet. Press Refresh once and try again.');return
+    }
+    const view=e.target.closest?.('[data-shared-view]');if(view){viewPrint(records.find(x=>x.id===view.dataset.sharedView));return}
+    const loadButton=e.target.closest?.('#majorLoadTemplate');if(loadButton){
+      const id=String($('majorTemplateSelect')?.value||'');if(!id)return;
+      const item=records.find(x=>x.id===id);if(item&&item.ownerUid!==user?.uid){e.preventDefault();e.stopImmediatePropagation();e.stopPropagation();applySharedTemplate(item);return}
+    }
+    if(e.target.closest?.('[data-pane-target="setup"],[data-pane-target="outputs"]'))setTimeout(load,180);
+  },true);
+
+  (async()=>{
+    const a=await api();a.onAuthStateChanged(a.auth,async u=>{
+      user=u;profile=null;if(!u)return;
+      try{const me=await a.getDoc(a.doc(a.db,'authorizedUsers',u.uid));profile=me.exists()?me.data():null;if(permitted())setTimeout(load,500)}catch{}
+    });
+  })().catch(()=>{});
+
+  let tries=0,t=setInterval(()=>{if(!permitted())return;if($('majorTemplateSelect')||$('[data-pane="outputs"]'))load();if(++tries>15)clearInterval(t)},700);
+})();
