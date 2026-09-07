@@ -3,6 +3,9 @@
   if(!document.querySelector('script[data-template-scope-fix]')){
     const s=document.createElement('script');s.src='vkv-exam-template-class-scope-fix.js?v=20260907-scope-repair-1';s.dataset.templateScopeFix='1';document.head.appendChild(s);
   }
+  if(!document.querySelector('script[data-vkv-template-delete-loader]')){
+    const s=document.createElement('script');s.src='vkv-exam-template-delete.js?v=20260907-safe-template-delete-1';s.dataset.vkvTemplateDeleteLoader='1';document.head.appendChild(s);
+  }
   const $=id=>document.getElementById(id);
   const wait=ms=>new Promise(r=>setTimeout(r,ms));
 
