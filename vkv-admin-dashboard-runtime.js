@@ -1,6 +1,7 @@
 /* Preview 2 · Canonical Admin Dashboard runtime. One owner for grouping, naming and routes. */
 (()=>{'use strict';
 const P2='./',$=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+if(!document.querySelector('script[src*="vkv-theme.js"]')){const s=document.createElement('script');s.src=P2+'vkv-theme.js?v=20260908-theme5';s.defer=true;document.head.appendChild(s)}
 const norm=s=>String(s||'').replace(/[^A-Za-z0-9&]+/g,' ').replace(/\s+/g,' ').trim().toLowerCase();
 function tile(id,icon,title,desc,url){let t=$('#'+id);if(!t){t=document.createElement('div');t.className='tile';t.id=id}t.innerHTML=`<b>${icon} ${title}</b><span>${desc}</span>`;if(url)t.onclick=()=>location.href=url;return t}
 function section(id,title,desc){let s=$('#'+id);if(!s){s=document.createElement('section');s.id=id;s.className='card vkvAdminGroup';s.style.marginTop='16px';s.innerHTML=`<div class="sectionTop"><div><h2 style="margin:0">${title}</h2><div class="help">${desc}</div></div></div><div class="tiles"></div>`}return s}
@@ -39,6 +40,7 @@ function build(){const home=$('#dashboardHome');if(!home||$('#vkvAdminArchitectu
  g4.append(tile('openStaffNoticeBoard','📢','Staff Notice Board','Create, publish, edit and manage notices/circulars shown to staff.',P2+'admin-staff-notice-board.html?v=1'));
 
  const academic=section('vkvAdminAcademic','5 · Academic Administration','Academic workflows, verification and question-bank administration.');const g5=academic.querySelector('.tiles');
+ g5.append(tile('openClassObservation','📝','Class Observation','Observe a class using the VKV Nalbari 20-criterion developmental rubric, finalise feedback and share it with the concerned teacher.',P2+'class-observation.html?v=20260908-observation-2'));
  g5.append(tile('openExamDepartment','🗓️','Examination Module','Prepare, submit, approve and publish exam timetables, invigilator allocations and reliever duty lists.',P2+'exam-department.html?v=20260904-template-apply-direct-3'));
  g5.append(tile('openQuestionBankAdmin','🧠','Question Bank Administration','Manage coordinators, verification, reports and Principal oversight.',P2+'admin-question-bank-v2.html?v=p2'));
  g5.append(tile('openQuestionBankImport','📥','Import Questions from Excel / Google Sheet','Import existing form responses. Repeated/duplicate form columns are consolidated into useful question fields.',P2+'admin-qb-import.html?v=1'));
