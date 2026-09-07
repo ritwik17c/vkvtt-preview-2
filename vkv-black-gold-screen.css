@@ -1,0 +1,110 @@
+/* VKVTT shared black + saffron screen theme.
+   Presentation only. Official print output remains white/black. */
+:root{
+  --vkv-screen-bg:#090a0a;
+  --vkv-screen-panel:#131414;
+  --vkv-screen-panel2:#181817;
+  --vkv-screen-line:#3a382f;
+  --vkv-screen-line2:#5c4b17;
+  --vkv-screen-gold:#f2c335;
+  --vkv-screen-gold2:#d9a91c;
+  --vkv-screen-cream:#f6f2e8;
+  --vkv-screen-muted:#aaa79f;
+}
+
+@media screen{
+  html{color-scheme:dark}
+  body{
+    background:radial-gradient(circle at 88% 2%,rgba(242,195,53,.07),transparent 26rem),linear-gradient(180deg,#0b0c0c,#080909 68%,#060707)!important;
+    color:var(--vkv-screen-cream)!important;
+  }
+  body>header,.topbar{
+    background:linear-gradient(135deg,#111212 0%,#161713 58%,#211b0d 100%)!important;
+    color:#fff!important;
+    border-color:var(--vkv-screen-line2)!important;
+    box-shadow:0 10px 28px rgba(0,0,0,.26)!important;
+  }
+  h1,h2,h3,h4,h5,h6,legend,strong{color:#fffaf0!important}
+  p{color:#ddd7ca}
+  .card,.panel,.view,.surface,.gateCard,.workspaceBadge,.summaryCard,.metric,.tile,.qcard,.currentBox,.replacementItem,.historyItem,.resultbox,.tableWrap,.tablewrap,.table-wrap,.table-shell,.draftCard,.outputCard,.reviewCard{
+    background:linear-gradient(145deg,#151616,#111212)!important;
+    color:var(--vkv-screen-cream)!important;
+    border-color:var(--vkv-screen-line)!important;
+    box-shadow:0 8px 22px rgba(0,0,0,.18)!important;
+  }
+  .hero,.schedule,.tip,.notice.info,.info,.warning,.hardRule,.adminWorkspaceHero{
+    background:linear-gradient(145deg,#171611,#201b0e)!important;
+    color:#e9e0c9!important;
+    border-color:var(--vkv-screen-line2)!important;
+  }
+  .notice,.status{
+    background:#131414!important;
+    color:var(--vkv-screen-cream)!important;
+    border-color:var(--vkv-screen-line)!important;
+  }
+  .ok,.green,.notice.success{
+    background:#102016!important;
+    color:#a9dbb5!important;
+    border-color:#315d3c!important;
+  }
+  .error,.danger,.notice.error{
+    background:#261313!important;
+    color:#f0b7b7!important;
+    border-color:#713939!important;
+  }
+  .eyebrow,.v66-eyebrow,.noticeHead,.num,.adminWorkspaceCopy .eyebrow{color:var(--vkv-screen-gold)!important}
+  .small,.help,.sub,.subtitle,.lab,label,.tableHint,.breadcrumb,.adminWorkspaceCopy p{color:var(--vkv-screen-muted)!important}
+  .adminWorkspaceCopy strong{color:#fffaf0!important}
+  button,.btn,a.btn,.button,.navButton{
+    background:#171817!important;
+    color:var(--vkv-screen-cream)!important;
+    border-color:#5a5648!important;
+    box-shadow:none!important;
+  }
+  button:hover,.btn:hover,a.btn:hover,.button:hover,.navButton:hover{
+    background:#211f18!important;
+    border-color:#8b7426!important;
+  }
+  button.primary,.primary,.button.primary,.tabs button.active,.navButton.active,[aria-pressed="true"]{
+    background:var(--vkv-screen-gold)!important;
+    color:#15130b!important;
+    border-color:var(--vkv-screen-gold)!important;
+    outline-color:var(--vkv-screen-gold)!important;
+  }
+  input,select,textarea{
+    background:#101111!important;
+    color:var(--vkv-screen-cream)!important;
+    border-color:#4a4638!important;
+  }
+  input::placeholder,textarea::placeholder{color:#77736c!important}
+  option{background:#101111;color:var(--vkv-screen-cream)}
+  input[type="checkbox"],input[type="radio"]{accent-color:var(--vkv-screen-gold2)}
+  .tableWrap,.tablewrap,.table-wrap,.table-shell{background:#111212!important}
+  table{background:#121313!important;color:#eee9dd!important}
+  th{background:#1d1c17!important;color:#f4d566!important;border-color:#34322c!important}
+  td{background:#121313!important;color:#eee9dd!important;border-color:#302f2a!important}
+  tr:hover td{background:#181817!important}
+  a{color:#f0cd58}
+  .badge,.tag,.chip,.chips>*{background:#282311!important;color:#f1d36c!important;border-color:#64531b!important}
+  .sidebar{background:#101111!important;border-color:#34322c!important}
+  .workspace{background:transparent!important}
+  .paneHead p,.sectionTitle p{color:var(--vkv-screen-muted)!important}
+  hr{border-color:#333128!important}
+}
+
+/* Printing is deliberately formal and independent of the screen theme. */
+@media print{
+  html,body{color-scheme:light!important;background:#fff!important;color:#000!important}
+  body *{text-shadow:none!important;box-shadow:none!important;filter:none!important}
+  body,main,section,article,header,footer,
+  .card,.panel,.view,.surface,.gateCard,.workspaceBadge,.summaryCard,.metric,.tile,.qcard,.currentBox,.replacementItem,.historyItem,.resultbox,.notice,.status,.tip,.warning,.info,.hardRule,.tableWrap,.tablewrap,.table-wrap,.table-shell,
+  table,thead,tbody,tfoot,tr,th,td{
+    background:#fff!important;color:#000!important;border-color:#000!important;
+  }
+  h1,h2,h3,h4,h5,h6,p,span,strong,small,label,legend,.small,.help,.sub,.subtitle,.lab,.eyebrow,.v66-eyebrow{color:#000!important}
+  input,select,textarea,button,.btn,.button,.navButton{
+    background:#fff!important;color:#000!important;border-color:#000!important;
+  }
+  a,a:visited{color:#000!important;text-decoration:none!important}
+  header::before,header::after,.tile::before,.tile::after,.adminWorkspaceHero::before{display:none!important}
+}
