@@ -10,8 +10,9 @@
   loadOnce('vkvExamMultiManager','vkv-exam-multi-manager.js?v=20260907-multi-manager-1');
   loadOnce('vkvExamCalendarGuard','vkv-exam-calendar-date-guard.js?v=20260907-calendar-guard-1');
   loadOnce('vkvExamDatewiseDuty','vkv-exam-datewise-duty-planner.js?v=20260907-datewise-duty-1');
-  loadOnce('vkvExamApprovedOutput','vkv-exam-approved-output-access.js?v=20260907-approved-output-1');
-  loadOnce('vkvExamManagerSharedLibrary','vkv-exam-manager-shared-library.js?v=20260907-shared-library-2');
+  // Production consolidation: approved-output cards and shared saved records now live
+  // in one authoritative library. Do not load the old duplicate approved-output panel.
+  loadOnce('vkvExamManagerSharedLibrary','vkv-exam-manager-shared-library.js?v=20260907-production-library-1');
   const $=id=>document.getElementById(id);
   const wait=ms=>new Promise(r=>setTimeout(r,ms));
   function clean(){const meta=$('masterMeta');if(meta&&meta.textContent!=='Read-only source')meta.textContent='Read-only source'}
