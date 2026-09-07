@@ -13,6 +13,9 @@
   // Production consolidation: approved-output cards and shared saved records now live
   // in one authoritative library. Do not load the old duplicate approved-output panel.
   loadOnce('vkvExamManagerSharedLibrary','vkv-exam-manager-shared-library.js?v=20260907-production-library-1');
+  // Print layout is frozen/approved. Shared library print buttons must never use an
+  // alternate generic table; reroute them to the approved official matrix renderer.
+  loadOnce('vkvExamApprovedPrintGuard','vkv-exam-approved-print-guard.js?v=20260907-approved-layout-restore-1');
   const $=id=>document.getElementById(id);
   const wait=ms=>new Promise(r=>setTimeout(r,ms));
   function clean(){const meta=$('masterMeta');if(meta&&meta.textContent!=='Read-only source')meta.textContent='Read-only source'}
