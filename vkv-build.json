@@ -1,6 +1,6 @@
 {
-  "build": "2026.09.08.12",
+  "build": "2026.09.08.13",
   "channel": "preview-2-production-hardening",
   "updated": "2026-09-08",
-  "notes": "Theme hardening pass: campus header visibility forced with cache-busted local asset, Light-theme contrast safeguards strengthened, Proxy print-preview and print-safe separation retained."
+  "notes": "Hourly hardening pass 1: theme controller now propagates to every navigated root app page through the service worker, theme choice syncs across tabs, campus header is rendered as a real image layer rather than CSS background only, and Light-theme contrast safeguards are broadened while print-only surfaces remain protected."
 }
