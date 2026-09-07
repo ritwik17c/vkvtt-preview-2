@@ -1,0 +1,31 @@
+// VKVTT Examination Module — production-authoritative Firestore block
+// 07/09/2026
+//
+// IMPORTANT: This block supersedes the older examSchedules block still present
+// in FIRESTORE_RULES_V66_REPLACE_ALL.txt. Do not re-publish the older block.
+//
+// Behaviour:
+// - Delegated Exam Managers may read Examination Department records.
+// - They may create their own draft records.
+// - They may edit/submit only their own draft/returned work.
+// - Principal/Admin may review, approve/publish and update any record.
+// - ONLY Principal/Admin may delete saved timetables or templates.
+
+match /examSchedules/{scheduleId} {
+  allow read: if canUseExamDepartment();
+  allow create: if canUseExamDepartment()
+                && request.resource.data.ownerUid == request.auth.uid
+                && request.resource.data.status == 'draft';
+  allow update: if isAdmin()
+                || (canUseExamDepartment()
+                    && resource.data.ownerUid == request.auth.uid
+                    && request.resource.data.ownerUid == resource.data.ownerUid
+                    && resource.data.status in ['draft', 'returned']
+                    && request.resource.data.status in ['draft', 'submitted']);
+  allow delete: if isAdmin();
+}
+
+match /publishedExam/{documentId} {
+  allow read: if canReadSchool();
+  allow create, update, delete: if isAdmin();
+}
