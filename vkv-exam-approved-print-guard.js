@@ -61,10 +61,21 @@
   function storedFooter(title){
     try{return JSON.parse(localStorage.getItem('vkvExamFooter:'+String(title||'').trim().toLowerCase())||'{}')||{}}catch{return{}}
   }
+  function liveFooter(){
+    return{
+      reporting:String(document.getElementById('examFooterReporting')?.value||'').trim(),
+      bus:String(document.getElementById('examFooterBus')?.value||'').trim(),
+      departure:String(document.getElementById('examFooterDeparture')?.value||'').trim()
+    };
+  }
   function printDetails(item){
-    const ws=item?.workspace||{},title=String(item?.name||ws?.name||'Examination Timetable').trim(),saved=storedFooter(title),x=ws.printDetails||item.printDetails||{};
+    const ws=item?.workspace||{},title=String(item?.name||ws?.name||'Examination Timetable').trim(),saved=storedFooter(title),live=liveFooter(),x=ws.printDetails||item.printDetails||{};
     const list=sessions(ws).map(sessionBounds).filter(y=>y.start&&y.end),last=list[list.length-1]||{};
-    return{reporting:x.reporting||saved.reporting||'',bus:x.bus||saved.bus||'',departure:x.departure||saved.departure||addMinutes(last.end,10)||''};
+    return{
+      reporting:x.reporting||live.reporting||saved.reporting||'',
+      bus:x.bus||live.bus||saved.bus||'',
+      departure:x.departure||live.departure||saved.departure||addMinutes(last.end,10)||''
+    };
   }
 
   function footerHtml(item){
