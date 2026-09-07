@@ -1,23 +1,24 @@
 (()=>{
   'use strict';
-  let cloudReady=null,busy=false,adminReady=null,isAdminUser=false;
+  let cloudReady=null,busy=false,adminReady=null,isAdminUser=false,authResolved=false;
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
 
   async function cloud(){
     if(cloudReady)return cloudReady;
     cloudReady=(async()=>{
-      const [{getApps,getApp},{getAuth},{getFirestore,getDoc,deleteDoc,doc}]=await Promise.all([
+      const [{getApps,getApp},{getAuth,onAuthStateChanged},{getFirestore,getDoc,deleteDoc,doc}]=await Promise.all([
         import('https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js'),
         import('https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js'),
         import('https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore-lite.js')
       ]);
       const app=getApps().length?getApp():null;if(!app)throw new Error('Firebase is not ready.');
-      return{auth:getAuth(app),db:getFirestore(app),getDoc,deleteDoc,doc};
+      return{auth:getAuth(app),db:getFirestore(app),getDoc,deleteDoc,doc,onAuthStateChanged};
     })();
     return cloudReady;
   }
 
   async function checkAdmin(force=false){
+    if(!authResolved)return null;
     if(adminReady&&!force)return adminReady;
     adminReady=(async()=>{
       const api=await cloud(),user=api.auth.currentUser;
@@ -36,6 +37,7 @@
 
   async function enforceControls(){
     const admin=await checkAdmin();
+    if(admin===null)return;
     if(!admin){
       document.querySelectorAll('[data-delete-exam-template],[data-real-delete]').forEach(b=>b.remove());
       return;
@@ -53,7 +55,8 @@
   }
 
   async function requireAdmin(){
-    if(await checkAdmin(true))return true;
+    const admin=await checkAdmin(true);
+    if(admin===true)return true;
     alert('Deletion is restricted to Admin. Exam In-charge / Exam Manager accounts cannot delete saved examination timetables or templates.');
     return false;
   }
@@ -86,7 +89,8 @@
     if(templateDelete){e.preventDefault();e.stopImmediatePropagation();e.stopPropagation();await removeTemplate(templateDelete);return}
     const timetableDelete=e.target.closest?.('[data-real-delete]');
     if(!timetableDelete)return;
-    if(await checkAdmin(true))return;
+    const admin=await checkAdmin(true);
+    if(admin===true)return;
     e.preventDefault();e.stopImmediatePropagation();e.stopPropagation();
     alert('Deletion is restricted to Admin. Exam In-charge / Exam Manager accounts cannot delete saved examination timetables or templates.');
     timetableDelete.remove();
@@ -94,6 +98,19 @@
 
   const root=document.getElementById('examApp')||document.body;
   let timer=null;
-  new MutationObserver(()=>{if(timer)clearTimeout(timer);timer=setTimeout(enforceControls,40)}).observe(root,{childList:true,subtree:true});
-  window.addEventListener('load',()=>{setTimeout(()=>{checkAdmin(true).then(enforceControls)},450);setTimeout(enforceControls,1200)});
+  new MutationObserver(()=>{if(timer)clearTimeout(timer);timer=setTimeout(enforceControls,60)}).observe(root,{childList:true,subtree:true});
+
+  (async()=>{
+    try{
+      const api=await cloud();
+      api.onAuthStateChanged(api.auth,async user=>{
+        authResolved=true;adminReady=null;isAdminUser=false;
+        if(user)await checkAdmin(true);
+        // Re-render the saved lists after the authenticated role is known.
+        document.getElementById('refreshSavedExamData')?.click();
+        setTimeout(enforceControls,180);
+        setTimeout(enforceControls,700);
+      });
+    }catch{}
+  })();
 })();
