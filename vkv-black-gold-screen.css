@@ -78,6 +78,30 @@
   body .myGrid>button.active,body .nav>button.active,body .opsGrid>button.active{background:#211d10!important;color:#fffaf0!important;border-color:var(--vkv-screen-gold)!important}
   body.adminDashboardPage #dashboardHome{border-top-color:var(--vkv-screen-gold)!important}
   body .adminWorkspaceArt{filter:sepia(.4) brightness(1.35);opacity:.55!important}
+
+  /* Finalisation preview deliberately resembles the actual printed sheet. */
+  body .printSheet{
+    background:#fff!important;
+    color:#000!important;
+    border:1px solid #d0d0d0!important;
+    border-radius:4px!important;
+    padding:20px!important;
+    box-shadow:0 8px 24px rgba(0,0,0,.28)!important;
+  }
+  body .printSheet h1,body .printSheet h2,body .printSheet h3,body .printSheet h4,
+  body .printSheet p,body .printSheet div,body .printSheet span,body .printSheet strong,
+  body .printSheet small,body .printSheet label{color:#000!important}
+  body .printSheet table,body .printSheet th,body .printSheet td{background:#fff!important;color:#000!important;border-color:#444!important}
+  body .printSheet .principalSignature{
+    display:block!important;
+    min-height:48px!important;
+    margin-top:34px!important;
+    padding-top:10px!important;
+    text-align:right!important;
+    color:#000!important;
+    font-weight:700!important;
+    page-break-inside:avoid!important;
+  }
 }
 
 /* Printing is deliberately formal and independent of the screen theme. */
@@ -85,10 +109,20 @@
   html,body{color-scheme:light!important;background:#fff!important;color:#000!important}
   body *{text-shadow:none!important;box-shadow:none!important;filter:none!important}
   body,main,section,article,header,footer,
-  .card,.panel,.view,.surface,.gateCard,.workspaceBadge,.summaryCard,.metric,.tile,.qcard,.currentBox,.replacementItem,.historyItem,.resultbox,.notice,.status,.tip,.warning,.info,.hardRule,.tableWrap,.tablewrap,.table-wrap,.table-shell,
+  .card,.panel,.view,.surface,.gateCard,.workspaceBadge,.summaryCard,.metric,.tile,.qcard,.currentBox,.replacementItem,.historyItem,.resultbox,.notice,.status,.tip,.warning,.info,.hardRule,.tableWrap,.tablewrap,.table-wrap,.table-shell,.printSheet,
   table,thead,tbody,tfoot,tr,th,td{background:#fff!important;color:#000!important;border-color:#000!important}
   h1,h2,h3,h4,h5,h6,p,span,strong,small,label,legend,.small,.help,.sub,.subtitle,.lab,.eyebrow,.v66-eyebrow{color:#000!important}
   input,select,textarea,button,.btn,.button,.navButton{background:#fff!important;color:#000!important;border-color:#000!important}
   a,a:visited{color:#000!important;text-decoration:none!important}
   header::before,header::after,.tile::before,.tile::after,.adminWorkspaceHero::before{display:none!important}
+  .printSheet .principalSignature{
+    display:block!important;
+    min-height:16mm!important;
+    margin-top:12mm!important;
+    padding-top:3mm!important;
+    text-align:right!important;
+    color:#000!important;
+    font-weight:700!important;
+    page-break-inside:avoid!important;
+  }
 }
