@@ -9,12 +9,12 @@
   let busy=false;
 
   async function firebase(){
-    const [{getApps,getApp},{getFirestore,getDoc,doc}]=await Promise.all([
+    const [{getApps,getApp},{getFirestore,getDoc,getDocs,doc,collection}]=await Promise.all([
       import('https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js'),
       import('https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore-lite.js')
     ]);
     const app=getApps().length?getApp():null;if(!app)throw new Error('Firebase is not ready.');
-    return{db:getFirestore(app),getDoc,doc};
+    return{db:getFirestore(app),getDoc,getDocs,doc,collection};
   }
   function patterns(data){const out=[];for(const x of data?.template?.timetablePattern||[])out.push(x);for(const x of data?.manualTimetable?.assignments||[])out.push({className:x.className,subject:x.subject,slotId:x.slotId,roomId:x.roomId,dayIndex:x.dayIndex});for(const x of data?.workspace?.timetable?.events||[])out.push({className:x.className,subject:x.subject,slotId:x.slotId,roomId:x.roomId,date:x.date});return out}
   function normalizedPattern(data,source){
@@ -35,7 +35,11 @@
     for(const c of classes)subjectObj[c]=[...(subjects.get(c)?.values()||[])];
     return{...raw,classes:[...classes],subjects:subjectObj,settings,sessions,printDetails,paperMeta,timetablePattern:normalizedPattern(data,source),description:String(raw.description||source?.workspace?.description||data?.description||'')};
   }
-  async function getTemplate(id){const api=await firebase(),snap=await api.getDoc(api.doc(api.db,'examSchedules',id));if(!snap.exists())throw new Error('Saved template not found.');const data=snap.data()||{};let source={};if(data.sourceScheduleId){try{const s=await api.getDoc(api.doc(api.db,'examSchedules',data.sourceScheduleId));if(s.exists())source=s.data()||{}}catch{}}return{template:mergeTemplate(data,source),name:data.name||'Saved Template'}}
+  async function findLegacySource(api,data,id){
+    const target=String(data.sourceScheduleName||data.name||'').replace(/\s+Template$/i,'').trim().toLowerCase();if(!target)return{};
+    try{const snap=await api.getDocs(api.collection(api.db,'examSchedules')),items=[];snap.forEach(d=>{if(d.id===id||/^TEMPLATE_/i.test(d.id)||d.id==='EXAM_SUBJECT_MASTER')return;const x=d.data()||{},name=String(x.name||x.workspace?.name||'').trim().toLowerCase();if(name===target&&x.workspace)items.push(x)});items.sort((a,b)=>Number(b.updatedAtMs||b.createdAtMs||0)-Number(a.updatedAtMs||a.createdAtMs||0));return items[0]||{}}catch{return{}}
+  }
+  async function getTemplate(id){const api=await firebase(),snap=await api.getDoc(api.doc(api.db,'examSchedules',id));if(!snap.exists())throw new Error('Saved template not found.');const data=snap.data()||{};let source={};if(data.sourceScheduleId){try{const s=await api.getDoc(api.doc(api.db,'examSchedules',data.sourceScheduleId));if(s.exists())source=s.data()||{}}catch{}}if(!source?.workspace)source=await findLegacySource(api,data,id);return{template:mergeTemplate(data,source),name:data.name||'Saved Template'}}
   async function waitControls(){for(let i=0;i<80;i++){if($('paperClassFilter')?.options?.length>1&&$('paperRows')&&$('sessionRows')&&window.vkvExamWorkspace)return true;await wait(100)}return false}
   async function applySubjects(t){if(window.vkvExamWorkspace?.installSubjectCatalogue){window.vkvExamWorkspace.installSubjectCatalogue(t.subjects||{});await wait(220)}const wanted=new Set();for(const[c,subs]of Object.entries(t.subjects||{}))for(const s of subs||[])wanted.add(key(c,s));const f=$('paperClassFilter'),search=$('paperSearch');if(!f||!search)return 0;const oldF=f.value,oldS=search.value;search.value='';dispatch(search,'input');let selected=0;for(const raw of[...f.options].map(o=>o.value).filter(Boolean)){f.value=raw;dispatch(f);await wait(12);for(const row of[...document.querySelectorAll('#paperRows tr[data-paper]')]){const c=base(row.cells?.[1]?.textContent||raw),s=subject(row.cells?.[2]?.textContent||''),box=row.querySelector('[data-paper-field="included"]'),on=wanted.has(key(c,s));if(on)selected++;if(box&&box.checked!==on){box.checked=on;dispatch(box);await wait(5)}if(on){const meta=t.paperMeta?.[key(c,s)]||{};const room=row.querySelector('[data-paper-field="roomId"]'),slot=row.querySelector('[data-paper-field="fixedSlotId"]'),date=row.querySelector('[data-paper-field="fixedDate"]');if(room&&meta.roomId){room.value=meta.roomId;dispatch(room)}if(slot&&meta.fixedSlotId){slot.value=meta.fixedSlotId;dispatch(slot)}if(date&&date.value){date.value='';dispatch(date)}}}}f.value=oldF;dispatch(f);search.value=oldS;dispatch(search,'input');await wait(120);return selected}
   async function applySessions(t){const slots=t.sessions||[];if(!slots.length)return;let rows=()=>[...document.querySelectorAll('#sessionRows [data-session-row]')];while(rows().length<slots.length){$('addSession')?.click();await wait(35)}while(rows().length>slots.length&&rows().length>1){rows().at(-1)?.querySelector('[data-remove-session]')?.click();await wait(35)}slots.forEach((slot,i)=>{const row=rows()[i];if(!row)return;for(const field of['name','startTime','endTime','durationMinutes']){const el=row.querySelector(`[data-session-field="${field}"]`);if(el&&slot?.[field]!=null){el.value=slot[field];dispatch(el)}}})}
