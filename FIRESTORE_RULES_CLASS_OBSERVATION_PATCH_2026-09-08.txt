@@ -1,0 +1,27 @@
+// VKVTT Class Observation module — Firestore rules patch
+// Insert this block inside match /databases/{database}/documents { ... }
+// BEFORE the final catch-all: match /{document=**} { allow read, write: if false; }
+//
+// Principal/Admin: full access to draft and finalised observations.
+// Concerned teacher: read-only access ONLY to their own FINALised observations.
+// No teacher can read another teacher's observation or an Admin draft.
+
+match /classObservations/{observationId} {
+  allow get: if isAdmin()
+             || (canReadSchool()
+                 && verifiedEmail()
+                 && resource.data.status == 'finalised'
+                 && resource.data.teacherEmail is string
+                 && resource.data.teacherEmail == authEmail());
+
+  // Teacher-side queries must constrain both teacherEmail == signed-in email
+  // and status == 'finalised'. The client page does this explicitly.
+  allow list: if isAdmin()
+              || (canReadSchool()
+                  && verifiedEmail()
+                  && resource.data.status == 'finalised'
+                  && resource.data.teacherEmail is string
+                  && resource.data.teacherEmail == authEmail());
+
+  allow create, update, delete: if isAdmin();
+}
