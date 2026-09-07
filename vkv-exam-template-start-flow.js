@@ -17,23 +17,25 @@
     return{db:getFirestore(app),getDoc,getDocs,doc,collection};
   }
   function patterns(data){const out=[];for(const x of data?.template?.timetablePattern||[])out.push(x);for(const x of data?.manualTimetable?.assignments||[])out.push({className:x.className,subject:x.subject,slotId:x.slotId,roomId:x.roomId,dayIndex:x.dayIndex});for(const x of data?.workspace?.timetable?.events||[])out.push({className:x.className,subject:x.subject,slotId:x.slotId,roomId:x.roomId,date:x.date});return out}
-  function normalizedPattern(data,source){
-    const direct=[...(data?.template?.timetablePattern||[])];if(direct.length)return direct.map(x=>({...x,className:base(x.className),subject:subject(x.subject)}));
-    const events=[...(source?.workspace?.timetable?.events||[]),...(data?.workspace?.timetable?.events||[])].filter(x=>x?.className&&x?.subject&&x?.date).sort((a,b)=>String(a.date).localeCompare(String(b.date))||String(a.slotId||'').localeCompare(String(b.slotId||''))||String(a.className).localeCompare(String(b.className),undefined,{numeric:true}));
+  function normalizedPattern(data,source,allowedClasses){
+    const allowed=allowedClasses&&allowedClasses.size?allowedClasses:null;
+    const direct=[...(data?.template?.timetablePattern||[])].filter(x=>!allowed||allowed.has(base(x.className)));if(direct.length)return direct.map(x=>({...x,className:base(x.className),subject:subject(x.subject)}));
+    const events=[...(source?.workspace?.timetable?.events||[]),...(data?.workspace?.timetable?.events||[])].filter(x=>x?.className&&x?.subject&&x?.date&&(!allowed||allowed.has(base(x.className)))).sort((a,b)=>String(a.date).localeCompare(String(b.date))||String(a.slotId||'').localeCompare(String(b.slotId||''))||String(a.className).localeCompare(String(b.className),undefined,{numeric:true}));
     const dates=[...new Set(events.map(x=>String(x.date)))],index=new Map(dates.map((d,i)=>[d,i+1]));
     return events.map(x=>({dayIndex:index.get(String(x.date))||1,className:base(x.className),subject:subject(x.subject),slotId:String(x.slotId||''),roomId:String(x.roomId||'')}));
   }
   function mergeTemplate(data,source){
-    const raw=JSON.parse(JSON.stringify(data?.template||{})),classes=new Set(),subjects=new Map(),paperMeta={};
-    const add=(c,s)=>{c=base(c);s=subject(s);if(!c||!s)return;classes.add(c);if(!subjects.has(c))subjects.set(c,new Map());subjects.get(c).set(key(c,s),s)};
-    const addMeta=(c,s,obj={})=>{c=base(c);s=subject(s);if(!c||!s)return;const k=key(c,s),old=paperMeta[k]||{};paperMeta[k]={...old,roomId:String(obj.roomId||old.roomId||''),fixedSlotId:String(obj.fixedSlotId||obj.slotId||old.fixedSlotId||'')}};
-    for(const c of raw.classes||[])if(base(c))classes.add(base(c));
+    const raw=JSON.parse(JSON.stringify(data?.template||{})),savedClasses=[...new Set((raw.classes||[]).map(base).filter(Boolean))],classes=new Set(savedClasses),subjects=new Map(),paperMeta={},authoritative=savedClasses.length>0;
+    const classAllowed=c=>!authoritative||classes.has(base(c));
+    const add=(c,s)=>{c=base(c);s=subject(s);if(!c||!s||!classAllowed(c))return;if(!authoritative)classes.add(c);if(!subjects.has(c))subjects.set(c,new Map());subjects.get(c).set(key(c,s),s)};
+    const addMeta=(c,s,obj={})=>{c=base(c);s=subject(s);if(!c||!s||!classAllowed(c))return;const k=key(c,s),old=paperMeta[k]||{};paperMeta[k]={...old,roomId:String(obj.roomId||old.roomId||''),fixedSlotId:String(obj.fixedSlotId||obj.slotId||old.fixedSlotId||'')}};
+    for(const c of classes)subjects.set(c,new Map());
     for(const [c,subs] of Object.entries(raw.subjects||{}))for(const s of subs||[])add(c,s);
-    for(const p of [...patterns(data),...patterns(source)]){add(p.className,p.subject);addMeta(p.className,p.subject,p)}
-    const target=new Set(classes);for(const src of[data,source])for(const p of src?.workspace?.papers||[]){const c=base(p.className),s=subject(p.subject);if(c&&s&&(!target.size||target.has(c))){add(c,s);addMeta(c,s,p)}}
+    for(const p of [...patterns(data),...patterns(source)])if(classAllowed(p.className)){add(p.className,p.subject);addMeta(p.className,p.subject,p)}
+    for(const src of[data,source])for(const p of src?.workspace?.papers||[]){const c=base(p.className),s=subject(p.subject);if(c&&s&&classAllowed(c)){add(c,s);addMeta(c,s,p)}}
     const settings={...(source?.workspace?.settings||{}),...(raw.settings||{})},sessions=(raw.sessions?.length?raw.sessions:source?.workspace?.slots)||[],printDetails=raw.printDetails||source?.workspace?.printDetails||{},subjectObj={};
     for(const c of classes)subjectObj[c]=[...(subjects.get(c)?.values()||[])];
-    return{...raw,classes:[...classes],subjects:subjectObj,settings,sessions,printDetails,paperMeta,timetablePattern:normalizedPattern(data,source),description:String(raw.description||source?.workspace?.description||data?.description||'')};
+    return{...raw,classes:[...classes],subjects:subjectObj,settings,sessions,printDetails,paperMeta,timetablePattern:normalizedPattern(data,source,classes),description:String(raw.description||source?.workspace?.description||data?.description||'')};
   }
   async function findLegacySource(api,data,id){
     const target=String(data.sourceScheduleName||data.name||'').replace(/\s+Template$/i,'').trim().toLowerCase();if(!target)return{};
