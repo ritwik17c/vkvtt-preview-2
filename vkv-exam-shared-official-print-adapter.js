@@ -12,13 +12,13 @@
   async function api(){
     if(apiReady)return apiReady;
     apiReady=(async()=>{
-      const [{getApps,getApp},{getAuth},{getFirestore,getDoc,setDoc,doc}]=await Promise.all([
+      const [{getApps,getApp},{getAuth},{getFirestore,getDoc,updateDoc,doc}]=await Promise.all([
         import('https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js'),
         import('https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js'),
         import('https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore-lite.js')
       ]);
       const app=getApps().length?getApp():null;if(!app)throw new Error('Firebase is not ready.');
-      return{auth:getAuth(app),db:getFirestore(app),getDoc,setDoc,doc};
+      return{auth:getAuth(app),db:getFirestore(app),getDoc,updateDoc,doc};
     })();return apiReady;
   }
 
@@ -73,15 +73,16 @@
     if(!details.reporting&&!details.bus)return;
     try{
       const a=await api();if(!a.auth.currentUser)return;
-      await a.setDoc(a.doc(a.db,'examSchedules',item.id),{
+      await a.updateDoc(a.doc(a.db,'examSchedules',item.id),{
         'workspace.printDetails':details,
         printDetails:details,
         printDetailsUpdatedAtMs:Date.now(),
         printDetailsUpdatedByUid:a.auth.currentUser.uid
-      },{merge:true});
+      });
     }catch(e){
-      // A published timetable is writable only by Admin; non-admin read-only viewers
-      // still print correctly from cloud/local data without changing the record.
+      // Published schedules are writable only by Admin. A read-only Exam Manager can
+      // still print the exact approved layout; the Admin-side migration is what makes
+      // legacy local footer values portable to other browsers/accounts.
       console.info('[exam official print] print-detail migration skipped:',e?.code||e?.message||e);
     }
   }
@@ -143,8 +144,8 @@
         if(titleInput)titleInput.value=oldTitle;
         if(f1)f1.value=oldFooter[0];if(f2)f2.value=oldFooter[1];if(f3)f3.value=oldFooter[2];
       };
-      // This invokes the exact approved vkv-exam-output-finalizer renderer and the
-      // frozen c3fe9c21 print CSS. No alternate HTML/print template is created here.
+      // Invoke the exact approved vkv-exam-output-finalizer renderer and frozen
+      // c3fe9c21 print CSS. No alternate HTML/print template is created here.
       $('majorPrint').click();
       setTimeout(restore,250);
     }catch(e){restore();alert('Could not open the approved timetable print: '+(e?.message||e))}finally{setTimeout(()=>{busy=false},300)}
