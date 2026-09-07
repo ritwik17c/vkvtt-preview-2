@@ -1,6 +1,6 @@
 {
-  "build": "2026.09.08.14",
+  "build": "2026.09.08.15",
   "channel": "preview-2-production-hardening",
   "updated": "2026-09-08",
-  "notes": "Hourly hardening: Light and Black & Gold are now mutually exclusive instead of competing; all duplicate theme stylesheet links are disabled according to the selected theme; theme choice syncs across tabs and is injected into navigated app pages; Home loads the current controller explicitly; campus header uses a real image layer; print/semantic leave surfaces remain protected."
+  "notes": "Added Principal/Admin Class Observation module based on the VKV Nalbari 20-criterion rubric, secure teacher-visible final feedback page, Admin/teacher navigation bridges, print-safe observation layout, and a narrow Firestore rules patch for classObservations."
 }
