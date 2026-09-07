@@ -72,7 +72,9 @@
   body td,html.v66-ui body td{background:#121313!important;color:#eee9dd!important;border-color:#302f2a!important}
   body tr:hover td{background:#181817!important}
   body a{color:#f0cd58}
-  body .badge,body .tag,body .chip,body .chips>*{background:#282311!important;color:#f1d36c!important;border-color:#64531b!important}
+  body .badge,body .tag,body .chip,body .chips>*,body .pill{
+    background:#282311!important;color:#f1d36c!important;border-color:#64531b!important;
+  }
   body .sidebar{background:#101111!important;border-color:#34322c!important}
   body .workspace{background:transparent!important}
   body .paneHead p,body .sectionTitle p{color:var(--vkv-screen-muted)!important}
@@ -81,6 +83,18 @@
   body .myGrid>button.active,body .nav>button.active,body .opsGrid>button.active{background:#211d10!important;color:#fffaf0!important;border-color:var(--vkv-screen-gold)!important}
   body.adminDashboardPage #dashboardHome{border-top-color:var(--vkv-screen-gold)!important}
   body .adminWorkspaceArt{filter:sepia(.4) brightness(1.35);opacity:.55!important}
+
+  /* Legacy module surfaces that otherwise stayed pale inside the dark shell. */
+  body .ruleCard,body .profile,body .timeItem,body .teacherChoice,body .item,
+  body .visibility,body .leaveCalendarCard,body .needcard,body .proxycard{
+    background:linear-gradient(145deg,#171817,#121313)!important;
+    color:var(--vkv-screen-cream)!important;
+    border-color:#484437!important;
+  }
+  body .ruleCard b,body .profile b,body .timeItem b,body .teacherChoice .name,body .item b,
+  body .visibility strong,body .needcard b,body .proxycard b{color:#fff7dc!important}
+  body .profile span,body .visibility span,body .teacherChoice .meta,body .item .meta{color:#aaa79f!important}
+  body .profile.active,body .profile.selected{background:#211d10!important;border-color:#a78520!important;outline-color:#7c641e!important}
 
   /* Admin dashboard launcher cards: deliberate warm gold with dark readable copy. */
   body.adminDashboardPage .tile,
@@ -102,46 +116,22 @@
   }
   body.adminDashboardPage .tile::after,body.adminDashboardPage .premiumTile::after{opacity:.18!important}
 
-  /* Common contrast repairs for pale semantic pills/cards created by legacy modules. */
+  /* Common contrast repairs for legacy semantic pills/cards. */
   body .statusChip,body .status-chip,body .categoryBadge,body .category-badge,
-  body .pill.light,body .badge.light,body .tag.light{
-    color:#19160d!important;
-  }
-  body .timeItem,body .periodCard,body .period-card{
-    background:#181817!important;color:#f6f2e8!important;border-color:#5a5133!important;
-  }
+  body .pill.light,body .badge.light,body .tag.light{color:#19160d!important}
+  body .timeItem,body .periodCard,body .period-card{background:#181817!important;color:#f6f2e8!important;border-color:#5a5133!important}
   body .timeItem label,body .periodCard label,body .period-card label{color:#cfc8b8!important}
   body .timeItem input,body .periodCard input,body .period-card input{background:#0f1010!important;color:#fff!important;border-color:#655820!important}
-
-  /* If a legacy module deliberately keeps a pale/gold card, its text must turn dark. */
-  body .goldCard,body .gold-card,body .warmCard,body .warm-card{
-    background:linear-gradient(145deg,#f0cf69,#e8bd3d)!important;color:#17130b!important;border-color:#b78d13!important;
-  }
+  body .goldCard,body .gold-card,body .warmCard,body .warm-card{background:linear-gradient(145deg,#f0cf69,#e8bd3d)!important;color:#17130b!important;border-color:#b78d13!important}
   body .goldCard *,body .gold-card *,body .warmCard *,body .warm-card *{color:#17130b!important}
 
   /* Finalisation preview deliberately resembles the actual printed sheet. */
-  body .printSheet{
-    background:#fff!important;
-    color:#000!important;
-    border:1px solid #d0d0d0!important;
-    border-radius:4px!important;
-    padding:20px!important;
-    box-shadow:0 8px 24px rgba(0,0,0,.28)!important;
-  }
+  body .printSheet{background:#fff!important;color:#000!important;border:1px solid #d0d0d0!important;border-radius:4px!important;padding:20px!important;box-shadow:0 8px 24px rgba(0,0,0,.28)!important}
   body .printSheet h1,body .printSheet h2,body .printSheet h3,body .printSheet h4,
   body .printSheet p,body .printSheet div,body .printSheet span,body .printSheet strong,
   body .printSheet small,body .printSheet label{color:#000!important}
   body .printSheet table,body .printSheet th,body .printSheet td{background:#fff!important;color:#000!important;border-color:#444!important}
-  body .printSheet .principalSignature{
-    display:block!important;
-    min-height:48px!important;
-    margin-top:34px!important;
-    padding-top:10px!important;
-    text-align:right!important;
-    color:#000!important;
-    font-weight:700!important;
-    page-break-inside:avoid!important;
-  }
+  body .printSheet .principalSignature{display:block!important;min-height:48px!important;margin-top:34px!important;padding-top:10px!important;text-align:right!important;color:#000!important;font-weight:700!important;page-break-inside:avoid!important}
 }
 
 /* Printing is deliberately formal and independent of the screen theme. */
@@ -155,14 +145,5 @@
   input,select,textarea,button,.btn,.button,.navButton{background:#fff!important;color:#000!important;border-color:#000!important}
   a,a:visited{color:#000!important;text-decoration:none!important}
   header::before,header::after,.tile::before,.tile::after,.adminWorkspaceHero::before{display:none!important}
-  .printSheet .principalSignature{
-    display:block!important;
-    min-height:16mm!important;
-    margin-top:12mm!important;
-    padding-top:3mm!important;
-    text-align:right!important;
-    color:#000!important;
-    font-weight:700!important;
-    page-break-inside:avoid!important;
-  }
+  .printSheet .principalSignature{display:block!important;min-height:16mm!important;margin-top:12mm!important;padding-top:3mm!important;text-align:right!important;color:#000!important;font-weight:700!important;page-break-inside:avoid!important}
 }
