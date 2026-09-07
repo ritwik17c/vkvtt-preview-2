@@ -1,6 +1,6 @@
 {
-  "build": "2026.09.08.16",
+  "build": "2026.09.08.17",
   "channel": "preview-2-production-hardening",
   "updated": "2026-09-08",
-  "notes": "Class Observation navigation made directly visible from Home: teacher feedback tile is loaded directly in the teaching section, Principal/Admin gets a direct Class Observation tile in delegated responsibilities, while Admin Dashboard bridge remains available for dashboard integration."
+  "notes": "Hardening pass: Class Observation is now a direct Academic Administration tile in the canonical Admin Dashboard runtime; Admin Dashboard loads the global theme controller directly; service worker presentation assets bypass stale browser caches; campus header image visibility and overlay stacking strengthened; official print surfaces remain white/black."
 }
