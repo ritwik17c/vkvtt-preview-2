@@ -11,6 +11,7 @@
   loadOnce('vkvExamCalendarGuard','vkv-exam-calendar-date-guard.js?v=20260907-calendar-guard-1');
   loadOnce('vkvExamDatewiseDuty','vkv-exam-datewise-duty-planner.js?v=20260907-datewise-duty-1');
   loadOnce('vkvExamApprovedOutput','vkv-exam-approved-output-access.js?v=20260907-approved-output-1');
+  loadOnce('vkvExamManagerSharedLibrary','vkv-exam-manager-shared-library.js?v=20260907-shared-library-1');
   const $=id=>document.getElementById(id);
   const wait=ms=>new Promise(r=>setTimeout(r,ms));
 
