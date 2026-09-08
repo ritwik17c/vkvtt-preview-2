@@ -1,6 +1,6 @@
 {
-  "build": "2026.09.08.21",
+  "build": "2026.09.08.22",
   "channel": "preview-2-production-candidate",
   "updated": "2026-09-08",
-  "notes": "Preview 2 consolidation build 21: preserves the matured mark-aware QB importer, adds Main's safer coordinator-access cleanup and Principal QB audit/reconciliation/integrity tools, retains upgraded teacher history, coordinator queue, dictation, submission recovery and Paper Builder features, and adds a Home header compatibility guard that removes the broken legacy campus image element so the CSS campus photograph is authoritative. Leave/Proxy, Exam, Class Observation and manual-only Staff Notice work remain untouched."
+  "notes": "Visual hardening build: restores the campus photograph as the Home header background by removing the conflicting legacy header guard; gives each non-exempt page its own consistent theme switch with logical Light and Black & Gold states; improves contrast for tips/notices; makes Annual Calendar open prominently in Monthly grid view with stronger grid/event contrast in both themes; and restores a visible Principal's Signature placeholder beneath finalised Proxy output without changing proxy data or print logic."
 }
