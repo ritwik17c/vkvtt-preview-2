@@ -54,3 +54,4 @@ async function loadData(){
 }
 ensureStyle();await loadData();mountQuick();mountApprovalCards();
 const q=document.getElementById('queue');if(q)new MutationObserver(()=>mountApprovalCards()).observe(q,{childList:true,subtree:true});
+import('./vkv-leave-official-conflict-cleanup.js?v=20260908-conflict-clean-1').catch(console.warn);
