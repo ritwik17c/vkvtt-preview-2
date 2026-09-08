@@ -1,6 +1,6 @@
 {
-  "build": "2026.09.08.23",
+  "build": "2026.09.08.24",
   "channel": "preview-2-production-candidate",
   "updated": "2026-09-08",
-  "notes": "Preview 2 cleanup build: removes the duplicate Office Duty Scheduler launcher from Home while keeping the staff-facing Office Duty Schedule; repairs Black & Gold and Light contrast for Proxy operational-status and shared result/tip/status surfaces; and aligns the selected theme switch styling with the selected appearance. No Proxy data, Leave data, Exam logic or timetable data was changed."
+  "notes": "Theme hardening build: fixes disappearing text on clicked/active Home cards in both Light and Black & Gold; makes Period Reminder, Proxy operational summary and shared result/tip/status surfaces readable in both themes; restores readable Home header subtitle; reduces the competing header overlays so the actual campus photograph remains visible; keeps theme-picker states visually logical; and preserves all operational, Proxy, Leave, Exam and timetable logic unchanged."
 }
