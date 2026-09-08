@@ -21,13 +21,14 @@
   </div>
 </header>
 <div id="msg">Loading Proxy Manager…</div>
-<iframe id="frame" src="./proxy-manager-core.html?proxy-manager=1&v=20260908-emergency-edit-3"></iframe>
+<iframe id="frame" src="./proxy-manager-core.html?proxy-manager=1&v=20260908-emergency-edit-4"></iframe>
 <script>
 const f=document.getElementById('frame'),m=document.getElementById('msg'),topEmergency=document.getElementById('emergencyEditTop');
 function safe(s){return String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
 function dpbRecord(t){const code=String(t&&t.code||'').trim().toUpperCase(),name=String(t&&t.name||'').trim().toLowerCase();return code==='DPB'||name==='dhruba prasad baruah'}
 function setMsg(text,ok=false){m.textContent=text;m.classList.toggle('ok',!!ok);m.style.display='block';if(ok)setTimeout(()=>{m.style.display='none'},5000)}
-async function waitForCore(ms=12000){const start=Date.now();while(Date.now()-start<ms){try{const w=f.contentWindow;if(w&&typeof w.proxyDateKey==='function'&&typeof w.todayKey==='function'&&typeof w.loadProxyWorkState==='function')return w}catch(_){ }await new Promise(r=>setTimeout(r,150))}throw new Error('Proxy Manager is still loading. Please refresh once and try again.')}
+async function waitForCore(ms=12000){const start=Date.now();while(Date.now()-start<ms){try{const w=f.contentWindow;if(w&&typeof w.proxyDateKey==='function'&&typeof w.todayKey==='function'&&(typeof w.loadProxyWorkCloud==='function'||typeof w.loadProxyWorkState==='function'))return w}catch(_){ }await new Promise(r=>setTimeout(r,150))}throw new Error('Proxy Manager is still loading. Please refresh once and try again.')}
+async function reloadLatest(w,date){if(typeof w.loadProxyWorkCloud==='function'){await w.loadProxyWorkCloud(date);return}if(typeof w.loadProxyWorkState==='function'){await w.loadProxyWorkState(date);return}throw new Error('Latest Leave / Duty reload service is not ready.')}
 function currentPublished(w,date){const a=w.__vkvWorkPublishedProxy,b=w.__vkvPublishedProxy;if(a&&a.date===date)return a;if(b&&b.date===date)return b;return null}
 function openEditableWorkspace(w){const d=f.contentDocument;try{if(typeof w.show==='function')w.show('allot',d.getElementById('proxyWorkBtn'))}catch(_){ }try{if(typeof w.renderProxyLockState==='function')w.renderProxyLockState()}catch(_){ }try{if(typeof w.renderTodayProxyStatusSummary==='function')w.renderTodayProxyStatusSummary()}catch(_){ }
  try{
@@ -43,9 +44,9 @@ async function emergencyEditReload(){
  topEmergency.disabled=true;const old=topEmergency.textContent;topEmergency.textContent='↻ Reloading latest Leave / Duty…';
  try{
   const w=await waitForCore(),date=w.proxyDateKey();
-  await w.loadProxyWorkState(date);
+  await reloadLatest(w,date);
   let pub=currentPublished(w,date);
-  if(!pub){openEditableWorkspace(w);setMsg('Latest Leave / Duty data reloaded. This date has no finalised Proxy lock, so Proxy Allotment is editable now.',true);return}
+  if(!pub){openEditableWorkspace(w);setMsg('Latest Leave / Duty data reloaded from cloud. This date has no finalised Proxy lock, so Proxy Allotment is editable now.',true);return}
   if(!w.__vkvWorkPublishedProxy||w.__vkvWorkPublishedProxy.date!==date)w.__vkvWorkPublishedProxy=pub;
   if(!pub.correctionEnabled){
     if(date<w.todayKey()){
@@ -56,11 +57,11 @@ async function emergencyEditReload(){
       await w.enableProxyCorrection();
     }
   }
-  await w.loadProxyWorkState(date);
+  await reloadLatest(w,date);
   pub=currentPublished(w,date);
   if(pub&&!pub.correctionEnabled)throw new Error('The Proxy remains locked. Principal correction was not enabled.');
   openEditableWorkspace(w);
-  setMsg('Emergency edit is open. Latest approved Leave / OD / Special Assignment data has been reloaded. Change or allot the affected period, then Review & Finalise again.',true);
+  setMsg('Emergency edit is open. Latest cloud Leave / OD / Special Assignment data has been reloaded. Change or allot the affected period, then Review & Finalise again.',true);
  }catch(e){alert('Emergency Proxy edit could not be opened: '+(e?.message||e));setMsg('Emergency edit could not be opened. '+(e?.message||e),false)}finally{topEmergency.disabled=false;topEmergency.textContent=old}
 }
 topEmergency.addEventListener('click',emergencyEditReload);
