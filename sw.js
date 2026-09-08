@@ -1,5 +1,5 @@
-const CACHE_NAME='vkvtt-shell-2026-09-08-production-candidate-21';
-const APP_SHELL=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./vkv-campus-header.jpg','./vkv-theme.js','./vkv-campus-header-fix.js','./vkv-light-screen.css','./vkv-black-gold-screen.css','./class-observation-admin-bridge.js','./class-observation-teacher-bridge.js','./v66-home.css','./v66-design-system.css','./v66-home.js','./v66-home-cloud.js','./v66-ui.js','./period-notifications.js','./v66-home-shell-v662.css','./v66-home-shell-v662.js','./v66-premium-unified.css','./qb-module-v2.html','./qb-module-v2.js','./qb-module-v3.js','./vkv-qb-paper-scoring.js','./vkv-qb-paper-subquestion-marks.js'];
+const CACHE_NAME='vkvtt-shell-2026-09-08-production-candidate-22';
+const APP_SHELL=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./vkv-campus-header.jpg','./vkv-theme.js','./vkv-campus-header-fix.js','./vkv-light-screen.css','./vkv-black-gold-screen.css','./class-observation-admin-bridge.js','./class-observation-teacher-bridge.js','./v66-home.css','./v66-design-system.css','./v66-home.js','./v66-home-cloud.js','./v66-ui.js','./period-notifications.js','./v66-home-shell-v662.css','./v66-home-shell-v662.js','./v66-premium-unified.css','./qb-module-v2.html','./qb-module-v2.js','./qb-module-v3.js','./vkv-qb-paper-scoring.js','./vkv-qb-paper-subquestion-marks.js','./vkv-qb-admin-production-tools.js','./admin-qb-live-teacher-audit.html','./admin-qb-source-reconcile.html','./admin-qb-submission-integrity-summary.html'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(APP_SHELL)));self.skipWaiting();});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k)))));self.clients.claim();});
 
@@ -11,6 +11,7 @@ function injectControllers(html,url){
   if(isHome&&!/vkv-campus-header-fix\.js/i.test(html))tags.push('<script src="./vkv-campus-header-fix.js?v=20260908-headerfix-1"></script>');
   if(/admin-dashboard\.html$/i.test(path)&&!/class-observation-admin-bridge\.js/i.test(html))tags.push('<script src="./class-observation-admin-bridge.js?v=20260908-observation-2"></script>');
   if(isHome&&!/class-observation-teacher-bridge\.js/i.test(html))tags.push('<script src="./class-observation-teacher-bridge.js?v=20260908-observation-2"></script>');
+  if(/admin-question-bank-v2\.html$/i.test(path)&&!/vkv-qb-admin-production-tools\.js/i.test(html))tags.push('<script src="./vkv-qb-admin-production-tools.js?v=20260908-qb-audit-1"></script>');
   if(!tags.length)return html;
   const tag=tags.join('');
   if(/<\/head>/i.test(html))return html.replace(/<\/head>/i,tag+'</head>');
