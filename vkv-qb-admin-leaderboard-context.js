@@ -1,0 +1,4 @@
+// Read-only Principal analytics UX helper. No Firestore/network access.
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+async function init(){for(let i=0;i<50&&!document.getElementById('submissionLeaderboard');i++)await wait(100);const panel=document.getElementById('submissionLeaderboard');if(!panel||document.getElementById('qbLeaderboardScopeNote'))return;const tip=panel.querySelector('.tip');if(!tip)return;const note=document.createElement('div');note.id='qbLeaderboardScopeNote';note.className='tip';note.style.marginTop='8px';note.innerHTML='<b>Scope:</b> All-time records matching the selected Subject/Class. This is a contribution-volume view, not a quality or performance score.';tip.insertAdjacentElement('afterend',note)}
+init().catch(e=>console.warn('QB leaderboard context helper:',e));
