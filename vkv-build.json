@@ -1,6 +1,6 @@
 {
-  "build": "2026.09.08.17",
+  "build": "2026.09.08.18",
   "channel": "preview-2-production-hardening",
   "updated": "2026-09-08",
-  "notes": "Hardening pass: Class Observation is now a direct Academic Administration tile in the canonical Admin Dashboard runtime; Admin Dashboard loads the global theme controller directly; service worker presentation assets bypass stale browser caches; campus header image visibility and overlay stacking strengthened; official print surfaces remain white/black."
+  "notes": "Urgent Proxy workflow correction: Quick Add Leave/Duty now supports either a continuous custom period range or selected non-contiguous periods on the same day; Principal approval expands selected periods into compatible operational segments so Proxy blocks only those periods; Admin can permanently delete a clearly invalid provisional leave request with an immutable approval-audit entry. Firestore rules already permit Admin-only provisional deletion, so no rules change is required."
 }
