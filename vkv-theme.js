@@ -10,8 +10,8 @@
 
   function ensureCss(doc,id,href){let l=doc.getElementById(id);if(!l){l=doc.createElement('link');l.id=id;l.rel='stylesheet';l.href=href;doc.head.appendChild(l)}return l}
   function allThemeLinks(doc=document){
-    const bg=ensureCss(doc,'vkvBlackGoldThemeCss','./vkv-black-gold-screen.css?v=20260908-theme6');
-    const lt=ensureCss(doc,'vkvLightThemeCss','./vkv-light-screen.css?v=20260908-theme6');
+    const bg=ensureCss(doc,'vkvBlackGoldThemeCss','./vkv-black-gold-screen.css?v=20260909-theme7');
+    const lt=ensureCss(doc,'vkvLightThemeCss','./vkv-light-screen.css?v=20260909-theme7');
     return{bg:[...new Set([bg,...doc.querySelectorAll('link[href*="vkv-black-gold-screen.css"]')])],lt:[...new Set([lt,...doc.querySelectorAll('link[href*="vkv-light-screen.css"]')])]};
   }
   function ensureThemeSafetyStyle(doc=document){
@@ -24,19 +24,25 @@
       html[data-vkv-theme="black-gold"] body .tip *,html[data-vkv-theme="black-gold"] body .notice *,html[data-vkv-theme="black-gold"] body .status *{color:inherit!important}
       html[data-vkv-theme="light"] body input,html[data-vkv-theme="light"] body select,html[data-vkv-theme="light"] body textarea{background:#fff!important;color:#17364f!important;border-color:#c7d5de!important}
       html[data-vkv-theme="black-gold"] body input,html[data-vkv-theme="black-gold"] body select,html[data-vkv-theme="black-gold"] body textarea{background:#161716!important;color:#f6f2e8!important;border-color:#514d41!important}
-      body>header>.head,body>header>.headline{position:relative!important;z-index:3!important}
+      body>header[data-vkv-campus-header="1"]::before,body>header[data-vkv-campus-header="1"]::after{display:none!important;content:none!important;background:none!important;background-image:none!important;opacity:0!important}
+      body>header[data-vkv-campus-header="1"]>.head,body>header[data-vkv-campus-header="1"]>.headline{position:relative!important;z-index:3!important}
+      body>header[data-vkv-campus-header="1"] h1,body>header[data-vkv-campus-header="1"] .eyebrow,body>header[data-vkv-campus-header="1"] .homeTitleBlock small,body>header[data-vkv-campus-header="1"] small{color:#fff!important;text-shadow:0 2px 5px rgba(0,0,0,.7)!important}
       @media print{.vkv-screen-only,#vkvThemeSwitch{display:none!important}html[data-vkv-theme] body *{text-shadow:none!important}}
     `;doc.head.appendChild(st);
   }
   function installCampusHeader(doc=document){
     const p=(doc.location?.pathname||'').split('/').pop()||'index.html';if(!(p===''||/^index\.html?$/i.test(p)))return;
     const header=doc.querySelector('body>header');if(!header)return;
+    header.dataset.vkvCampusHeader='1';
     header.style.position='relative';header.style.overflow='hidden';
     const legacy=doc.getElementById('vkvCampusHeaderImage');if(legacy)legacy.remove();
     const overlay=doc.getElementById('vkvCampusHeaderOverlay');if(overlay)overlay.remove();
-    const tint=theme==='light'?'linear-gradient(90deg,rgba(24,85,123,.76),rgba(35,109,153,.55),rgba(18,74,109,.26))':'linear-gradient(90deg,rgba(5,6,6,.88),rgba(7,8,8,.64),rgba(10,9,5,.42))';
-    header.style.setProperty('background-image',`${tint},url('./vkv-campus-header.jpg?v=20260908-theme6')`,'important');
-    header.style.setProperty('background-position','center 48%','important');header.style.setProperty('background-size','cover','important');header.style.setProperty('background-repeat','no-repeat','important');
+    header.style.setProperty('background','#1c668f','important');
+    header.style.setProperty('background-image',"url('./vkv-campus-header.jpg?v=20260909-direct1')",'important');
+    header.style.setProperty('background-position','center center','important');
+    header.style.setProperty('background-size','cover','important');
+    header.style.setProperty('background-repeat','no-repeat','important');
+    header.style.setProperty('background-blend-mode','normal','important');
   }
   function apply(next,doc=document,persist=doc===document){
     if(!VALID.has(next))next='black-gold';if(EXEMPT&&doc===document){doc.documentElement.dataset.vkvTheme='semantic';return}
@@ -44,7 +50,7 @@
     if(persist){try{localStorage.setItem(KEY,next)}catch(_){}}
     if(doc===document){installCampusHeader(doc);document.querySelectorAll('[data-vkv-theme-choice]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.vkvThemeChoice===next?'true':'false'));window.dispatchEvent(new CustomEvent('vkv-theme-change',{detail:{theme:next}}));}
   }
-  function registerThemeShell(){if(!('serviceWorker' in navigator)||location.protocol==='file:')return;navigator.serviceWorker.register('./sw.js?v=20260908-theme6',{scope:'./'}).catch(e=>console.info('[VKVTT theme] shell registration skipped:',e?.message||e))}
+  function registerThemeShell(){if(!('serviceWorker' in navigator)||location.protocol==='file:')return;navigator.serviceWorker.register('./sw.js?v=20260909-theme7',{scope:'./'}).catch(e=>console.info('[VKVTT theme] shell registration skipped:',e?.message||e))}
   function mount(){
     if(EXEMPT)return;installCampusHeader();
     if(!document.getElementById('vkvThemeSwitch')){
