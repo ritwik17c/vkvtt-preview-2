@@ -13,76 +13,40 @@
 <script src="./vkv-theme.js?v=20260908-theme1"></script>
 </head>
 <body>
-<header>
-  <h1>👥 Proxy Manager</h1>
-  <div class="headActions">
-    <button id="emergencyEditTop" class="btn emergency" type="button">🚨 Emergency Edit / Reload</button>
-    <a class="btn" href="./?v=66.0">🏠 Home</a>
-  </div>
-</header>
+<header><h1>👥 Proxy Manager</h1><div class="headActions"><button id="emergencyEditTop" class="btn emergency" type="button">🚨 Emergency Edit / Reload</button><a class="btn" href="./?v=66.0">🏠 Home</a></div></header>
 <div id="msg">Loading Proxy Manager…</div>
-<iframe id="frame" src="./proxy-manager-core.html?proxy-manager=1&v=20260908-emergency-edit-4"></iframe>
+<iframe id="frame" src="./proxy-manager-core.html?proxy-manager=1&v=20260908-emergency-edit-5"></iframe>
 <script>
 const f=document.getElementById('frame'),m=document.getElementById('msg'),topEmergency=document.getElementById('emergencyEditTop');
-function safe(s){return String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
 function dpbRecord(t){const code=String(t&&t.code||'').trim().toUpperCase(),name=String(t&&t.name||'').trim().toLowerCase();return code==='DPB'||name==='dhruba prasad baruah'}
 function setMsg(text,ok=false){m.textContent=text;m.classList.toggle('ok',!!ok);m.style.display='block';if(ok)setTimeout(()=>{m.style.display='none'},5000)}
-async function waitForCore(ms=12000){const start=Date.now();while(Date.now()-start<ms){try{const w=f.contentWindow;if(w&&typeof w.proxyDateKey==='function'&&typeof w.todayKey==='function'&&(typeof w.loadProxyWorkCloud==='function'||typeof w.loadProxyWorkState==='function'))return w}catch(_){ }await new Promise(r=>setTimeout(r,150))}throw new Error('Proxy Manager is still loading. Please refresh once and try again.')}
+async function waitForCore(ms=12000){const start=Date.now();while(Date.now()-start<ms){try{const w=f.contentWindow;if(w&&typeof w.proxyDateKey==='function'&&typeof w.todayKey==='function'&&(typeof w.loadProxyWorkCloud==='function'||typeof w.loadProxyWorkState==='function'))return w}catch(_){}await new Promise(r=>setTimeout(r,150))}throw new Error('Proxy Manager is still loading. Please refresh once and try again.')}
 async function reloadLatest(w,date){if(typeof w.loadProxyWorkCloud==='function'){await w.loadProxyWorkCloud(date);return}if(typeof w.loadProxyWorkState==='function'){await w.loadProxyWorkState(date);return}throw new Error('Latest Leave / Duty reload service is not ready.')}
 function currentPublished(w,date){const a=w.__vkvWorkPublishedProxy,b=w.__vkvPublishedProxy;if(a&&a.date===date)return a;if(b&&b.date===date)return b;return null}
-function openEditableWorkspace(w){const d=f.contentDocument;try{if(typeof w.show==='function')w.show('allot',d.getElementById('proxyWorkBtn'))}catch(_){ }try{if(typeof w.renderProxyLockState==='function')w.renderProxyLockState()}catch(_){ }try{if(typeof w.renderTodayProxyStatusSummary==='function')w.renderTodayProxyStatusSummary()}catch(_){ }
- try{
-  const rows=typeof w.proxyRows==='function'?w.proxyRows():[],a=typeof w.allotData==='function'?w.allotData():{},s=typeof w.supervisionData==='function'?w.supervisionData():{};
-  const unmet=rows.find(r=>{try{const k=typeof w.needKey==='function'?w.needKey(r):'';return k&&!a[k]&&!s[k]}catch(_){return false}});
-  if(unmet&&unmet.period&&d.getElementById('allotPeriod')&&typeof w.jumpProxyPeriod==='function'){
-    d.getElementById('allotPeriod').value=String(unmet.period);w.jumpProxyPeriod();
-  }else if(typeof w.renderProxyPeriod==='function')w.renderProxyPeriod();
- }catch(_){try{if(typeof w.renderProxyPeriod==='function')w.renderProxyPeriod()}catch(__){ }}
- try{d.getElementById('allot')?.scrollIntoView({behavior:'smooth',block:'start'})}catch(_){ }
-}
-async function emergencyEditReload(){
- topEmergency.disabled=true;const old=topEmergency.textContent;topEmergency.textContent='↻ Reloading latest Leave / Duty…';
- try{
-  const w=await waitForCore(),date=w.proxyDateKey();
-  await reloadLatest(w,date);
-  let pub=currentPublished(w,date);
-  if(!pub){openEditableWorkspace(w);setMsg('Latest Leave / Duty data reloaded from cloud. This date has no finalised Proxy lock, so Proxy Allotment is editable now.',true);return}
-  if(!w.__vkvWorkPublishedProxy||w.__vkvWorkPublishedProxy.date!==date)w.__vkvWorkPublishedProxy=pub;
-  if(!pub.correctionEnabled){
-    if(date<w.todayKey()){
-      if(typeof w.authoriseHistoricalProxy!=='function')throw new Error('Historical Proxy authorisation is not ready.');
-      await w.authoriseHistoricalProxy();
-    }else{
-      if(typeof w.enableProxyCorrection!=='function')throw new Error('Emergency correction service is not ready.');
-      await w.enableProxyCorrection();
-    }
+function installMultiPeriodStatusFix(w){
+ if(w.__vkvMultiPeriodStatusFixInstalled)return true;
+ if(typeof w.leaveData!=='function'||typeof w.activeLeaveAt!=='function')return false;
+ w.__vkvMultiPeriodStatusFixInstalled=true;
+ const originalLeaveData=w.leaveData.bind(w),originalActiveLeaveAt=w.activeLeaveAt.bind(w);
+ w.activeLeaveAt=function(o,p){if(Array.isArray(o?.__vkvPeriods))return o.__vkvPeriods.includes(Number(p));return originalActiveLeaveAt(o,p)};
+ w.leaveData=function(date){
+  const rows=(originalLeaveData(date)||[]).filter(Boolean),groups=new Map(),out=[];
+  for(const r of rows){const code=String(r.code||r.teacherCode||'').trim();if(!code){out.push(r);continue}if(!groups.has(code))groups.set(code,[]);groups.get(code).push(r)}
+  for(const rs of groups.values()){
+   if(rs.length===1){out.push(rs[0]);continue}
+   const periods=[];for(let p=1;p<=20;p++)if(rs.some(r=>originalActiveLeaveAt(r,p)))periods.push(p);
+   out.push({...rs[0],__vkvPeriods:periods,__vkvSourceRecords:rs,__vkvMergedSameDay:true});
   }
-  await reloadLatest(w,date);
-  pub=currentPublished(w,date);
-  if(pub&&!pub.correctionEnabled)throw new Error('The Proxy remains locked. Principal correction was not enabled.');
-  openEditableWorkspace(w);
-  setMsg('Emergency edit is open. Latest cloud Leave / OD / Special Assignment data has been reloaded. Change or allot the affected period, then Review & Finalise again.',true);
- }catch(e){alert('Emergency Proxy edit could not be opened: '+(e?.message||e));setMsg('Emergency edit could not be opened. '+(e?.message||e),false)}finally{topEmergency.disabled=false;topEmergency.textContent=old}
+  return out;
+ };
+ return true;
 }
+function openEditableWorkspace(w){const d=f.contentDocument;try{if(typeof w.show==='function')w.show('allot',d.getElementById('proxyWorkBtn'))}catch(_){}try{if(typeof w.renderProxyLockState==='function')w.renderProxyLockState()}catch(_){}try{if(typeof w.renderTodayProxyStatusSummary==='function')w.renderTodayProxyStatusSummary()}catch(_){}try{const rows=typeof w.proxyRows==='function'?w.proxyRows():[],a=typeof w.allotData==='function'?w.allotData():{},s=typeof w.supervisionData==='function'?w.supervisionData():{};const unmet=rows.find(r=>{try{const k=typeof w.needKey==='function'?w.needKey(r):'';return k&&!a[k]&&!s[k]}catch(_){return false}});if(unmet&&unmet.period&&d.getElementById('allotPeriod')&&typeof w.jumpProxyPeriod==='function'){d.getElementById('allotPeriod').value=String(unmet.period);w.jumpProxyPeriod()}else if(typeof w.renderProxyPeriod==='function')w.renderProxyPeriod()}catch(_){try{if(typeof w.renderProxyPeriod==='function')w.renderProxyPeriod()}catch(__){}}try{d.getElementById('allot')?.scrollIntoView({behavior:'smooth',block:'start'})}catch(_){}}
+async function emergencyEditReload(){topEmergency.disabled=true;const old=topEmergency.textContent;topEmergency.textContent='↻ Reloading latest Leave / Duty…';try{const w=await waitForCore(),date=w.proxyDateKey();installMultiPeriodStatusFix(w);await reloadLatest(w,date);let pub=currentPublished(w,date);if(!pub){openEditableWorkspace(w);setMsg('Latest Leave / Duty data reloaded from cloud. This date has no finalised Proxy lock, so Proxy Allotment is editable now.',true);return}if(!w.__vkvWorkPublishedProxy||w.__vkvWorkPublishedProxy.date!==date)w.__vkvWorkPublishedProxy=pub;if(!pub.correctionEnabled){if(date<w.todayKey()){if(typeof w.authoriseHistoricalProxy!=='function')throw new Error('Historical Proxy authorisation is not ready.');await w.authoriseHistoricalProxy()}else{if(typeof w.enableProxyCorrection!=='function')throw new Error('Emergency correction service is not ready.');await w.enableProxyCorrection()}}await reloadLatest(w,date);installMultiPeriodStatusFix(w);pub=currentPublished(w,date);if(pub&&!pub.correctionEnabled)throw new Error('The Proxy remains locked. Principal correction was not enabled.');openEditableWorkspace(w);setMsg('Emergency edit is open. All same-day Leave / OD / Special Assignment periods have been reloaded. Adjust the affected period, then Review & Finalise again.',true)}catch(e){alert('Emergency Proxy edit could not be opened: '+(e?.message||e));setMsg('Emergency edit could not be opened. '+(e?.message||e),false)}finally{topEmergency.disabled=false;topEmergency.textContent=old}}
 topEmergency.addEventListener('click',emergencyEditReload);
-function installCoreOverrides(){
- try{
-  const w=f.contentWindow,d=f.contentDocument;if(!w||!d||typeof w.operationalTeachers!=='function')return false;
-  if(!w.__vkvProxyWrapperFixInstalled){
-   w.__vkvProxyWrapperFixInstalled=true;
-   const original=w.operationalTeachers.bind(w);w.operationalTeachers=function(date){return(original(date)||[]).filter(t=>!dpbRecord(t))};
-  }
-  if(window.VKVTheme)window.VKVTheme.applyToDocument(d,window.VKVTheme.get());
-  return true;
- }catch(e){console.warn('Proxy wrapper setup:',e);return false}
-}
-function installFinalPrintSafety(){
- try{
-  const d=f.contentDocument;if(!d||d.getElementById('vkvProxyFinalSafety'))return;
-  const st=d.createElement('style');st.id='vkvProxyFinalSafety';st.textContent='@media print{#publishedProxy,#publishedProxy *{background:#fff!important;color:#000!important}#publishedProxy table{border-collapse:collapse!important}#publishedProxy th,#publishedProxy td{border-color:#000!important}}';d.head.appendChild(st);
- }catch(_){ }
-}
-f.addEventListener('load',()=>{let n=0;const t=setInterval(()=>{const ok=installCoreOverrides();installFinalPrintSafety();try{const w=f.contentWindow;if(typeof w.show==='function'){w.show('allot');m.style.display='none'}}catch(_){ }if(ok||++n>50)clearInterval(t)},200)});
+function installCoreOverrides(){try{const w=f.contentWindow,d=f.contentDocument;if(!w||!d||typeof w.operationalTeachers!=='function')return false;if(!w.__vkvProxyWrapperFixInstalled){w.__vkvProxyWrapperFixInstalled=true;const original=w.operationalTeachers.bind(w);w.operationalTeachers=function(date){return(original(date)||[]).filter(t=>!dpbRecord(t))}}installMultiPeriodStatusFix(w);if(window.VKVTheme)window.VKVTheme.applyToDocument(d,window.VKVTheme.get());return true}catch(e){console.warn('Proxy wrapper setup:',e);return false}}
+function installFinalPrintSafety(){try{const d=f.contentDocument;if(!d||d.getElementById('vkvProxyFinalSafety'))return;const st=d.createElement('style');st.id='vkvProxyFinalSafety';st.textContent='@media print{#publishedProxy,#publishedProxy *{background:#fff!important;color:#000!important}#publishedProxy table{border-collapse:collapse!important}#publishedProxy th,#publishedProxy td{border-color:#000!important}}';d.head.appendChild(st)}catch(_){}}
+f.addEventListener('load',()=>{let n=0;const t=setInterval(()=>{const ok=installCoreOverrides();installFinalPrintSafety();try{const w=f.contentWindow;if(typeof w.show==='function'){w.show('allot');m.style.display='none'}}catch(_){}if(ok||++n>50)clearInterval(t)},200)});
 window.addEventListener('vkv-theme-change',()=>{try{if(window.VKVTheme&&f.contentDocument)window.VKVTheme.applyToDocument(f.contentDocument,window.VKVTheme.get())}catch(_){}});
 </script>
 </body>
