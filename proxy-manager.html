@@ -1,13 +1,88 @@
-<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><title>VKVTT · Proxy Manager</title><style>*{box-sizing:border-box}body{margin:0;font-family:system-ui,Segoe UI,Arial;background:#edf6f1;color:#17364f}header{height:66px;background:#1f678f;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 18px;gap:12px}h1{font-size:1.25rem;margin:0}.btn{font-weight:800;text-decoration:none;color:#17364f;background:#eef7fb;border:1px solid #bad0db;border-radius:10px;padding:9px 12px}iframe{display:block;width:100%;height:calc(100vh - 66px);border:0;background:#edf6f1}#msg{position:fixed;left:50%;top:78px;transform:translateX(-50%);background:#fff7dd;border:1px solid #dfbf62;border-radius:10px;padding:9px 12px;z-index:10}</style><script src="./vkv-theme.js?v=20260908-theme1"></script></head><body><header><h1>👥 Proxy Manager</h1><div><a class="btn" href="./?v=66.0">🏠 Home</a></div></header><div id="msg">Loading the proven Proxy Manager workspace…</div><iframe id="frame" src="./proxy-manager-core.html?proxy-manager=1&v=20260908-emergency-edit-2"></iframe><script>
-const f=document.getElementById('frame'),m=document.getElementById('msg');
-function dpbRecord(t){const code=String(t&&t.code||'').trim().toUpperCase(),name=String(t&&t.name||'').trim().toLowerCase();return code==='DPB'||name==='dhruba prasad baruah'}
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>VKVTT · Proxy Manager</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,Segoe UI,Arial;background:#edf6f1;color:#17364f}header{min-height:66px;background:#1f678f;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:8px 18px;gap:12px;flex-wrap:wrap}h1{font-size:1.25rem;margin:0}.headActions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.btn{font:inherit;font-weight:800;text-decoration:none;color:#17364f;background:#eef7fb;border:1px solid #bad0db;border-radius:10px;padding:9px 12px;cursor:pointer}.emergency{background:#8b2d2d;color:#fff;border-color:#b65a5a}.emergency:hover{background:#762323}.emergency:disabled{opacity:.65;cursor:wait}iframe{display:block;width:100%;height:calc(100vh - 66px);border:0;background:#edf6f1}#msg{position:fixed;left:50%;top:78px;transform:translateX(-50%);background:#fff7dd;border:1px solid #dfbf62;border-radius:10px;padding:9px 12px;z-index:10;max-width:min(760px,92vw);text-align:center}#msg.ok{background:#edf9ef;border-color:#88bd91;color:#21562c}@media(max-width:700px){header{align-items:flex-start}.headActions{width:100%}.headActions .btn{flex:1;text-align:center}iframe{height:calc(100vh - 116px)}}
+</style>
+<script src="./vkv-theme.js?v=20260908-theme1"></script>
+</head>
+<body>
+<header>
+  <h1>👥 Proxy Manager</h1>
+  <div class="headActions">
+    <button id="emergencyEditTop" class="btn emergency" type="button">🚨 Emergency Edit / Reload</button>
+    <a class="btn" href="./?v=66.0">🏠 Home</a>
+  </div>
+</header>
+<div id="msg">Loading Proxy Manager…</div>
+<iframe id="frame" src="./proxy-manager-core.html?proxy-manager=1&v=20260908-emergency-edit-3"></iframe>
+<script>
+const f=document.getElementById('frame'),m=document.getElementById('msg'),topEmergency=document.getElementById('emergencyEditTop');
 function safe(s){return String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
-function currentPublished(w,date){const work=w.__vkvWorkPublishedProxy;if(work&&work.date===date)return work;const today=w.__vkvPublishedProxy;if(today&&today.date===date)return today;return null}
-function emergencyButton(w,d,host,id){if(!host)return;let b=d.getElementById(id);if(!b){b=d.createElement('button');b.id=id;b.type='button';b.style.cssText='background:#8b2d2d;color:#fff;border-color:#8b2d2d;font-weight:800';host.insertBefore(b,host.firstChild)}const date=typeof w.proxyDateKey==='function'?w.proxyDateKey():'',p=currentPublished(w,date),available=!!(w.__vkvRole==='admin'&&p&&p.date===date);b.style.display=available?'inline-block':'none';if(!available)return;b.textContent=p.correctionEnabled?'↻ Reload Latest Leave/Duty & Continue':'🚨 Emergency Edit / Reopen';b.onclick=async()=>{try{if(!w.__vkvWorkPublishedProxy||w.__vkvWorkPublishedProxy.date!==date)w.__vkvWorkPublishedProxy=p;if(!p.correctionEnabled){if(date<w.todayKey()&&typeof w.authoriseHistoricalProxy==='function')await w.authoriseHistoricalProxy();else if(typeof w.enableProxyCorrection==='function')await w.enableProxyCorrection()}const updated=currentPublished(w,date)||w.__vkvWorkPublishedProxy;if(!updated||!updated.correctionEnabled)return;if(typeof w.loadProxyWorkState==='function')await w.loadProxyWorkState(date);if(typeof w.openProxyAllotment==='function')w.openProxyAllotment(d.getElementById('proxyWorkBtn'));else if(typeof w.show==='function')w.show('allot');if(typeof w.renderTodayProxyStatusSummary==='function')w.renderTodayProxyStatusSummary();if(typeof w.renderProxyPeriod==='function')w.renderProxyPeriod();setTimeout(()=>installEmergencyProxyEdit(),50)}catch(e){alert('Emergency edit could not be opened: '+(e?.message||e))}}}
-function installEmergencyProxyEdit(){try{const w=f.contentWindow,d=f.contentDocument;if(!w||!d)return false;emergencyButton(w,d,d.querySelector('#allot .actions'),'vkvEmergencyProxyEditBtnAllot');emergencyButton(w,d,d.querySelector('#publishedProxy .actions'),'vkvEmergencyProxyEditBtnPublished');return true}catch(e){console.warn('Emergency proxy edit control:',e);return false}}
-function installFinalisedPrintPreview(){try{const w=f.contentWindow,d=f.contentDocument;if(!w||!d)return false;if(window.VKVTheme)window.VKVTheme.applyToDocument(d,window.VKVTheme.get());if(!d.getElementById('vkvProxyFinalPrintPreviewStyle')){const st=d.createElement('style');st.id='vkvProxyFinalPrintPreviewStyle';st.textContent=`.vkv-final-proxy-paper{background:#fff!important;color:#111!important;border:1px solid #c9c9c9!important;border-radius:10px!important;padding:22px!important;box-shadow:0 8px 28px rgba(0,0,0,.18)!important;margin-top:14px!important}.vkv-final-proxy-paper table{width:100%!important;border-collapse:collapse!important;background:#fff!important;color:#111!important}.vkv-final-proxy-paper th{background:#f1f1f1!important;color:#111!important;border:1px solid #777!important;padding:7px!important}.vkv-final-proxy-paper td{background:#fff!important;color:#111!important;border:1px solid #999!important;padding:7px!important}.vkv-final-proxy-paper .vkv-principal-signature{margin-top:48px!important;padding-top:18px!important;display:flex!important;justify-content:flex-end!important;color:#111!important;font-weight:700!important}.vkv-final-proxy-paper .vkv-principal-signature span{display:inline-block!important;min-width:300px!important;border-top:1px solid #111!important;padding-top:7px!important;text-align:center!important}@media print{body.vkv-print-final-proxy *{visibility:hidden!important}body.vkv-print-final-proxy .vkv-final-proxy-paper,body.vkv-print-final-proxy .vkv-final-proxy-paper *{visibility:visible!important}body.vkv-print-final-proxy .vkv-final-proxy-paper{position:absolute!important;left:0!important;top:0!important;width:100%!important;margin:0!important;padding:0!important;border:0!important;box-shadow:none!important;background:#fff!important;color:#000!important}}`;d.head.appendChild(st)}const heading=[...d.querySelectorAll('h1,h2,h3,h4,h5,strong,b')].find(x=>/Finalised\s+Proxy\s+Allotment/i.test(x.textContent||''));if(!heading)return false;let paper=heading.parentElement;while(paper&&paper!==d.body){if(paper.querySelector&&paper.querySelector('table'))break;paper=paper.parentElement}if(!paper||paper===d.body)return false;paper.classList.add('vkv-final-proxy-paper');if(!/Principal'?s?\s+Signature/i.test(paper.textContent||'')){const sig=d.createElement('div');sig.className='vkv-principal-signature';sig.innerHTML='<span>Principal\'s Signature</span>';paper.appendChild(sig)}return true}catch(e){return false}}
-function installCoreOverrides(){try{const w=f.contentWindow,d=f.contentDocument;if(!w||!d)return false;if(typeof w.todayKey!=='function'||typeof w.operationalTeachers!=='function'||typeof w.proxyDateKey!=='function'||typeof w.leaveData!=='function')return false;if(!w.__vkvProxyFixInstalled){w.__vkvProxyFixInstalled=true;const original=w.operationalTeachers.bind(w);w.operationalTeachers=function(date){return(original(date)||[]).filter(t=>!dpbRecord(t))};w.renderTodayProxyStatusSummary=function(){const out=d.getElementById('proxyTodayStatusSummary');if(!out)return;const date=w.proxyDateKey(),today=w.todayKey(),rows=(w.leaveData(date)||[]).filter(o=>o&&['full','half','od','special','vacant'].includes(o.type)),label=typeof w.displayDate==='function'?w.displayDate(date):date,title=date===today?'Today’s Leave / Duty Leave / Operational Status Summary':'Leave / Duty Leave / Operational Status for '+label;if(!rows.length){out.innerHTML='<b>'+safe(title)+'</b><div class="small" style="margin-top:5px">No approved or scheduled Leave / Duty Leave / Operational Status record is available for this selected date.</div>';return}out.innerHTML='<b>'+safe(title)+'</b><div class="small" style="margin:4px 0 8px">'+rows.length+' staff record'+(rows.length===1?'':'s')+' applicable to '+safe(label)+'.</div>'+rows.map(o=>{let t=null;try{t=w.teacherByEffectiveCode(o.code,date)}catch(_){}let text='';try{text=w.statusLabel(o)}catch(_){text=o.type||'Status'}return'<div style="padding:4px 0;border-top:1px solid #dbe7df"><b>'+safe(t?t.name:o.code)+'</b> ('+safe(o.code)+') — '+safe(text)+'</div>'}).join('')}}}const input=d.getElementById('proxyWorkDate'),hint=input?.parentElement?.querySelector('.small');if(hint)hint.textContent='Finalised dates may be reopened by the Principal for an emergency correction. Re-finalise after changes.';if(typeof w.renderTodayProxyStatusSummary==='function')w.renderTodayProxyStatusSummary();if(typeof w.renderProxyPeriod==='function')w.renderProxyPeriod();installEmergencyProxyEdit();installFinalisedPrintPreview();return true}catch(e){console.warn('Proxy compatibility fix:',e);return false}}
-function focusProxy(){try{const w=f.contentWindow;if(typeof w.show==='function'){w.show('allot');m.style.display='none';return true}}catch(_){}return false}
-f.addEventListener('load',()=>{let tries=0;const t=setInterval(()=>{const ok=installCoreOverrides();focusProxy();installEmergencyProxyEdit();installFinalisedPrintPreview();if(ok||++tries>40)clearInterval(t)},250);try{const d=f.contentDocument;new MutationObserver(()=>{installEmergencyProxyEdit();installFinalisedPrintPreview()}).observe(d.body,{childList:true,subtree:true});d.addEventListener('click',()=>setTimeout(installEmergencyProxyEdit,60),true);d.addEventListener('change',e=>{if(e.target&&e.target.id==='proxyWorkDate')setTimeout(()=>{installCoreOverrides();installEmergencyProxyEdit()},100)},true)}catch(_){}});
+function dpbRecord(t){const code=String(t&&t.code||'').trim().toUpperCase(),name=String(t&&t.name||'').trim().toLowerCase();return code==='DPB'||name==='dhruba prasad baruah'}
+function setMsg(text,ok=false){m.textContent=text;m.classList.toggle('ok',!!ok);m.style.display='block';if(ok)setTimeout(()=>{m.style.display='none'},5000)}
+async function waitForCore(ms=12000){const start=Date.now();while(Date.now()-start<ms){try{const w=f.contentWindow;if(w&&typeof w.proxyDateKey==='function'&&typeof w.todayKey==='function'&&typeof w.loadProxyWorkState==='function')return w}catch(_){ }await new Promise(r=>setTimeout(r,150))}throw new Error('Proxy Manager is still loading. Please refresh once and try again.')}
+function currentPublished(w,date){const a=w.__vkvWorkPublishedProxy,b=w.__vkvPublishedProxy;if(a&&a.date===date)return a;if(b&&b.date===date)return b;return null}
+function openEditableWorkspace(w){const d=f.contentDocument;try{if(typeof w.show==='function')w.show('allot',d.getElementById('proxyWorkBtn'))}catch(_){ }try{if(typeof w.renderProxyLockState==='function')w.renderProxyLockState()}catch(_){ }try{if(typeof w.renderTodayProxyStatusSummary==='function')w.renderTodayProxyStatusSummary()}catch(_){ }
+ try{
+  const rows=typeof w.proxyRows==='function'?w.proxyRows():[],a=typeof w.allotData==='function'?w.allotData():{},s=typeof w.supervisionData==='function'?w.supervisionData():{};
+  const unmet=rows.find(r=>{try{const k=typeof w.needKey==='function'?w.needKey(r):'';return k&&!a[k]&&!s[k]}catch(_){return false}});
+  if(unmet&&unmet.period&&d.getElementById('allotPeriod')&&typeof w.jumpProxyPeriod==='function'){
+    d.getElementById('allotPeriod').value=String(unmet.period);w.jumpProxyPeriod();
+  }else if(typeof w.renderProxyPeriod==='function')w.renderProxyPeriod();
+ }catch(_){try{if(typeof w.renderProxyPeriod==='function')w.renderProxyPeriod()}catch(__){ }}
+ try{d.getElementById('allot')?.scrollIntoView({behavior:'smooth',block:'start'})}catch(_){ }
+}
+async function emergencyEditReload(){
+ topEmergency.disabled=true;const old=topEmergency.textContent;topEmergency.textContent='↻ Reloading latest Leave / Duty…';
+ try{
+  const w=await waitForCore(),date=w.proxyDateKey();
+  await w.loadProxyWorkState(date);
+  let pub=currentPublished(w,date);
+  if(!pub){openEditableWorkspace(w);setMsg('Latest Leave / Duty data reloaded. This date has no finalised Proxy lock, so Proxy Allotment is editable now.',true);return}
+  if(!w.__vkvWorkPublishedProxy||w.__vkvWorkPublishedProxy.date!==date)w.__vkvWorkPublishedProxy=pub;
+  if(!pub.correctionEnabled){
+    if(date<w.todayKey()){
+      if(typeof w.authoriseHistoricalProxy!=='function')throw new Error('Historical Proxy authorisation is not ready.');
+      await w.authoriseHistoricalProxy();
+    }else{
+      if(typeof w.enableProxyCorrection!=='function')throw new Error('Emergency correction service is not ready.');
+      await w.enableProxyCorrection();
+    }
+  }
+  await w.loadProxyWorkState(date);
+  pub=currentPublished(w,date);
+  if(pub&&!pub.correctionEnabled)throw new Error('The Proxy remains locked. Principal correction was not enabled.');
+  openEditableWorkspace(w);
+  setMsg('Emergency edit is open. Latest approved Leave / OD / Special Assignment data has been reloaded. Change or allot the affected period, then Review & Finalise again.',true);
+ }catch(e){alert('Emergency Proxy edit could not be opened: '+(e?.message||e));setMsg('Emergency edit could not be opened. '+(e?.message||e),false)}finally{topEmergency.disabled=false;topEmergency.textContent=old}
+}
+topEmergency.addEventListener('click',emergencyEditReload);
+function installCoreOverrides(){
+ try{
+  const w=f.contentWindow,d=f.contentDocument;if(!w||!d||typeof w.operationalTeachers!=='function')return false;
+  if(!w.__vkvProxyWrapperFixInstalled){
+   w.__vkvProxyWrapperFixInstalled=true;
+   const original=w.operationalTeachers.bind(w);w.operationalTeachers=function(date){return(original(date)||[]).filter(t=>!dpbRecord(t))};
+  }
+  if(window.VKVTheme)window.VKVTheme.applyToDocument(d,window.VKVTheme.get());
+  return true;
+ }catch(e){console.warn('Proxy wrapper setup:',e);return false}
+}
+function installFinalPrintSafety(){
+ try{
+  const d=f.contentDocument;if(!d||d.getElementById('vkvProxyFinalSafety'))return;
+  const st=d.createElement('style');st.id='vkvProxyFinalSafety';st.textContent='@media print{#publishedProxy,#publishedProxy *{background:#fff!important;color:#000!important}#publishedProxy table{border-collapse:collapse!important}#publishedProxy th,#publishedProxy td{border-color:#000!important}}';d.head.appendChild(st);
+ }catch(_){ }
+}
+f.addEventListener('load',()=>{let n=0;const t=setInterval(()=>{const ok=installCoreOverrides();installFinalPrintSafety();try{const w=f.contentWindow;if(typeof w.show==='function'){w.show('allot');m.style.display='none'}}catch(_){ }if(ok||++n>50)clearInterval(t)},200)});
 window.addEventListener('vkv-theme-change',()=>{try{if(window.VKVTheme&&f.contentDocument)window.VKVTheme.applyToDocument(f.contentDocument,window.VKVTheme.get())}catch(_){}});
-</script></body></html>
+</script>
+</body>
+</html>
