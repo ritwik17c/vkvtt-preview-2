@@ -1,6 +1,6 @@
 {
-  "build": "2026.09.08.19",
-  "channel": "preview-2-production-hardening",
+  "build": "2026.09.08.20",
+  "channel": "preview-2-production-candidate",
   "updated": "2026-09-08",
-  "notes": "Proxy/Leave cleanup hardening: Admin approval cards can now remove genuine conflicting approved leave/duty records together with their canonical scheduled-plan entry and approvedDailyStatus Proxy projection in one audited batch. This closes the stale-conflict case where deleting only a provisional request left an official conflict behind. Non-contiguous custom period support remains unchanged."
+  "notes": "Preview 2 consolidation: upgraded Question Bank teacher history, coordinator queue, dictation review, submission recovery, Paper Builder scoring/Answer Any/subquestion marks/Paper Health while preserving the newer mark-aware bulk importer. Campus photograph is now the authoritative Home header background instead of the competing SVG treatment. Leave/Proxy emergency corrections remain intact."
 }
