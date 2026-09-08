@@ -1,6 +1,6 @@
 {
-  "build": "2026.09.08.24",
+  "build": "2026.09.09.25",
   "channel": "preview-2-production-candidate",
-  "updated": "2026-09-08",
-  "notes": "Theme hardening build: fixes disappearing text on clicked/active Home cards in both Light and Black & Gold; makes Period Reminder, Proxy operational summary and shared result/tip/status surfaces readable in both themes; restores readable Home header subtitle; reduces the competing header overlays so the actual campus photograph remains visible; keeps theme-picker states visually logical; and preserves all operational, Proxy, Leave, Exam and timetable logic unchanged."
+  "updated": "2026-09-09",
+  "notes": "Direct-header production candidate: removes all Home-header tint/overlay rendering paths and uses vkv-campus-header.jpg as the sole authoritative background image; disables competing Home header pseudo-overlays; loads the final shared contrast-hardening layer for clicked cards, Period Reminder, Proxy summary and theme controls; preserves operational, Proxy, Leave, Exam and timetable logic unchanged."
 }
