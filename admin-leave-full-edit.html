@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
+<title>VKVTT · Full Leave Edit</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Arial;background:#edf6f1;color:#17364f}header{height:64px;background:#123d68;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 16px;gap:10px}h1{font-size:1.15rem;margin:0}.btn{font:inherit;font-weight:800;border:1px solid #b9ced9;border-radius:10px;padding:8px 11px;background:#eef7fb;color:#17364f;text-decoration:none;cursor:pointer}.note{position:fixed;z-index:20;left:50%;top:70px;transform:translateX(-50%);max-width:min(760px,92vw);background:#fff7df;border:1px solid #e4c873;border-radius:11px;padding:9px 12px;box-shadow:0 5px 18px rgba(0,0,0,.12);font-size:.86rem}.note.hide{display:none}iframe{display:block;width:100%;height:calc(100vh - 64px);border:0;background:#edf6f1}.vkv-delete-erroneous{background:#8b2d2d!important;color:#fff!important;border-color:#8b2d2d!important}
+</style>
+</head>
+<body>
+<header><h1>🛠 Full Leave / Duty Edit</h1><div><a class="btn" href="./admin-leave.html?v=66.0">← Approved Register</a> <a class="btn" href="./leave-manager.html?v=66.0">Leave Manager</a></div></header>
+<div id="note" class="note">Loading full editor…</div>
+<iframe id="editorFrame" src="./admin-leave-editor-v64-clean.html?v=20260908-full-edit-delete-1"></iframe>
+<script type="module">
+import{initializeApp,getApps,getApp}from'https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js';
+import{getAuth,setPersistence,browserLocalPersistence}from'https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js';
+import{getFirestore,doc,getDoc,deleteDoc,setDoc,serverTimestamp}from'https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore-lite.js';
+const cfg={apiKey:'AIzaSyDheZpyXghd1aQ9_RLhwpacVriG__wNZW4',authDomain:'vkv-nalbari-timetable.firebaseapp.com',projectId:'vkv-nalbari-timetable',storageBucket:'vkv-nalbari-timetable.firebasestorage.app',messagingSenderId:'791432856951',appId:'1:791432856951:web:61324065a54bef30f98d72'},app=getApps().length?getApp():initializeApp(cfg),auth=getAuth(app),db=getFirestore(app),frame=document.getElementById('editorFrame'),note=document.getElementById('note');
+await setPersistence(auth,browserLocalPersistence).catch(()=>{});if(auth.authStateReady)await auth.authStateReady().catch(()=>{});
+function datesOf(p){if(Array.isArray(p?.dates)&&p.dates.length)return[...new Set(p.dates.filter(Boolean))];const a=p?.startDate||p?.date||'',b=p?.endDate||a;if(!a)return[];if(!b||a===b)return[a];const out=[],d=new Date(a+'T00:00:00'),z=new Date(b+'T00:00:00');for(let i=0;d<=z&&i<370;i++,d.setDate(d.getDate()+1))out.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'));return out}
+async function admin(){const u=auth.currentUser;if(!u)return null;const s=await getDoc(doc(db,'authorizedUsers',u.uid)).catch(()=>null);return s?.exists()&&s.data().active===true&&String(s.data().role||'')==='admin'?u:null}
+async function resolveRecord(id){let snap=await getDoc(doc(db,'approvedStatusPlans',id)).catch(()=>null);if(snap?.exists())return{id,data:snap.data()||{}};const ms=await getDoc(doc(db,'dailyRecords','__leavePlans')).catch(()=>null),plans=ms?.exists()?(ms.data().plans||{}):{},p=plans[id];return p?{id,data:p}:null}
+async function cascadeDelete(id){const u=await admin();if(!u)throw Error('Principal/Admin access is required.');const rec=await resolveRecord(id);if(!rec)throw Error('This official record could not be found. It may already have been removed.');const p=rec.data,dates=datesOf(p),who=p.teacherName||p.staffName||p.code||p.teacherCode||'this staff member',kind=p.type==='special'?'Special Assignment':p.type==='od'?'On Duty':p.leaveCategory||p.type||'Leave / Duty';if(!confirm(`DELETE ERRONEOUS OFFICIAL RECORD\n\n${who}\n${kind}\n${dates.join(', ')||'Date unavailable'}\n\nThis removes the approved record and its linked Proxy/day projection. Use this only when the record itself is wrong or duplicated.\n\nContinue?`))return;
+ const masterRef=doc(db,'dailyRecords','__leavePlans'),ms=await getDoc(masterRef).catch(()=>null),master=ms?.exists()?ms.data()||{}:{},plans={...(master.plans||{})};for(const[k,v]of Object.entries(plans)){const vid=String(v?.id||v?.canonicalLeaveId||k);if(k===id||vid===id)delete plans[k]}
+ await setDoc(masterRef,{...master,plans,updatedAt:serverTimestamp(),updatedBy:u.uid,updatedByEmail:u.email||''},{merge:false});
+ await deleteDoc(doc(db,'approvedStatusPlans',id)).catch(()=>{});
+ for(const date of dates){const ref=doc(db,'approvedDailyStatus',date),s=await getDoc(ref).catch(()=>null);if(!s?.exists())continue;const old=s.data()||{},statuses=(Array.isArray(old.statuses)?old.statuses:[]).filter(x=>![String(x?.id||''),String(x?.canonicalLeaveId||''),String(x?.projectionPlanId||'')].includes(id));await setDoc(ref,{...old,statuses,projectionUpdatedAt:serverTimestamp(),projectionUpdatedBy:u.uid,projectionUpdatedByEmail:u.email||''},{merge:false})}
+ const now=Date.now();await setDoc(doc(db,'leaveApprovalAudit',`full_edit_delete_${now}_${Math.random().toString(36).slice(2,7)}`),{action:'deleted_erroneous_official_record',officialPlanId:id,staffCode:p.code||p.teacherCode||'',staffName:who,type:p.type||'',leaveCategory:p.leaveCategory||'',affectedDates:dates,actedByUid:u.uid,actedByEmail:u.email||'',actedAtMs:now,actedAt:serverTimestamp()});
+ alert('Erroneous official record and linked Proxy/day projection removed.');frame.contentWindow.location.reload();
+}
+function install(){try{const d=frame.contentDocument;if(!d?.body)return false;note.classList.add('hide');d.querySelectorAll('[data-archive-key]').forEach(a=>{if(a.dataset.archiveKind==='manual'||a.parentElement?.querySelector('.vkv-delete-erroneous'))return;const b=d.createElement('button');b.type='button';b.className='danger vkv-delete-erroneous';b.textContent='Delete Erroneous Record';b.onclick=()=>cascadeDelete(a.dataset.archiveKey).catch(e=>alert('Delete failed: '+(e?.message||e)));a.insertAdjacentElement('afterend',b)});return true}catch(e){return false}}
+frame.addEventListener('load',()=>{let n=0;const t=setInterval(()=>{install();if(++n>60)clearInterval(t)},250);try{new MutationObserver(()=>install()).observe(frame.contentDocument.body,{childList:true,subtree:true})}catch(_){}});
+</script>
+</body></html>
