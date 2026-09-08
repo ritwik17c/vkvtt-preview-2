@@ -1,61 +1,114 @@
-/* VKVTT screen-only contrast repairs for shared Light / Black & Gold themes. */
+/* VKVTT final screen-only contrast + active-state + campus-photo hardening.
+   Presentation only. Operational data and print layouts are untouched. */
 @media screen{
-  /* Proxy operational summary must stay readable in either theme. */
-  html[data-vkv-theme="black-gold"] #proxyTodayStatusSummary,
-  html[data-vkv-theme="black-gold"] #proxyTodayStatusSummary.result{
-    background:#151616!important;
-    color:#f6f2e8!important;
-    border:1px solid #4a4638!important;
+  /* Campus photo must actually be visible. The image element is authoritative. */
+  body>header{background-color:#1c668f!important}
+  #vkvCampusHeaderImage{
+    display:block!important;visibility:visible!important;opacity:1!important;
+    filter:none!important;mix-blend-mode:normal!important;
+    object-fit:cover!important;object-position:center 50%!important;
+    position:absolute!important;inset:0!important;width:100%!important;height:100%!important;
+    z-index:0!important;pointer-events:none!important;
   }
-  html[data-vkv-theme="black-gold"] #proxyTodayStatusSummary b,
-  html[data-vkv-theme="black-gold"] #proxyTodayStatusSummary strong{color:#fff7dc!important}
-  html[data-vkv-theme="black-gold"] #proxyTodayStatusSummary .small{color:#c8c0b0!important}
-  html[data-vkv-theme="black-gold"] #proxyTodayStatusSummary>div{color:#f1eadc!important;border-top-color:#3b3932!important}
+  #vkvCampusHeaderOverlay{display:block!important;position:absolute!important;inset:0!important;z-index:1!important;pointer-events:none!important}
+  html[data-vkv-theme="light"] #vkvCampusHeaderOverlay{background:linear-gradient(90deg,rgba(15,79,116,.26) 0%,rgba(20,91,132,.12) 46%,rgba(8,45,69,.06) 72%,rgba(8,35,52,.14) 100%)!important}
+  html[data-vkv-theme="black-gold"] #vkvCampusHeaderOverlay{background:linear-gradient(90deg,rgba(7,8,8,.34) 0%,rgba(8,9,9,.20) 46%,rgba(10,9,5,.10) 75%,rgba(10,9,5,.22) 100%)!important}
+  body>header>.head{position:relative!important;z-index:3!important}
+  body>header .homeTitleBlock small,body>header .homeTitleBlock .subtitle,body>header .subtitle,body>header small{color:#fff!important;opacity:.96!important;text-shadow:0 1px 4px rgba(0,0,0,.55)!important}
 
-  html[data-vkv-theme="light"] #proxyTodayStatusSummary,
-  html[data-vkv-theme="light"] #proxyTodayStatusSummary.result{
-    background:#eef7fb!important;
-    color:#17364f!important;
-    border:1px solid #cbdce5!important;
-  }
-  html[data-vkv-theme="light"] #proxyTodayStatusSummary b,
-  html[data-vkv-theme="light"] #proxyTodayStatusSummary strong{color:#17364f!important}
-  html[data-vkv-theme="light"] #proxyTodayStatusSummary .small{color:#617685!important}
-  html[data-vkv-theme="light"] #proxyTodayStatusSummary>div{color:#263d4e!important;border-top-color:#dbe7df!important}
-
-  /* Generic result/tip surfaces should never inherit unreadable opposite-theme text. */
-  html[data-vkv-theme="black-gold"] body .result,
-  html[data-vkv-theme="black-gold"] body .tip,
-  html[data-vkv-theme="black-gold"] body .status{
-    color:#f6f2e8!important;
-  }
-  html[data-vkv-theme="black-gold"] body .result b,
-  html[data-vkv-theme="black-gold"] body .tip b,
-  html[data-vkv-theme="black-gold"] body .status b{color:#fff7dc!important}
-  html[data-vkv-theme="black-gold"] body .result .small,
-  html[data-vkv-theme="black-gold"] body .tip .small,
-  html[data-vkv-theme="black-gold"] body .status .small{color:#bdb5a7!important}
-
+  /* LIGHT: pale surfaces always use dark text. */
   html[data-vkv-theme="light"] body .result,
   html[data-vkv-theme="light"] body .tip,
-  html[data-vkv-theme="light"] body .status{color:#17364f!important}
+  html[data-vkv-theme="light"] body .status,
+  html[data-vkv-theme="light"] body #proxyTodayStatusSummary,
+  html[data-vkv-theme="light"] body #periodReminderControl,
+  html[data-vkv-theme="light"] body #periodReminderControl details{
+    background:#f7fbfd!important;color:#17364f!important;border-color:#bfd7e3!important;
+  }
   html[data-vkv-theme="light"] body .result b,
+  html[data-vkv-theme="light"] body .result strong,
+  html[data-vkv-theme="light"] body .result summary,
   html[data-vkv-theme="light"] body .tip b,
-  html[data-vkv-theme="light"] body .status b{color:#17364f!important}
+  html[data-vkv-theme="light"] body .status b,
+  html[data-vkv-theme="light"] body #proxyTodayStatusSummary b,
+  html[data-vkv-theme="light"] body #proxyTodayStatusSummary strong,
+  html[data-vkv-theme="light"] body #periodReminderControl b,
+  html[data-vkv-theme="light"] body #periodReminderControl strong,
+  html[data-vkv-theme="light"] body #periodReminderControl summary{color:#17364f!important}
   html[data-vkv-theme="light"] body .result .small,
   html[data-vkv-theme="light"] body .tip .small,
-  html[data-vkv-theme="light"] body .status .small{color:#617685!important}
+  html[data-vkv-theme="light"] body .status .small,
+  html[data-vkv-theme="light"] body #proxyTodayStatusSummary .small,
+  html[data-vkv-theme="light"] body #periodReminderControl .small{color:#607786!important}
+  html[data-vkv-theme="light"] #proxyTodayStatusSummary>div{color:#263d4e!important;border-top-color:#dbe7df!important}
 
-  /* Theme switch: selected state should visually match the selected theme. */
-  html[data-vkv-theme="light"] #vkvThemeSwitch button[data-vkv-theme-choice="light"][aria-pressed="true"]{
-    background:#ffffff!important;color:#17364f!important;border-color:#b9ced9!important;
+  /* LIGHT clicked cards: never white text on pale green/gold. */
+  html[data-vkv-theme="light"].v66-ui body .myGrid>button.active,
+  html[data-vkv-theme="light"].v66-ui body .nav>button.active,
+  html[data-vkv-theme="light"].v66-ui body .opsGrid>button.active,
+  html[data-vkv-theme="light"].v66-ui body .myGrid>button[aria-pressed="true"],
+  html[data-vkv-theme="light"].v66-ui body .nav>button[aria-pressed="true"],
+  html[data-vkv-theme="light"].v66-ui body .opsGrid>button[aria-pressed="true"]{
+    background:#fff6d8!important;color:#17364f!important;border-color:#d19a1d!important;
+    box-shadow:0 0 0 2px rgba(209,154,29,.13),0 8px 22px rgba(11,43,66,.08)!important;
   }
-  html[data-vkv-theme="black-gold"] #vkvThemeSwitch button[data-vkv-theme-choice="black-gold"][aria-pressed="true"]{
-    background:#f2c335!important;color:#17130b!important;border-color:#f2c335!important;
+  html[data-vkv-theme="light"].v66-ui body .myGrid>button.active *,
+  html[data-vkv-theme="light"].v66-ui body .nav>button.active *,
+  html[data-vkv-theme="light"].v66-ui body .opsGrid>button.active *,
+  html[data-vkv-theme="light"].v66-ui body .myGrid>button[aria-pressed="true"] *,
+  html[data-vkv-theme="light"].v66-ui body .nav>button[aria-pressed="true"] *,
+  html[data-vkv-theme="light"].v66-ui body .opsGrid>button[aria-pressed="true"] *{color:#17364f!important}
+
+  /* BLACK & GOLD: result/reminder/status surfaces stay dark and readable. */
+  html[data-vkv-theme="black-gold"] body .result,
+  html[data-vkv-theme="black-gold"] body .tip,
+  html[data-vkv-theme="black-gold"] body .status,
+  html[data-vkv-theme="black-gold"] body #proxyTodayStatusSummary,
+  html[data-vkv-theme="black-gold"] body #periodReminderControl,
+  html[data-vkv-theme="black-gold"] body #periodReminderControl details{
+    background:#141515!important;color:#f6f2e8!important;border-color:#494538!important;
   }
+  html[data-vkv-theme="black-gold"] body .result b,
+  html[data-vkv-theme="black-gold"] body .result strong,
+  html[data-vkv-theme="black-gold"] body .result summary,
+  html[data-vkv-theme="black-gold"] body .tip b,
+  html[data-vkv-theme="black-gold"] body .status b,
+  html[data-vkv-theme="black-gold"] body #proxyTodayStatusSummary b,
+  html[data-vkv-theme="black-gold"] body #periodReminderControl b,
+  html[data-vkv-theme="black-gold"] body #periodReminderControl strong,
+  html[data-vkv-theme="black-gold"] body #periodReminderControl summary{color:#fff7dc!important}
+  html[data-vkv-theme="black-gold"] body .result .small,
+  html[data-vkv-theme="black-gold"] body .tip .small,
+  html[data-vkv-theme="black-gold"] body .status .small,
+  html[data-vkv-theme="black-gold"] body #proxyTodayStatusSummary .small,
+  html[data-vkv-theme="black-gold"] body #periodReminderControl .small{color:#b8b1a2!important}
+  html[data-vkv-theme="black-gold"] #proxyTodayStatusSummary>div{color:#f1eadc!important;border-top-color:#3b3932!important}
+
+  /* BLACK & GOLD clicked cards: dark-gold state, no pale active background. */
+  html[data-vkv-theme="black-gold"].v66-ui body .myGrid>button.active,
+  html[data-vkv-theme="black-gold"].v66-ui body .nav>button.active,
+  html[data-vkv-theme="black-gold"].v66-ui body .opsGrid>button.active,
+  html[data-vkv-theme="black-gold"].v66-ui body .myGrid>button[aria-pressed="true"],
+  html[data-vkv-theme="black-gold"].v66-ui body .nav>button[aria-pressed="true"],
+  html[data-vkv-theme="black-gold"].v66-ui body .opsGrid>button[aria-pressed="true"]{
+    background:#292310!important;color:#fff7dc!important;border-color:#e2b72d!important;
+    box-shadow:0 0 0 2px rgba(226,183,45,.12),0 8px 22px rgba(0,0,0,.24)!important;
+  }
+  html[data-vkv-theme="black-gold"].v66-ui body .myGrid>button.active *,
+  html[data-vkv-theme="black-gold"].v66-ui body .nav>button.active *,
+  html[data-vkv-theme="black-gold"].v66-ui body .opsGrid>button.active *,
+  html[data-vkv-theme="black-gold"].v66-ui body .myGrid>button[aria-pressed="true"] *,
+  html[data-vkv-theme="black-gold"].v66-ui body .nav>button[aria-pressed="true"] *,
+  html[data-vkv-theme="black-gold"].v66-ui body .opsGrid>button[aria-pressed="true"] *{color:#fff7dc!important}
+
+  /* Theme picker itself visually represents the selected appearance. */
+  html[data-vkv-theme="light"] #vkvThemeSwitch button[data-vkv-theme-choice="light"][aria-pressed="true"]{background:#f7fbff!important;color:#17364f!important;border-color:#3d82a7!important;box-shadow:inset 0 0 0 1px #d4e6ef!important}
+  html[data-vkv-theme="light"] #vkvThemeSwitch button[data-vkv-theme-choice="black-gold"]{background:#171817!important;color:#f2c335!important;border-color:#75601b!important}
+  html[data-vkv-theme="black-gold"] #vkvThemeSwitch button[data-vkv-theme-choice="black-gold"][aria-pressed="true"]{background:#f2c335!important;color:#17130b!important;border-color:#f2c335!important}
+  html[data-vkv-theme="black-gold"] #vkvThemeSwitch button[data-vkv-theme-choice="light"]{background:#f7fbff!important;color:#17364f!important;border-color:#bad0db!important}
 }
-
 @media print{
   #proxyTodayStatusSummary{background:#fff!important;color:#000!important;border-color:#000!important}
   #proxyTodayStatusSummary *{color:#000!important}
+  #vkvCampusHeaderImage,#vkvCampusHeaderOverlay,#vkvThemeSwitch{display:none!important}
 }
