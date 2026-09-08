@@ -1,6 +1,6 @@
 {
-  "build": "2026.09.08.22",
+  "build": "2026.09.08.23",
   "channel": "preview-2-production-candidate",
   "updated": "2026-09-08",
-  "notes": "Visual hardening build: restores the campus photograph as the Home header background by removing the conflicting legacy header guard; gives each non-exempt page its own consistent theme switch with logical Light and Black & Gold states; improves contrast for tips/notices; makes Annual Calendar open prominently in Monthly grid view with stronger grid/event contrast in both themes; and restores a visible Principal's Signature placeholder beneath finalised Proxy output without changing proxy data or print logic."
+  "notes": "Preview 2 cleanup build: removes the duplicate Office Duty Scheduler launcher from Home while keeping the staff-facing Office Duty Schedule; repairs Black & Gold and Light contrast for Proxy operational-status and shared result/tip/status surfaces; and aligns the selected theme switch styling with the selected appearance. No Proxy data, Leave data, Exam logic or timetable data was changed."
 }
