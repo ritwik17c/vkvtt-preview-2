@@ -1,53 +1,42 @@
 /* Home header typography over photographic campus background. Presentation only. */
 body>header .brand small{
-  color:#ffd34d!important;
+  color:#ffd54a!important;
   font-weight:950!important;
-  letter-spacing:.16em!important;
-  -webkit-text-stroke:.35px rgba(20,20,18,.95);
-  text-shadow:
-    0 1px 0 rgba(0,0,0,.95),
-    0 2px 6px rgba(0,0,0,.9),
-    0 0 12px rgba(0,0,0,.65)!important;
+  letter-spacing:.17em!important;
+  -webkit-text-stroke:.65px #111!important;
+  paint-order:stroke fill;
+  text-shadow:0 2px 3px #000,0 0 10px rgba(0,0,0,.92)!important;
 }
 body>header .brand h1{
   color:#fff!important;
-  font-weight:900!important;
-  -webkit-text-stroke:1px rgba(17,24,28,.9);
+  font-weight:950!important;
+  -webkit-text-stroke:1.55px #0b1114!important;
   paint-order:stroke fill;
-  text-shadow:
-    0 2px 0 rgba(0,0,0,.9),
-    0 4px 12px rgba(0,0,0,.95),
-    0 0 20px rgba(0,0,0,.65)!important;
+  text-shadow:0 3px 3px rgba(0,0,0,.96),0 5px 14px rgba(0,0,0,.95),0 0 22px rgba(0,0,0,.72)!important;
 }
 body>header .brand p{
   color:#fff!important;
-  font-weight:700!important;
-  -webkit-text-stroke:.55px rgba(20,24,26,.9);
+  font-weight:800!important;
+  -webkit-text-stroke:.9px #101619!important;
   paint-order:stroke fill;
-  text-shadow:
-    0 1px 0 rgba(0,0,0,.95),
-    0 3px 9px rgba(0,0,0,.9)!important;
+  text-shadow:0 2px 2px rgba(0,0,0,.98),0 4px 10px rgba(0,0,0,.92)!important;
 }
 body>header .logo{
-  filter:drop-shadow(0 3px 8px rgba(0,0,0,.9)) drop-shadow(0 0 4px rgba(255,255,255,.22))!important;
+  filter:drop-shadow(0 3px 8px rgba(0,0,0,.94)) drop-shadow(0 0 4px rgba(255,255,255,.25))!important;
 }
 body>header .portrait{
-  opacity:.98!important;
-  filter:
-    brightness(0) saturate(100%)
-    invert(78%) sepia(72%) saturate(1240%) hue-rotate(353deg) brightness(103%) contrast(101%)
-    drop-shadow(0 2px 3px rgba(0,0,0,.96))
-    drop-shadow(0 0 5px rgba(242,195,53,.42))!important;
+  opacity:1!important;
+  /* Force every visible line/pixel to a saffron-gold tone, preserving transparency. */
+  filter:brightness(0) saturate(100%) invert(81%) sepia(85%) saturate(1550%) hue-rotate(348deg) brightness(101%) contrast(105%) drop-shadow(0 2px 3px rgba(0,0,0,.98)) drop-shadow(0 0 6px rgba(255,198,41,.55))!important;
 }
 html[data-vkv-theme="light"] body>header .brand h1,
 html[data-vkv-theme="black-gold"] body>header .brand h1,
 html[data-vkv-theme="light"] body>header .brand p,
-html[data-vkv-theme="black-gold"] body>header .brand p{
-  color:#fff!important;
-}
+html[data-vkv-theme="black-gold"] body>header .brand p{color:#fff!important}
 @media(max-width:700px){
-  body>header .brand h1{-webkit-text-stroke:.75px rgba(17,24,28,.95)}
-  body>header .brand p{-webkit-text-stroke:.4px rgba(20,24,26,.95)}
+  body>header .brand h1{-webkit-text-stroke:1.1px #0b1114!important}
+  body>header .brand p{-webkit-text-stroke:.65px #101619!important}
+  body>header .brand small{-webkit-text-stroke:.45px #111!important}
 }
 @media print{
   body>header .brand small,body>header .brand h1,body>header .brand p{-webkit-text-stroke:0!important;text-shadow:none!important}
