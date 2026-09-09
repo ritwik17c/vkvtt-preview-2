@@ -1,10 +1,10 @@
-const CACHE_NAME='vkvtt-shell-2026-09-09-production-candidate-27';
+const CACHE_NAME='vkvtt-shell-2026-09-09-production-candidate-28';
 const APP_SHELL=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./vkv-campus-header.jpg','./vkv-theme.js','./vkv-theme-contrast-fixes.css','./vkv-theme-contrast-hardening.css','./vkv-home-header-typography.css','./vkv-home-card-cleanup.js','./vkv-annual-calendar-theme.js','./vkv-light-screen.css','./vkv-black-gold-screen.css','./class-observation-admin-bridge.js','./class-observation-teacher-bridge.js','./v66-home.css','./v66-design-system.css','./v66-home.js','./v66-home-cloud.js','./v66-ui.js','./period-notifications.js','./v66-home-shell-v662.css','./v66-home-shell-v662.js','./v66-premium-unified.css','./qb-module-v2.html','./qb-module-v2.js','./qb-module-v3.js','./vkv-qb-paper-scoring.js','./vkv-qb-paper-subquestion-marks.js','./vkv-qb-admin-production-tools.js','./admin-qb-live-teacher-audit.html','./admin-qb-source-reconcile.html','./admin-qb-submission-integrity-summary.html'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(APP_SHELL)));self.skipWaiting();});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k)))));self.clients.claim();});
 function injectControllers(html,url){
   const tags=[];const path=new URL(url).pathname;const isHome=/\/index\.html$/i.test(path)||/\/vkvtt-preview-2\/?$/i.test(path);
-  if(!/vkv-theme\.js/i.test(html))tags.push('<script src="./vkv-theme.js?v=20260909-theme7"></script>');
+  if(!/vkv-theme\.js/i.test(html))tags.push('<script src="./vkv-theme.js?v=20260909-theme8"></script>');
   if(!/vkv-theme-contrast-fixes\.css/i.test(html))tags.push('<link rel="stylesheet" href="./vkv-theme-contrast-fixes.css?v=20260909-contrast2">');
   if(!/vkv-theme-contrast-hardening\.css/i.test(html))tags.push('<link rel="stylesheet" href="./vkv-theme-contrast-hardening.css?v=20260909-hardening1">');
   if(isHome&&!/vkv-home-header-typography\.css/i.test(html))tags.push('<link rel="stylesheet" href="./vkv-home-header-typography.css?v=20260909-header-type2">');
