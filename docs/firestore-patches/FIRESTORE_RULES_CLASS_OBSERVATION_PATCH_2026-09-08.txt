@@ -1,0 +1,38 @@
+// VKVTT Class Observation module — Firestore rules patch
+// Insert this block inside match /databases/{database}/documents { ... }
+// BEFORE the final catch-all: match /{document=**} { allow read, write: if false; }
+//
+// Principal/Admin: full access to draft and finalised observations.
+// Manager: may read the observation workspace and prepare/maintain ONLY their own drafts.
+// Manager cannot finalise/share an observation or alter/delete a finalised observation.
+// Concerned teacher: read-only access ONLY to their own FINALised observations.
+
+match /classObservations/{observationId} {
+  allow get, list: if isAdmin()
+                   || (uidActive() && uidRole() == 'manager')
+                   || (canReadSchool()
+                       && verifiedEmail()
+                       && resource.data.status == 'finalised'
+                       && resource.data.teacherEmail is string
+                       && resource.data.teacherEmail == authEmail());
+
+  allow create: if isAdmin()
+                || (uidActive()
+                    && uidRole() == 'manager'
+                    && request.resource.data.status == 'draft'
+                    && request.resource.data.observerUid == request.auth.uid);
+
+  allow update: if isAdmin()
+                || (uidActive()
+                    && uidRole() == 'manager'
+                    && resource.data.status == 'draft'
+                    && resource.data.observerUid == request.auth.uid
+                    && request.resource.data.status == 'draft'
+                    && request.resource.data.observerUid == request.auth.uid);
+
+  allow delete: if isAdmin()
+                || (uidActive()
+                    && uidRole() == 'manager'
+                    && resource.data.status == 'draft'
+                    && resource.data.observerUid == request.auth.uid);
+}

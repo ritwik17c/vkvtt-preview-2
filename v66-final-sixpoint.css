@@ -87,10 +87,10 @@ html.v66-ui body.adminDashboardPage .tile::after{
   content:"";
   position:absolute;
   z-index:-1;
-  right:24px;
-  top:16px;
-  width:38px;
-  height:38px;
+  right:14px;
+  top:12px;
+  width:18px;
+  height:18px;
   border:1px solid rgba(31,102,140,.12);
   border-radius:50%;
   background:radial-gradient(circle,rgba(200,138,24,.08),transparent 66%);
@@ -144,4 +144,12 @@ html.v66-ui body.adminDashboardPage .v662-admin-art{width:100%;height:120px;colo
   html.v66-ui body.adminDashboardPage .v662-admin-ribbon{grid-template-columns:1fr}
   html.v66-ui body.adminDashboardPage .v662-admin-art{height:95px}
   html.v66-ui body.adminDashboardPage .tile span{max-width:100%}
+}
+
+/* Leave-area consolidation: supporting settings/import/register remain reachable from Leave Manager,
+   but are not presented as competing primary modules on the grouped Admin Dashboard. */
+html.v66-ui body.adminDashboardPage #vkvAdminLeave #openLeaveRules,
+html.v66-ui body.adminDashboardPage #vkvAdminLeave #openLeaveImport,
+html.v66-ui body.adminDashboardPage #vkvAdminLeave #openLeaveRegister{
+  display:none!important;
 }

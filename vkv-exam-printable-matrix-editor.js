@@ -19,6 +19,35 @@ function render(){const host=$('printableMatrixHost');if(!host)return;const m=ma
 function assignments(){return[...pending.values()].filter(x=>x.className&&x.subject&&x.date).sort((a,b)=>String(a.date).localeCompare(String(b.date))||String(a.className).localeCompare(String(b.className),undefined,{numeric:true})||String(a.subject).localeCompare(String(b.subject)))}
 function signature(list=assignments()){return JSON.stringify(list.map(x=>[x.className,x.subject,x.date]))}
 function applyImportedPattern(){if(!importedPattern.length)return false;const dates=selectedDates();if(!dates.length)return false;const rows=advancedRows(),allowed=new Set(rows.filter(r=>r.included).map(r=>cls(r.className)+'|'+keySub(r.subject)));pending.clear();let count=0;for(const p of importedPattern){const c=cls(p.className),s=subj(p.subject),idx=Math.max(1,Number(p.dayIndex)||1),date=dates[idx-1];if(!c||!s||!date||!allowed.has(c+'|'+keySub(s)))continue;pending.set(c+'|'+keySub(s),{className:c,subject:s,date});count++}dirty=true;render();const m=$('printableMatrixMsg');if(m){m.className='notice success';m.innerHTML=`<b>Template timetable pattern applied.</b> ${count} assignment${count===1?'':'s'} mapped onto your newly selected examination dates.`}return count>0}
+function movePapersByDate(){
+  const from=iso($('movePaperFromDate')?.value||''),to=iso($('movePaperToDate')?.value||''),raw=String($('movePaperClasses')?.value||'').trim();
+  if(!from||!to){alert('Select both the original date and the new date.');return}
+  if(from===to){alert('The From date and To date are the same.');return}
+  const requested=new Set(raw.split(/[,;\n]+/).map(cls).filter(Boolean));
+  const sourceRows=[...pending.values()].filter(x=>x.date===from);
+  if(!sourceRows.length){alert('No saved papers were found on '+disp(from)+'.');return}
+  const sourceClasses=[...new Set(sourceRows.map(x=>cls(x.className)).filter(Boolean))];
+  const wanted=requested.size?requested:new Set(sourceClasses);
+  let moved=0;const movedRows=[];
+  for(const [k,obj] of pending){
+    const cc=cls(obj.className);
+    if(obj.date!==from||!wanted.has(cc))continue;
+    obj.date=to;pending.set(k,obj);moved++;movedRows.push(cc+' — '+subj(obj.subject));
+  }
+  if(!moved){alert('No saved papers matched the selected classes on '+disp(from)+'.');return}
+  const revisedDates=[...new Set([...pending.values()].map(x=>x.date).filter(Boolean))].sort();
+  const startInput=$('startDate'),endInput=$('endDate'),cadenceInput=$('cadence'),customInput=$('customDates');
+  if(revisedDates.length){
+    if(startInput)startInput.value=revisedDates[0];
+    if(endInput)endInput.value=revisedDates[revisedDates.length-1];
+    if(cadenceInput)cadenceInput.value='custom';
+    if(customInput){customInput.value=revisedDates.join(', ');customInput.dispatchEvent(new Event('change',{bubbles:true}))}
+  }
+  dirty=true;render();scheduleManualSave(50);
+  const summary=[...new Set(movedRows)].join(', ');
+  const msg=$('printableMatrixMsg');
+  if(msg){msg.className='notice success';msg.innerHTML='<b>'+moved+' paper assignment'+(moved===1?'':'s')+' moved successfully.</b> '+esc(disp(from))+' → '+esc(disp(to))+'.<br><small>'+esc(summary)+'</small><br><small>Date range updated automatically to '+esc(disp(revisedDates[0]))+' – '+esc(disp(revisedDates[revisedDates.length-1]))+'.</small>'}
+}
 function localOnlyMessage(){const m=$('printableMatrixMsg');if(m){m.className='notice info';m.innerHTML='<b>Manual timetable kept locally.</b> Press Save Cloud Draft when you want to create the cloud draft; subsequent edits will autosave to that same draft.'}}
 function scheduleManualSave(delay=650){dirty=true;if(!activeDraftId&&!allowNameLookup){localOnlyMessage();return}if(saveTimer)clearTimeout(saveTimer);saveTimer=setTimeout(()=>{saveTimer=null;saveManual({ensureDraft:true}).catch(showSaveError)},delay)}
 function edit(e){const s=e.target.closest('[data-matrix-class]');if(!s)return;const c=cls(s.dataset.matrixClass),date=iso(s.dataset.matrixDate),oldSub=subj(s.dataset.matrixCurrent||''),newSub=subj(s.value||'');if(keySub(oldSub)===keySub(newSub))return;if(oldSub)pending.delete(c+'|'+keySub(oldSub));if(newSub){for(const [k,obj] of [...pending])if(k.startsWith(c+'|')&&keySub(obj.subject)===keySub(newSub))pending.delete(k);pending.set(c+'|'+keySub(newSub),{className:c,subject:newSub,date})}render();const msg=$('printableMatrixMsg');if(msg){msg.className='notice info';msg.innerHTML=newSub?`<b>Manual edit recorded.</b> ${esc(c)}: ${esc(newSub)} on ${esc(disp(date))}.`:`<b>Manual slot cleared.</b> ${esc(c)} on ${esc(disp(date))}.`}scheduleManualSave()}
@@ -28,10 +57,23 @@ async function ensureCloudDraft(){let item=await currentDraftDoc();if(item)retur
 function showSaveError(err){const m=$('printableMatrixMsg');if(m){m.className='notice error';m.textContent='Manual timetable save failed: '+(err?.message||err)}}
 async function saveManual({ensureDraft=false,force=false}={}){if(savingManual)return false;const list=assignments(),sig=signature(list);if(!force&&!dirty&&sig===lastSavedSignature)return false;savingManual=true;try{const item=ensureDraft?await ensureCloudDraft():await currentDraftDoc();if(!item){localOnlyMessage();return false}activeDraftId=item.id;const api=await cloud(),payload={schemaVersion:4,assignments:list,updatedAtMs:Date.now()};await api.updateDoc(api.doc(api.db,'examSchedules',item.id),{'manualTimetable':payload,'workspace.manualTimetable':payload});dirty=false;lastSavedSignature=sig;const msg=$('printableMatrixMsg');if(msg){msg.className='notice success';msg.innerHTML=`<b>Manual timetable saved.</b> ${list.length} assignment${list.length===1?'':'s'} stored in this cloud draft.`}return true}finally{savingManual=false}}
 async function loadManual(){const item=await currentDraftDoc();pending.clear();const list=item?.workspace?.manualTimetable?.assignments||item?.manualTimetable?.assignments||[];for(const a of list){const c=cls(a.className),s=subj(a.subject),d=iso(a.date);if(c&&s&&d)pending.set(c+'|'+keySub(s),{className:c,subject:s,date:d})}dirty=false;lastSavedSignature=signature();render();const msg=$('printableMatrixMsg');if(msg){msg.className=list.length?'notice success':'notice info';msg.innerHTML=list.length?`<b>Saved manual timetable restored.</b> ${list.length} assignment${list.length===1?'':'s'} loaded from the cloud draft.`:'No saved manual timetable assignments in this draft yet.'}}
-function ensure(){const pane=document.querySelector('[data-pane="timetable"]');if(!pane||$('printableMatrixEditor'))return false;const a=document.createElement('article');a.id='printableMatrixEditor';a.className='surface';a.innerHTML='<div class="sectionTitle"><div><h3>Printable Timetable · Edit Here</h3><p>Manual timetable workspace. Before the first cloud save, edits stay local; afterwards they autosave to that saved draft.</p></div><div class="buttonRow"><button id="refreshPrintableMatrix" class="button">Refresh</button><button id="resetPrintableMatrix" class="button">Reset Manual Assignments</button></div></div><div class="tableWrap"><div id="printableMatrixHost"></div></div><div id="printableMatrixMsg" class="notice info">Press Save Cloud Draft once when you want this timetable stored in the cloud.</div>';const old=$('majorTimetableActions');if(old)old.before(a);else pane.appendChild(a);$('refreshPrintableMatrix').onclick=()=>activeDraftId?loadManual().catch(showSaveError):render();$('resetPrintableMatrix').onclick=()=>{if(!confirm('Clear all manual timetable assignments?'))return;pending.clear();importedPattern=[];render();scheduleManualSave(50)};$('printableMatrixHost').addEventListener('change',edit);return true}
+function ensure(){const pane=document.querySelector('[data-pane="timetable"]');if(!pane||$('printableMatrixEditor'))return false;const a=document.createElement('article');a.id='printableMatrixEditor';a.className='surface';a.innerHTML='<div class="sectionTitle"><div><h3>Printable Timetable · Edit Here</h3><p>Manual timetable workspace. Before the first cloud save, edits stay local; afterwards they autosave to that saved draft.</p></div><div class="buttonRow"><button id="refreshPrintableMatrix" class="button">Refresh</button><button id="resetPrintableMatrix" class="button">Reset Manual Assignments</button></div></div><div class="surface" style="margin:10px 0"><div class="sectionTitle"><div><h4 style="margin:0">Move Papers by Date</h4><p class="small">For timetable amendments. Existing class-subject assignments move together.</p></div></div><div class="formGrid four"><label>From date<input id="movePaperFromDate" type="date" value="2026-09-21"></label><label>To date<input id="movePaperToDate" type="date"></label><label>Classes <small>(optional — leave blank for all classes on the From date)</small><input id="movePaperClasses" placeholder="e.g. III, IV, V"></label><div class="buttonRow" style="align-self:end"><button id="movePapersByDate" type="button" class="button primary">Move Papers</button></div></div></div><div class="tableWrap"><div id="printableMatrixHost"></div></div><div id="printableMatrixMsg" class="notice info">Press Save Cloud Draft once when you want this timetable stored in the cloud.</div>';const old=$('majorTimetableActions');if(old)old.before(a);else pane.appendChild(a);$('refreshPrintableMatrix').onclick=()=>activeDraftId?loadManual().catch(showSaveError):render();$('resetPrintableMatrix').onclick=()=>{if(!confirm('Clear all manual timetable assignments?'))return;pending.clear();importedPattern=[];render();scheduleManualSave(50)};$('movePapersByDate').onclick=movePapersByDate;$('printableMatrixHost').addEventListener('change',edit);return true}
 let n=0,t=setInterval(()=>{if(ensure()){render();clearInterval(t)}else if(++n>50)clearInterval(t)},200);
 window.addEventListener('load',()=>setTimeout(()=>{ensure();render()},500));
 document.addEventListener('click',e=>{const open=e.target.closest?.('[data-open-cloud]'),revise=e.target.closest?.('[data-revise-cloud]'),save=e.target.closest?.('#saveDraft');if(open){activeDraftId=String(open.dataset.openCloud||'');allowNameLookup=true;importedPattern=[]}if(revise){activeDraftId='';allowNameLookup=false;importedPattern=[]}if(open||revise)setTimeout(()=>loadManual().catch(showSaveError),750);if(save&&e.isTrusted){allowNameLookup=true;setTimeout(()=>saveManual({ensureDraft:true,force:true}).catch(showSaveError),900)}},true);
+document.addEventListener('vkv-exam-cloud-deleted',e=>{
+  const id=String(e.detail?.id||'');
+  if(id&&activeDraftId===id){
+    if(saveTimer){clearTimeout(saveTimer);saveTimer=null}
+    activeDraftId='';
+    allowNameLookup=false;
+    dirty=false;
+    lastSavedSignature=signature();
+    const msg=$('printableMatrixMsg');
+    if(msg){msg.className='notice info';msg.textContent='Deleted cloud draft detached. Further edits will stay local until you explicitly save a new cloud draft.'}
+  }
+});
+document.addEventListener('vkv-exam-cloud-opened',e=>{activeDraftId=String(e.detail?.id||'');allowNameLookup=true;importedPattern=[];setTimeout(()=>loadManual().catch(showSaveError),180)});
 document.addEventListener('vkv-exam-template-fresh-draft',e=>{activeDraftId='';allowNameLookup=false;pending.clear();dirty=false;lastSavedSignature='';importedPattern=Array.isArray(e.detail?.timetablePattern)?e.detail.timetablePattern.map(x=>({...x})):[];setTimeout(()=>{applyImportedPattern()||render()},120)});
 document.addEventListener('change',e=>{if(e.target.matches?.('[data-exam-date]'))setTimeout(()=>{if(importedPattern.length)applyImportedPattern();else render()},80);else if(e.target.matches?.('#allowDoubleBooking,[data-major-class],[data-major-subject]'))setTimeout(render,80)});
 document.addEventListener('vkv-exam-workspace-subjects-applied',()=>setTimeout(render,80));

@@ -16,7 +16,7 @@
     let doc;try{doc=frame.contentDocument}catch(_){return}
     if(!doc||!doc.getElementById('qt'))return;
     if(!doc.getElementById('qbBulkImportEnhancement')){
-      const enhancement=doc.createElement('script');enhancement.id='qbBulkImportEnhancement';enhancement.type='module';enhancement.src='vkv-qb-teacher-bulk-import.js?v=20260903-mark-aware-dedup-1';doc.body.appendChild(enhancement);
+      const enhancement=doc.createElement('script');enhancement.id='qbBulkImportEnhancement';enhancement.type='module';enhancement.src='vkv-qb-teacher-bulk-import.js?v=20260915-coordinator-submit-2';doc.body.appendChild(enhancement);
     }
     if(!doc.getElementById('qbHistoryRefreshEnhancement')){
       const history=doc.createElement('script');history.id='qbHistoryRefreshEnhancement';history.type='module';history.src='vkv-qb-safe-history-refresh.js?v=20260902-1';doc.body.appendChild(history);

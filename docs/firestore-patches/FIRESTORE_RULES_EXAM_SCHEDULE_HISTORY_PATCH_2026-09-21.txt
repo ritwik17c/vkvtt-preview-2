@@ -1,0 +1,21 @@
+// VKVTT Examination Module — Revision History Rules Patch
+// Date: 21/09/2026
+//
+// Add this block inside:
+// service cloud.firestore {
+//   match /databases/{database}/documents {
+//     ...
+//   }
+// }
+//
+// Purpose:
+// - Allow Principal/Admin to archive previous published timetable versions.
+// - Keep history readable only by Principal/Admin.
+// - Prevent updates/deletions of audit history.
+//
+// Requires the existing isAdmin() helper.
+
+match /examScheduleHistory/{historyId} {
+  allow read, create: if isAdmin();
+  allow update, delete: if false;
+}

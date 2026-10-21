@@ -215,7 +215,14 @@ html.v66-ui .btn:hover {
 html.v66-ui button:not(:disabled):active,
 html.v66-ui .btn:active { transform: translateY(0); box-shadow: none; }
 html.v66-ui button:disabled,
-html.v66-ui .btn[aria-disabled="true"] { cursor: not-allowed; opacity: .55; box-shadow: none; }
+html.v66-ui .btn[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 1;
+  border-color: #bacbd3 !important;
+  background: #e6edf0 !important;
+  color: #526d7d !important;
+  box-shadow: none;
+}
 
 html.v66-ui .primary,
 html.v66-ui button.primary,

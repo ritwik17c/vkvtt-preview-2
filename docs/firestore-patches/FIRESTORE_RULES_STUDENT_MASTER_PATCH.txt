@@ -1,0 +1,52 @@
+VKVTT STUDENT MASTER FIRESTORE RULES PATCH
+==========================================
+
+Purpose
+-------
+Student Setup uses the Firestore collection `studentMaster` for student records,
+new admissions, Campusdean imports and TC/transferred status.
+
+IMPORTANT
+---------
+This is a patch for review, NOT a complete Firestore rules file and NOT a live
+deployment. Merge the block below into the rules currently deployed in Firebase
+Console. Do not replace the complete ruleset with this fragment.
+
+Add inside:
+  service cloud.firestore {
+    match /databases/{database}/documents {
+      ...
+    }
+  }
+
+Rule block:
+------------
+    // Student records contain personal information. Restrict the entire
+    // Student Master collection to the active Principal/Admin account.
+    match /studentMaster/{studentId} {
+      allow get, list: if isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+This uses the existing isAdmin() helper from the school's ruleset, which checks
+that the signed-in UID has an active authorizedUsers profile with role 'admin'.
+
+Deployment checklist
+--------------------
+1. Open Firebase Console -> Firestore Database -> Rules for project
+   vkv-nalbari-timetable.
+2. Review the CURRENT deployed rules, not only repository copies or historical
+   patch files.
+3. Merge the block above into the current rules inside the documents match.
+4. Run Rules Playground / Emulator tests:
+   - active Admin can list, create, update and delete studentMaster records;
+   - signed-out user is denied;
+   - active non-admin staff/viewer is denied;
+   - other existing collections retain their current permissions.
+5. Publish the merged rules only after reviewing the complete ruleset.
+6. Test Student Setup using a small, non-sensitive sample before importing the
+   full Campusdean list.
+
+Do not add a broad wildcard grant or allow public read/write. No Storage rule
+change is required for this first version because student photographs are not
+uploaded to Firebase Storage by this module.

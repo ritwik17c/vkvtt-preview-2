@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VKV Nalbari · Bulk Admit Cards</title>
+<script src="./vkv-theme.js?v=20260919-admit-card-theme-1"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script type="module">
+import{initializeApp,getApps,getApp}from'https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js';
+import{getAuth}from'https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js';
+import{getFirestore,doc,getDoc,collection,getDocs}from'https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore-lite.js';
+const cfg={apiKey:'AIzaSyDheZpyXghd1aQ9_RLhwpacVriG__wNZW4',authDomain:'vkv-nalbari-timetable.firebaseapp.com',projectId:'vkv-nalbari-timetable',storageBucket:'vkv-nalbari-timetable.firebasestorage.app',messagingSenderId:'791432856951',appId:'1:791432856951:web:61324065a54bef30f98d72'};
+const app=getApps().length?getApp():initializeApp(cfg),auth=getAuth(app),db=getFirestore(app);
+window.vkvAdmitFetchExam=async examId=>{
+  if(auth.authStateReady)await auth.authStateReady().catch(()=>{});
+  if(examId){
+    try{
+      const exact=await getDoc(doc(db,'examSchedules',examId));
+      if(exact.exists()){
+        const x=exact.data()||{},events=x.workspace?.timetable?.events||[],manual=x.workspace?.manualTimetable?.assignments||x.manualTimetable?.assignments||[];
+        if(events.length||manual.length)return{id:exact.id,...x,source:'examSchedules/'+exact.id};
+      }
+    }catch(error){console.warn('Exact exam lookup failed:',error)}
+  }
+  try{
+    const s=await getDoc(doc(db,'publishedExam','current'));
+    const p=s.exists()?s.data():null;
+    if(p&&(p?.workspace?.timetable?.events?.length||p?.workspace?.manualTimetable?.assignments?.length||p?.manualTimetable?.assignments?.length))return{...p,source:'publishedExam/current'};
+  }catch(error){}
+  try{
+    const snap=await getDocs(collection(db,'examSchedules')),items=[];
+    snap.forEach(d=>{const x=d.data()||{},events=x.workspace?.timetable?.events||[],manual=x.workspace?.manualTimetable?.assignments||x.manualTimetable?.assignments||[],name=String(x.name||x.workspace?.name||'').trim();if(d.id!=='EXAM_SUBJECT_MASTER'&&name&&name.toLowerCase()!=='new examination schedule'&&(events.length||manual.length))items.push({id:d.id,...x})});
+    items.sort((a,b)=>Number(b.approvedAtMs||b.submittedAtMs||b.updatedAtMs||b.createdAtMs||0)-Number(a.approvedAtMs||a.submittedAtMs||a.updatedAtMs||a.createdAtMs||0));
+    return items[0]||null;
+  }catch(error){return null}
+};
+
+window.vkvAdmitFetchPublishedIds=async ids=>{
+  if(auth.authStateReady)await auth.authStateReady().catch(()=>{});
+  const out=[];
+  for(const id of ids||[]){
+    try{
+      const s=await getDoc(doc(db,'examSchedules',id));
+      if(!s.exists())continue;
+      const x=s.data()||{},events=x.workspace?.timetable?.events||[],manual=x.workspace?.manualTimetable?.assignments||x.manualTimetable?.assignments||[],name=String(x.name||x.workspace?.name||'').trim();
+      if(name&&(events.length||manual.length))out.push({id:s.id,name,workspace:x.workspace,manualTimetable:x.manualTimetable,status:x.status||'',approvedAtMs:Number(x.approvedAtMs||0),updatedAtMs:Number(x.updatedAtMs||x.createdAtMs||0)});
+    }catch(error){console.warn('Admit timetable fetch failed for',id,error)}
+  }
+  return out;
+};
+window.vkvAdmitListPublished=async()=>{
+  if(auth.authStateReady)await auth.authStateReady().catch(()=>{});
+  const snap=await getDocs(collection(db,'examSchedules')),items=[];
+  snap.forEach(d=>{
+    const x=d.data()||{},events=x.workspace?.timetable?.events||[],manual=x.workspace?.manualTimetable?.assignments||x.manualTimetable?.assignments||[],name=String(x.name||x.workspace?.name||'').trim();
+    if(d.id!=='EXAM_SUBJECT_MASTER'&&x.status==='published'&&name&&(events.length||manual.length)){
+      items.push({id:d.id,name,workspace:x.workspace,manualTimetable:x.manualTimetable,status:x.status,approvedAtMs:Number(x.approvedAtMs||0),updatedAtMs:Number(x.updatedAtMs||0)})
+    }
+  });
+  items.sort((a,b)=>(b.approvedAtMs||b.updatedAtMs)-(a.approvedAtMs||a.updatedAtMs));
+  return items;
+};
+</script>
+<style>
+:root{--navy:#0b1f3a;--navy2:#12345a;--ink:#172033;--muted:#68758a;--bg:#f4f7fb;--line:#dce4ef;--soft:#eef4fb;--ok:#177a57;--warn:#b56c00;--bad:#b93434}
+html[data-theme="dark"],html[data-vkv-theme="black-gold"]{--ink:#f6f2e8;--muted:#bed0d9;--bg:#0c1720;--line:#42606f;--soft:#152630;--ok:#8ee0b2;--warn:#ffd98a;--bad:#ffb4b4}
+html[data-theme="dark"] body,html[data-vkv-theme="black-gold"] body{background:#0c1720;color:#f6f2e8}
+html[data-theme="dark"] .card,html[data-vkv-theme="black-gold"] .card{background:#152630;border-color:#42606f}
+html[data-theme="dark"] h1,html[data-theme="dark"] h2,html[data-theme="dark"] h3,html[data-theme="dark"] h4,html[data-theme="dark"] label,
+html[data-vkv-theme="black-gold"] h1,html[data-vkv-theme="black-gold"] h2,html[data-vkv-theme="black-gold"] h3,html[data-vkv-theme="black-gold"] h4,html[data-vkv-theme="black-gold"] label{color:#f6f2e8}
+html[data-theme="dark"] input,html[data-theme="dark"] select,html[data-vkv-theme="black-gold"] input,html[data-vkv-theme="black-gold"] select{background:#0d1b24;color:#f6f2e8;border-color:#42606f}
+html[data-theme="dark"] .callout,html[data-vkv-theme="black-gold"] .callout{background:#183343;color:#eef5f7;border-color:#567482}
+html[data-theme="dark"] .tablewrap,html[data-theme="dark"] th,html[data-theme="dark"] td,
+html[data-vkv-theme="black-gold"] .tablewrap,html[data-vkv-theme="black-gold"] th,html[data-vkv-theme="black-gold"] td{border-color:#42606f}
+html[data-theme="dark"] th,html[data-vkv-theme="black-gold"] th{background:#1b3340;color:#f6f2e8}
+html[data-theme="dark"] td,html[data-vkv-theme="black-gold"] td{color:#f6f2e8}
+html[data-theme="dark"] .stat,html[data-theme="dark"] .progress,html[data-vkv-theme="black-gold"] .stat,html[data-vkv-theme="black-gold"] .progress{background:#152630;border-color:#42606f}
+html[data-theme="dark"] .stat strong,html[data-vkv-theme="black-gold"] .stat strong{color:#f2c335}
+html[data-theme="dark"] .ghost,html[data-vkv-theme="black-gold"] .ghost{background:#183343;color:#f6f2e8;border-color:#567482}
+html[data-theme="dark"] .secondary,html[data-vkv-theme="black-gold"] .secondary{background:#244655;color:#fffaf0}
+html[data-theme="dark"] .success,html[data-theme="dark"] .ok,html[data-vkv-theme="black-gold"] .success,html[data-vkv-theme="black-gold"] .ok{background:#174836;color:#c9f5dc}
+html[data-theme="dark"] .pending,html[data-vkv-theme="black-gold"] .pending{background:#513b12;color:#ffe7ac}
+html[data-theme="dark"] .modal,html[data-vkv-theme="black-gold"] .modal{background:#152630;color:#f6f2e8;border:1px solid #42606f}
+html[data-theme="dark"] .admit,html[data-vkv-theme="black-gold"] .admit{background:#fff;color:#111}
+html[data-theme="dark"] .admit h3,html[data-vkv-theme="black-gold"] .admit h3{color:#111}
+html[data-theme="dark"] .admit .notice,html[data-vkv-theme="black-gold"] .admit .notice{background:#f5f6f8!important;color:#111!important}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:16px 22px;position:sticky;top:0;z-index:20}.head{max-width:1400px;margin:auto;display:flex;gap:14px;align-items:center}.back{color:#fff;text-decoration:none;font-weight:800}.brand{font-weight:900;font-size:20px}.sub{font-size:12px;color:#dce8f6;margin-top:2px}main{max-width:1400px;margin:22px auto;padding:0 16px 70px}.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:17px;margin-bottom:16px;box-shadow:0 5px 18px #0f1f350d}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.row{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.sourcegrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.sourcecard{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--soft)}.sourcecard h3{margin:0 0 8px;font-size:14px}.sourcecard label.inline{display:flex;align-items:center;gap:8px}.sourcecard input[type="checkbox"]{width:auto}.assessment-editor{overflow:auto;margin-top:10px}.assessment-editor table{min-width:760px}.assessment-editor select,.assessment-editor input[type="date"]{padding:7px;border-radius:7px}.source-status{margin-top:7px;font-size:11px;color:var(--muted)}.modegrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}label{display:block;font-size:12px;font-weight:800;color:#46566f;margin-bottom:5px}input,select{width:100%;padding:10px;border:1px solid #ccd7e4;border-radius:10px;font:inherit}button{border:0;border-radius:10px;padding:10px 13px;font-weight:800;cursor:pointer}.primary{background:var(--navy);color:#fff}.secondary{background:var(--soft);color:var(--navy)}.gold{background:#fff1d6;color:#815008}.success{background:#e7f7ef;color:var(--ok)}.ghost{background:#fff;border:1px solid var(--line)}.btns{display:flex;gap:8px;flex-wrap:wrap}.callout{background:#f3f8fe;border:1px solid #bfd2e7;color:#35506e;border-radius:11px;padding:10px 12px;font-size:12px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}.stat{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:11px}.stat strong{display:block;font-size:20px;color:var(--navy)}.stat span{font-size:11px;color:var(--muted)}.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:12px}table{width:100%;border-collapse:collapse;min-width:900px}th,td{padding:9px;border-bottom:1px solid #edf1f6;text-align:left;font-size:12px}th{background:#f8fafc;color:#526279}.badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:800}.ok{background:#e7f7ef;color:var(--ok)}.pending{background:#fff2da;color:var(--warn)}.hidden{display:none!important}.progress{background:#fff;border:1px solid var(--line);border-radius:13px;padding:13px;margin-bottom:14px}.track{height:11px;background:#e8eef6;border-radius:999px;overflow:hidden}.fill{height:100%;width:0;background:linear-gradient(90deg,#12345a,#247b91);transition:width .15s}.preview{background:#dfe6ef;border-radius:14px;padding:14px}.admit{background:#fff;border:1.5px solid #1a3151;width:190mm;min-height:85mm;margin:0 auto 12px;padding:8mm 8mm 5mm;color:#111;overflow:hidden}.achead{display:grid;grid-template-columns:20mm minmax(0,1fr) 20mm;align-items:center;gap:3mm;border-bottom:1px solid #999;padding-bottom:4mm}.achead img{width:20mm;height:22mm;max-width:20mm;max-height:22mm;object-fit:contain;object-position:center center;display:block}.achead .schoolmark{justify-self:start}.achead .swamimark{justify-self:end;position:relative;z-index:2}.school{text-align:center}.school h3{margin:0;font-family:Georgia,serif;font-size:12.8px;white-space:nowrap}.school .place{font-size:9.5px;margin-top:2px}.school .title{font-size:13.5px;font-weight:900;margin-top:4px}.school .exam{font-size:9px;margin-top:1.2px;white-space:nowrap}.bodygrid{display:grid;grid-template-columns:1fr 1fr;gap:3.2mm 9mm;margin-top:3.6mm;font-size:10px}.field{display:grid;grid-template-columns:31mm 1fr;gap:2mm}.field b{font-weight:700}.studentname{font-size:12px;font-weight:800}.examstrip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1mm;margin-top:2.2mm;font-size:7.7px}.examcell{border:1px solid #c9cdd3;border-radius:3px;padding:.8mm 1mm;text-align:center;white-space:nowrap}.examcell b{font-size:8px}.notice{font-size:7.8px;margin-top:2.2mm;padding:1.7mm 2.3mm;background:#f5f6f8;border-radius:4px;line-height:1.22}.noticegrid{display:grid;grid-template-columns:1fr 1fr;gap:2mm 7mm}.notice ul{margin:0;padding-left:13px}.notice li{margin:.8px 0}.signs{display:grid;grid-template-columns:repeat(4,1fr);gap:4mm;margin-top:3mm;text-align:center;font-size:8.2px}.sigbox{height:17mm;min-height:17mm;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;overflow:visible}.sigbox img{display:block;max-width:100%;object-fit:contain;object-position:center bottom;background:transparent!important;filter:none!important;margin:0 auto .3mm;overflow:visible}.exam-sig img{width:43mm;height:12mm;max-height:12mm}.principal-sig img{width:29mm;height:17mm;max-height:17mm}.sigline{border-top:1px solid #222;width:100%;padding-top:.7mm}.admit .schoolmark{filter:grayscale(1) contrast(1.15)!important}.admit .swamimark{filter:invert(1) grayscale(1) contrast(1.15)!important}.modalback{position:fixed;inset:0;background:#0c1727aa;display:grid;place-items:center;z-index:100;padding:20px}.modal{width:min(560px,100%);background:#fff;border-radius:16px;padding:18px}.modal p{color:var(--muted);font-size:13px;line-height:1.5}
+button:hover{filter:brightness(1.06)}button:active{filter:brightness(.94);transform:translateY(1px)}button:focus-visible,.back:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #f2c335;outline-offset:2px}button:disabled{cursor:not-allowed;background:#dfe5ea!important;color:#596775!important;border:1px dashed #8997a3!important;filter:none;transform:none}.back:visited{color:#fff}.primary:hover,.primary:active{color:#fff}.ghost:hover,.ghost:active{color:var(--ink)}
+html[data-theme="dark"] button:disabled,html[data-vkv-theme="black-gold"] button:disabled{background:#203540!important;color:#b9c8cf!important;border-color:#607985!important}
+html[data-theme="dark"] .primary:hover,html[data-theme="dark"] .primary:active,html[data-vkv-theme="black-gold"] .primary:hover,html[data-vkv-theme="black-gold"] .primary:active{background:#164b6e;color:#fff}
+html[data-theme="dark"] .ghost:hover,html[data-theme="dark"] .ghost:active,html[data-vkv-theme="black-gold"] .ghost:hover,html[data-vkv-theme="black-gold"] .ghost:active{background:#244655;color:#fffaf0}
+@media(max-width:900px){.grid,.row,.modegrid,.sourcegrid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.preview{overflow:auto}}@media print{@page{size:A4 portrait;margin:6mm}html,body{background:#fff!important;color:#000!important;-webkit-print-color-adjust:economy!important;print-color-adjust:economy!important}header,.screenonly{display:none!important}main{max-width:none;margin:0;padding:0}.preview{padding:0;background:#fff!important}.admit{width:198mm;height:89mm;min-height:89mm;max-height:89mm;margin:0 0 3mm 0;page-break-inside:avoid;break-inside:avoid;border-radius:0;padding:5mm 7mm 4mm;background:#fff!important;color:#000!important;border-color:#000!important}.admit *{color:#000!important}.schoolmark{filter:grayscale(1) contrast(1.25)!important}.swamimark{filter:invert(1) grayscale(1) contrast(1.25)!important}.swamimark{display:block!important;width:20mm!important;height:22mm!important;max-width:20mm!important;max-height:22mm!important;object-fit:contain!important;object-position:center center!important;position:relative!important;z-index:2!important}.sigbox{height:18mm!important;overflow:visible!important}.sigbox img{max-width:100%!important;object-fit:contain!important;object-position:center bottom!important;filter:none!important;background:transparent!important;overflow:visible!important}.exam-sig img{width:43mm!important;height:12mm!important;max-height:12mm!important}.principal-sig img{width:29mm!important;height:17mm!important;max-height:17mm!important}.examcell,.notice,.noticegrid{background:#fff!important;color:#000!important;border-color:#777!important}.admit:nth-of-type(3n){page-break-after:always;break-after:page}}
+</style>
+</head>
+<body>
+<header><div class="head"><a class="back backButton" href="exam-department.html">← Back to Examination Module</a><div><div class="brand">Bulk Admit Cards</div><div class="sub">Vivekananda Kendra Vidyalaya, Nalbari</div></div></div></header>
+<main>
+<section class="card screenonly"><h2>1. Generation Channel</h2><div class="modegrid"><button id="modeFee" class="primary">Fee-linked<br><small>Fee clearance + Principal override</small></button><button id="modeDirect" class="ghost">Direct / No Fee Parameter<br><small>Generate directly from student data</small></button></div><div id="modeInfo" class="callout" style="margin-top:10px">Fee-linked generation is active.</div></section>
+<section class="card screenonly">
+<h2>2. Schedule Sources</h2>
+<div class="sourcegrid">
+  <div class="sourcecard">
+    <label class="inline"><input id="useAssessment" type="checkbox" checked><strong>B1–II Assessment</strong></label>
+    <label>Assessment preset</label>
+    <select id="assessmentPreset">
+      <option value="terminal1-2026">Terminal 1 · Worksheet-based Assessment · Sep 2026</option>
+      <option value="custom">Custom dates & subjects</option>
+    </select>
+    <label style="margin-top:8px">Published Assessment Schedule</label>
+    <select id="assessmentSchedule"><option value="">Use preset / custom assessment schedule</option></select>
+    <div class="source-status">Assessment Tickets never print an exam-name line. Selected dates and subjects can still appear on the ticket.</div>
+  </div>
+  <div class="sourcecard">
+    <label class="inline"><input id="useJuniorExam" type="checkbox" checked><strong>Classes III–V</strong></label>
+    <label>Published timetable</label>
+    <select id="juniorSchedule"><option value="">Loading published timetables…</option></select>
+    <div id="juniorSourceStatus" class="source-status">Choose a published timetable containing III–V.</div>
+  </div>
+  <div class="sourcecard">
+    <label class="inline"><input id="useSeniorExam" type="checkbox" checked><strong>Classes VI–XII</strong></label>
+    <label>Published timetable</label>
+    <select id="seniorSchedule"><option value="">Loading published timetables…</option></select>
+    <div id="seniorSourceStatus" class="source-status">Choose a published timetable containing VI–XII.</div>
+  </div>
+</div>
+<div id="assessmentEditor" class="assessment-editor"></div>
+<div id="juniorPreview" class="assessment-editor"></div>
+<div id="seniorPreview" class="assessment-editor"></div>
+</section>
+<div class="grid screenonly">
+<section class="card"><h2>3. Session & Signatures</h2>
+<div class="row"><div><label>Academic Session</label><input id="session" value="2026–27"></div><div><div class="callout">Exam names for Class III onward come from the selected published timetable. B1–II remain Assessment Tickets without an exam-name line.</div></div></div>
+<div class="row" style="margin-top:10px"><div><label>Exam In-charge Signature <small>(default loaded; upload only to override)</small></label><input id="examSig" type="file" accept="image/*"></div><div><label>Principal Signature <small>(default loaded; upload only to override)</small></label><input id="principalSig" type="file" accept="image/*"></div></div>
+<div class="callout" style="margin-top:10px">School logo and Swamiji portrait are loaded automatically. Student and Class Teacher signatures remain blank for physical signing.</div>
+</section>
+<section class="card"><h2>4. Student & Fee Data</h2><label>Student Excel</label><input id="studentFile" type="file" accept=".xlsx,.xls,.csv"><div style="height:8px"></div><label>Due Fee Report <small>(Fee-linked channel only)</small></label><input id="feeFile" type="file" accept=".xlsx,.xls,.csv"><div id="matchSummary" class="callout" style="margin-top:10px">Load the student master first.</div></section>
+</div>
+<section class="card screenonly"><div class="btns"><button id="selectAll" class="primary">Select All Students</button><button id="selectPending" class="ghost">Select All Pending</button><button id="selectEligible" class="ghost">Select All Eligible</button><button id="overridePending" class="gold">Override All Pending</button><button id="overrideSelected" class="gold">Principal Override Selected</button><button id="clearSelection" class="secondary">Clear Selection</button></div><div class="stats"><div class="stat"><strong id="sTotal">0</strong><span>Students</span></div><div class="stat"><strong id="sEligible">0</strong><span>Eligible</span></div><div class="stat"><strong id="sOverride">0</strong><span>Overrides</span></div><div class="stat"><strong id="sSelected">0</strong><span>Selected</span></div></div><div class="tablewrap"><table><thead><tr><th><input id="checkAll" type="checkbox"></th><th>GR No.</th><th>Student</th><th>Class</th><th>Section</th><th>Roll</th><th>Fee</th><th>Override</th></tr></thead><tbody id="rows"><tr><td colspan="8">Load student data.</td></tr></tbody></table></div><div class="btns" style="margin-top:12px"><button id="generateSelected" class="primary">Generate Selected</button><button id="generateAll" class="success">Generate All Students</button><button id="generatePdf" class="success">Generate All & Export PDF</button></div></section>
+<section id="progressBox" class="progress screenonly hidden"><div style="display:flex;justify-content:space-between;font-weight:800"><span id="progressTitle">Generating…</span><span id="progressPct">0%</span></div><div class="track" style="margin-top:8px"><div id="progressFill" class="fill"></div></div><div id="progressDetail" style="font-size:11px;color:var(--muted);margin-top:6px">0 of 0</div></section>
+<section><div class="screenonly" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div><h2 style="margin:0">Admit Card Preview</h2><small>Print order: B1 → B2 → B3 → I → … → XII, grouped by section and roll number. 3 cards per A4 page.</small></div><button id="printBtn" class="primary">Print / Save PDF</button></div><div id="preview" class="preview"><div class="screenonly" style="text-align:center;padding:40px;color:var(--muted)">Generated cards will appear here.</div></div></section>
+</main>
+<div id="modal" class="modalback hidden"><div class="modal"><h3 id="modalTitle">Confirm</h3><p id="modalText"></p><div class="btns" style="justify-content:flex-end"><button id="modalCancel" class="secondary">Cancel</button><button id="modalOk" class="primary">Continue</button></div></div></div>
+<script>
+const DEFAULT_EXAM_SIG='assets/admit-card/exam-incharge-signature.svg?v=20260922-sig4',DEFAULT_PRINCIPAL_SIG='assets/admit-card/principal-signature.svg?v=20260922-sig4';const $=id=>document.getElementById(id),state={students:[],feeRows:[],mode:'fee',examSig:DEFAULT_EXAM_SIG,principalSig:DEFAULT_PRINCIPAL_SIG,generated:[],publishedSchedules:[],sources:{assessment:{enabled:true,rows:[],schedule:null},junior:{enabled:true,schedule:null},senior:{enabled:true,schedule:null}}};const safe=v=>String(v??'').trim(),norm=s=>safe(s).toLowerCase().replace(/[^a-z0-9]/g,'');
+function pick(o,a){const k=Object.keys(o);for(const x of a){const f=k.find(y=>norm(y)===norm(x));if(f!==undefined)return o[f]}return''}function isClear(v){return['clear','paid','eligible','yes','ok','cleared','no dues','nodues'].includes(safe(v).toLowerCase())}function eligible(s){return state.mode==='direct'||isClear(s.fee)||s.override}
+function mapStudent(r,i){return{id:'s'+i+'_'+Date.now(),gr:safe(pick(r,['GR No.','GR No','Gr No','Admission No'])),name:safe(pick(r,['Student Name','Name','Student'])),className:safe(pick(r,['Standard','Class','Grade'])),section:safe(pick(r,['Division','Section','Sec'])),roll:safe(pick(r,['RollNo','Roll No.','Roll No','Roll'])),fee:'Not Matched',due:0,override:false,selected:false}}
+function locateHeader(m){for(let i=0;i<Math.min(m.length,30);i++){const r=(m[i]||[]).map(norm);if(r.some(x=>x==='grno')&&r.some(x=>x==='studentname'||x==='name')&&r.some(x=>x==='dueamount'||x==='due'))return i}return-1}function feeRows(m){const h=locateHeader(m);if(h<0)throw Error('Could not locate GR No., Student Name and Due Amount headings.');const heads=(m[h]||[]).map(safe),out=[];for(let i=h+1;i<m.length;i++){const o={};heads.forEach((x,c)=>{if(x)o[x]=(m[i]||[])[c]});const gr=safe(pick(o,['GR No.','GR No','Admission No'])),name=safe(pick(o,['Student Name','Name'])),due=Number(String(pick(o,['Due Amount','Due'])||0).replace(/,/g,''))||0;if(gr&&name&&/^\d+$/.test(gr))out.push({gr,name,due})}return out}
+function matchFees(){const by=new Map(state.feeRows.map(f=>[safe(f.gr),f]));state.students.forEach(s=>{const f=by.get(s.gr);if(f){s.due=f.due;s.fee=f.due>0?'Pending':'Clear'}else{s.due=0;s.fee='Clear'}})}
+function ask(t,x,ok){$('modalTitle').textContent=t;$('modalText').textContent=x;$('modal').classList.remove('hidden');$('modalOk').onclick=()=>{$('modal').classList.add('hidden');ok&&ok()}}$('modalCancel').onclick=()=>$('modal').classList.add('hidden');
+function render(){const tb=$('rows');tb.innerHTML=state.students.length?state.students.map(s=>`<tr><td><input type="checkbox" data-id="${s.id}" ${s.selected?'checked':''}></td><td>${s.gr}</td><td><b>${s.name}</b></td><td>${s.className}</td><td>${s.section}</td><td>${s.roll}</td><td><span class="badge ${isClear(s.fee)?'ok':'pending'}">${state.mode==='direct'?'Ignored':s.fee}</span>${s.due>0?`<div style="font-size:10px">₹${s.due.toLocaleString('en-IN')} due</div>`:''}</td><td>${state.mode==='direct'?'—':(s.override?'<span class="badge ok">Principal Override</span>':'—')}</td></tr>`).join(''):'<tr><td colspan="8">Load student data.</td></tr>';$('sTotal').textContent=state.students.length;$('sEligible').textContent=state.students.filter(eligible).length;$('sOverride').textContent=state.students.filter(x=>x.override).length;$('sSelected').textContent=state.students.filter(x=>x.selected).length;$('checkAll').checked=state.students.length>0&&state.students.every(x=>x.selected);$('selectPending').classList.toggle('hidden',state.mode==='direct');$('selectEligible').classList.toggle('hidden',state.mode==='direct');$('overridePending').classList.toggle('hidden',state.mode==='direct');$('overrideSelected').classList.toggle('hidden',state.mode==='direct');$('modeInfo').textContent=state.mode==='direct'?'Direct channel: fee status is ignored.':'Fee-linked channel: fee clearance or Principal override is required.'}
+function readImage(input,key,defaultSrc){state[key]=defaultSrc;input.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{state[key]=r.result};r.readAsDataURL(f)}}try{localStorage.removeItem('vkvtt-exam-incharge-signature');localStorage.removeItem('vkvtt-principal-signature')}catch(error){}readImage($('examSig'),'examSig',DEFAULT_EXAM_SIG);readImage($('principalSig'),'principalSig',DEFAULT_PRINCIPAL_SIG);
+$('studentFile').onchange=async e=>{try{const wb=XLSX.read(await e.target.files[0].arrayBuffer(),{type:'array'}),rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});state.students=rows.map(mapStudent).filter(x=>x.name&&x.gr);if(state.feeRows.length)matchFees();$('matchSummary').textContent=`Student master loaded: ${state.students.length} students.`;render()}catch(err){ask('Student file error',err.message)}};
+$('feeFile').onchange=async e=>{try{const wb=XLSX.read(await e.target.files[0].arrayBuffer(),{type:'array'}),m=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''});state.feeRows=feeRows(m);matchFees();$('matchSummary').textContent=`Matched ${state.feeRows.length} due-fee rows by GR No. against ${state.students.length} students.`;render()}catch(err){ask('Fee file error',err.message)}};
+$('modeFee').onclick=()=>{state.mode='fee';$('modeFee').className='primary';$('modeDirect').className='ghost';if(state.feeRows.length)matchFees();render()};$('modeDirect').onclick=()=>{state.mode='direct';$('modeDirect').className='primary';$('modeFee').className='ghost';render()};$('rows').onchange=e=>{const s=state.students.find(x=>x.id===e.target.dataset.id);if(s){s.selected=e.target.checked;render()}};$('checkAll').onchange=e=>{state.students.forEach(x=>x.selected=e.target.checked);render()};$('selectAll').onclick=()=>{state.students.forEach(x=>x.selected=true);render()};$('selectPending').onclick=()=>{state.students.forEach(x=>x.selected=!isClear(x.fee)&&!x.override);render()};$('selectEligible').onclick=()=>{state.students.forEach(x=>x.selected=eligible(x));render()};$('clearSelection').onclick=()=>{state.students.forEach(x=>x.selected=false);render()};
+$('overridePending').onclick=()=>{const a=state.students.filter(x=>!isClear(x.fee)&&!x.override);ask('Override all pending?',`Principal override will be applied to ${a.length} pending student(s).`,()=>{a.forEach(x=>x.override=true);render()})};$('overrideSelected').onclick=()=>{const a=state.students.filter(x=>x.selected&&!isClear(x.fee)&&!x.override);ask('Override selected pending students?',`Principal override will be applied to ${a.length} selected student(s).`,()=>{a.forEach(x=>x.override=true);render()})};
+function classKey(v){let x=safe(v).toUpperCase().replace(/[_–—]/g,'-').replace(/\s+/g,' ').trim();if(/^BALVATIKA\s*-?\s*1$/.test(x)||x==='B1')return'B1';if(/^BALVATIKA\s*-?\s*2$/.test(x)||x==='B2')return'B2';if(/^BALVATIKA\s*-?\s*3$/.test(x)||x==='B3')return'B3';x=x.replace(/^CLASS\s*/,'').replace(/\b(SCIENCE|SCI|ARTS?|HUMANITIES|HUM)\b/g,'').replace(/\bSECTION\s*[A-Z]+\b/g,'').replace(/\b(ANAND|VIVEK)\b/g,'').replace(/\s*\([^)]*\)\s*$/,'').replace(/[()]/g,'').replace(/[- ]+/g,'').trim();return x}
+function classBand(v){const k=classKey(v);if(['B1','B2','B3','I','II','1','2'].includes(k))return'assessment';if(['III','IV','V','3','4','5'].includes(k))return'junior';return'senior'}
+function isAssessmentClass(v){return classBand(v)==='assessment'}
+function shortSubject(v){const raw=safe(v),k=raw.toUpperCase().replace(/[^A-Z0-9/]+/g,' ');const map=[[/ASSAMESE.*HINDI|HINDI.*ASSAMESE/,'ASS/HIN'],[/^ASSAMESE$|^AS$/,'ASS'],[/^HINDI$/,'HIN'],[/^ENGLISH$|^ENG$/,'ENG'],[/^MATHEMATICS$|^MATHS?$|^MAT$/,'MAT'],[/^EVS$|^ENVIRONMENTAL STUDIES$/,'EVS'],[/^SCIENCE$|^SCI$/,'SCI'],[/^SOCIAL SCIENCE$|^SOCIAL STUDIES$|^SST$|^SSC$/,'SST'],[/^PHYSICS$|^PHY$/,'PHY'],[/^CHEMISTRY$|^CHEM$/,'CHE'],[/^BIOLOGY$|^BIO$/,'BIO'],[/^COMPUTER SCIENCE$|^CS$/,'CS'],[/^INFORMATION TECHNOLOGY$|^IT$/,'IT'],[/^POLITICAL SCIENCE$/,'POL'],[/^HISTORY$/,'HIS'],[/^GEOGRAPHY$/,'GEO'],[/^ECONOMICS$/,'ECO'],[/^SANSKRIT$/,'SAN'],[/^DRAWING$/,'DRW'],[/^RHYMES?$/,'RHY'],[/^GK$|^GENERAL KNOWLEDGE$/,'GK']];for(const[r,code]of map)if(r.test(k.trim()))return code;const words=raw.replace(/[^A-Za-z0-9 ]+/g,' ').trim().split(/\s+/).filter(Boolean);return(words.length>1?words.map(w=>w[0]).join(''):raw.slice(0,4)).toUpperCase()}
+function displayShortDate(v){const m=safe(v).match(/^(\d{4})-(\d{2})-(\d{2})/);return m?m[3]+'/'+m[2]:safe(v)}
+const ASSESSMENT_SUBJECTS=['','English','Hindi','Math','Maths','EVS','Assamese','Drawing','Rhymes','GK'];
+const ASSESSMENT_PRESET=[
+ {date:'2026-09-22',B1:'English',B2:'English',B3:'Math',I:'EVS',II:'Hindi'},
+ {date:'2026-09-23',B1:'Hindi',B2:'Math',B3:'English',I:'Assamese',II:'English'},
+ {date:'2026-09-25',B1:'Maths',B2:'Hindi',B3:'Hindi',I:'English',II:'Math'},
+ {date:'2026-09-26',B1:'Drawing',B2:'Drawing',B3:'EVS',I:'Hindi',II:'EVS'},
+ {date:'2026-09-28',B1:'Rhymes',B2:'Rhymes',B3:'Drawing',I:'Math',II:'Assamese'},
+ {date:'2026-09-29',B1:'',B2:'',B3:'Rhymes',I:'GK',II:'GK'},
+ {date:'2026-09-30',B1:'',B2:'',B3:'',I:'Drawing',II:'Drawing'}
+];
+function assessmentClassColumn(v){const k=classKey(v);return k==='1'?'I':k==='2'?'II':k}
+function renderAssessmentEditor(){
+  const source=state.sources.assessment.schedule;
+  let rows=state.sources.assessment.rows;
+  if(source){
+    const byDate=new Map();
+    for(const e of scheduleEvents(source)){
+      const key=classKey(e.className),date=safe(e.date),subject=safe(e.subject);
+      if(!['B1','B2','B3','I','II'].includes(key)||!date||!subject)continue;
+      if(!byDate.has(date))byDate.set(date,{date,enabled:true,B1:'',B2:'',B3:'',I:'',II:''});
+      const row=byDate.get(date);
+      if(!row[key])row[key]=subject;
+    }
+    rows=[...byDate.values()].sort((a,b)=>a.date.localeCompare(b.date));
+  }
+  if(source){
+    const fmtDate=v=>{
+      const m=safe(v).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      return m?m[3]+'/'+m[2]+'/'+m[1]:safe(v);
+    };
+    $('assessmentEditor').innerHTML='<table><thead><tr><th>Date</th><th>B1</th><th>B2</th><th>B3</th><th>I</th><th>II</th></tr></thead><tbody>'+
+      rows.map(r=>'<tr><td>'+fmtDate(r.date)+'</td>'+['B1','B2','B3','I','II'].map(k=>'<td>'+safe(r[k])+'</td>').join('')+'</tr>').join('')+
+      '</tbody></table>';
+    return;
+  }
+  const options=v=>ASSESSMENT_SUBJECTS.map(s=>'<option value="'+s+'" '+(s===v?'selected':'')+'>'+ (s||'—') +'</option>').join('');
+  $('assessmentEditor').innerHTML='<table><thead><tr><th>Use</th><th>Date</th><th>B1</th><th>B2</th><th>B3</th><th>I</th><th>II</th></tr></thead><tbody>'+rows.map((r,i)=>'<tr><td><input type="checkbox" data-assess-use="'+i+'" checked></td><td><input type="date" data-assess-date="'+i+'" value="'+r.date+'"></td>'+['B1','B2','B3','I','II'].map(k=>'<td><select data-assess-subject="'+i+'" data-class="'+k+'">'+options(r[k]||'')+'</select></td>').join('')+'</tr>').join('')+'</tbody></table>';
+}
+function scheduleEvents(schedule){
+  const generated=schedule?.workspace?.timetable?.events;
+  if(Array.isArray(generated)&&generated.length)return generated.map(x=>({date:x.date||x.examDate||x.examDateTime||'',className:x.className||x.class||x.classId||'',subject:x.subject||x.subjectName||x.paperSubject||'',slotId:x.slotId||x.sessionId||''}));
+  const manual=schedule?.workspace?.manualTimetable?.assignments||schedule?.manualTimetable?.assignments;
+  if(Array.isArray(manual)&&manual.length)return manual.map(x=>({date:x.date||x.examDate||'',className:x.className||x.class||x.classId||'',subject:x.subject||x.subjectName||x.paperSubject||'',slotId:x.slotId||x.sessionId||''}));
+  return[];
+}
+function scheduleCovers(schedule,band){return scheduleEvents(schedule).some(e=>classBand(e.className)===band)}
+function examTitleOf(schedule){return safe(schedule?.name||schedule?.title||schedule?.examTitle||schedule?.workspace?.name||schedule?.workspace?.title||schedule?.workspace?.examTitle||schedule?.workspace?.exam?.name||schedule?.workspace?.exam?.title||'')}
+function selectedSchedule(band){
+  const current=state.sources[band]?.schedule;
+  if(current)return current;
+  const list=Array.isArray(state.publishedSchedules)?state.publishedSchedules:[];
+  return list.find(x=>scheduleCovers(x,band))||null;
+}
+function scheduleNameForStudent(s){
+  const band=classBand(s.className);
+  if(band==='assessment')return'';
+  return examTitleOf(selectedSchedule(band));
+}
+function scheduleFor(s){
+  const band=classBand(s.className),key=classKey(s.className),seen=new Set(),out=[];
+  if(band==='assessment'){
+    if(!state.sources.assessment.enabled)return[];
+    const source=state.sources.assessment.schedule;
+    if(source){
+      for(const e of scheduleEvents(source).filter(e=>classKey(e.className)===key).sort((a,b)=>safe(a.date).localeCompare(safe(b.date)))){
+        const date=safe(e.date),subject=safe(e.subject);if(!date||!subject)continue;
+        const id=date+'|'+subject.toUpperCase();if(seen.has(id))continue;seen.add(id);out.push({date,code:shortSubject(subject)})
+      }
+      return out;
+    }
+    const col=assessmentClassColumn(s.className);
+    for(const r of state.sources.assessment.rows){if(r.enabled===false)continue;const subject=safe(r[col]);if(!r.date||!subject)continue;out.push({date:r.date,code:shortSubject(subject)})}
+    return out;
+  }
+  const source=selectedSchedule(band);
+  if(!state.sources[band].enabled||!source)return[];
+  const events=scheduleEvents(source);
+  const matches=events.filter(e=>classKey(e.className)===key)
+    .sort((a,b)=>safe(a.date).localeCompare(safe(b.date)));
+  for(const e of matches){const date=safe(e.date),subject=safe(e.subject);if(!date||!subject)continue;const id=date+'|'+subject.toUpperCase();if(seen.has(id))continue;seen.add(id);out.push({date,code:shortSubject(subject)})}
+  return out;
+}
+async function loadScheduleSources(){
+  state.sources.assessment.rows=ASSESSMENT_PRESET.map(x=>({...x,enabled:true}));
+  renderAssessmentEditor();
+  try{
+    const params=new URLSearchParams(location.search);
+    const ids=(params.get('publishedIds')||'').split(',').map(x=>x.trim()).filter(Boolean);
+    let catalog=[];
+    if(ids.length)catalog=await window.vkvAdmitFetchPublishedIds(ids);
+    if(!catalog.length){
+      const raw=sessionStorage.getItem('vkvtt-admit-published-catalog')||localStorage.getItem('vkvtt-admit-published-catalog-last');
+      catalog=raw?JSON.parse(raw):[];
+    }
+    if(!Array.isArray(catalog)||!catalog.length)catalog=await window.vkvAdmitListPublished();
+    state.publishedSchedules=Array.isArray(catalog)?catalog:[];
+  }catch(error){
+    try{state.publishedSchedules=await window.vkvAdmitListPublished()}catch(e){state.publishedSchedules=[]}
+  }
+  const assessmentSelect=$('assessmentSchedule');
+  const assessmentMatches=state.publishedSchedules.filter(s=>scheduleEvents(s).some(e=>classBand(e.className)==='assessment'));
+  assessmentSelect.innerHTML='<option value="">Use preset / custom assessment schedule</option>'+assessmentMatches.map(s=>'<option value="'+s.id+'">'+examTitleOf(s)+'</option>').join('');
+  const assessmentPreferred=assessmentMatches[0];
+  if(assessmentPreferred){assessmentSelect.value=assessmentPreferred.id;state.sources.assessment.schedule=assessmentPreferred;renderAssessmentEditor()}
+  const coveredClasses=s=>{
+    const seen=[];
+    for(const e of scheduleEvents(s)){const k=classKey(e.className);if(k&&!seen.includes(k))seen.push(k)}
+    return seen.sort((a,b)=>cRank(a)-cRank(b)).join(', ');
+  };
+  for(const band of ['junior','senior']){
+    const select=$(band==='junior'?'juniorSchedule':'seniorSchedule');
+    const matches=state.publishedSchedules;
+    select.innerHTML='<option value="">Select published timetable…</option>'+matches.map(s=>'<option value="'+s.id+'">'+examTitleOf(s)+' · '+coveredClasses(s)+'</option>').join('');
+    const preferred=matches.find(s=>scheduleCovers(s,band))||matches.find(s=>band==='junior'?/III\s*[-–—]\s*V|III.*V/i.test(examTitleOf(s)):/VI\s*[-–—]\s*XII|VI.*XII/i.test(examTitleOf(s)));
+    if(preferred){select.value=preferred.id;state.sources[band].schedule=preferred}
+    const status=$(band==='junior'?'juniorSourceStatus':'seniorSourceStatus');
+    status.textContent=matches.length
+      ? matches.length+' published timetable(s) available. '+(preferred?'A likely match was selected automatically.':'Please choose the relevant timetable.')
+      : 'No published timetable was received. Return to Examination Module and open Generate Admit Cards again.';
+    renderSchedulePreview(band);
+  }
+}
+function renderSchedulePreview(band){
+  const target=$(band==='junior'?'juniorPreview':'seniorPreview');
+  const source=state.sources[band]?.schedule;
+  if(!target)return;
+  if(!source){
+    target.innerHTML='';
+    return;
+  }
+  const classes=band==='junior'?['III','IV','V']:['VI','VII','VIII','IX','X','XI','XII'];
+  const title=band==='junior'?'Classes III–V Timetable Preview':'Classes VI–XII Timetable Preview';
+  const byDate=new Map();
+  for(const e of scheduleEvents(source)){
+    const key=classKey(e.className),date=safe(e.date),subject=safe(e.subject);
+    if(!classes.includes(key)||!date||!subject)continue;
+    if(!byDate.has(date))byDate.set(date,{date});
+    const row=byDate.get(date);
+    if(!row[key])row[key]=[];
+    if(!row[key].includes(subject))row[key].push(subject);
+  }
+  const rows=[...byDate.values()].sort((a,b)=>a.date.localeCompare(b.date));
+  const fmtDate=v=>{
+    const m=safe(v).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    return m?m[3]+'/'+m[2]+'/'+m[1]:safe(v);
+  };
+  target.innerHTML='<h3 style="margin:14px 0 8px">'+title+'</h3>'+
+    '<table><thead><tr><th>Date</th>'+classes.map(k=>'<th>'+k+'</th>').join('')+'</tr></thead><tbody>'+
+    (rows.length?rows.map(r=>'<tr><td>'+fmtDate(r.date)+'</td>'+classes.map(k=>'<td>'+safe((r[k]||[]).join(', '))+'</td>').join('')+'</tr>').join(''):
+    '<tr><td colspan="'+(classes.length+1)+'">No timetable entries found in the selected published schedule.</td></tr>')+
+    '</tbody></table>';
+}
+
+function cRank(v){const r=safe(v).toUpperCase().replace(/\s+/g,''),m={B1:1,'BALVATIKA-1':1,BALVATIKA1:1,B2:2,'BALVATIKA-2':2,BALVATIKA2:2,B3:3,'BALVATIKA-3':3,BALVATIKA3:3,I:4,II:5,III:6,IV:7,V:8,VI:9,VII:10,VIII:11,IX:12,X:13,XI:14,XISCIENCE:14,XIARTS:14,XII:15,XIISCIENCE:15,XIIARTS:15};return m[r]??999}function sRank(v){const x=safe(v).toUpperCase(),m={A:1,B:2,C:3,D:4,E:5,ANAND:20,VIVEK:21};return m[x]??50}function sorted(a){return[...a].sort((x,y)=>cRank(x.className)-cRank(y.className)||sRank(x.section)-sRank(y.section)||safe(x.section).localeCompare(safe(y.section))||(parseInt(x.roll)||9999)-(parseInt(y.roll)||9999)||x.name.localeCompare(y.name))}
+function card(s){const assessment=isAssessmentClass(s.className),examName=scheduleNameForStudent(s),schedule=scheduleFor(s),scheduleHtml=schedule.length?`<div class="examstrip">${schedule.map(x=>`<div class="examcell"><b>${displayShortDate(x.date)}</b> · ${x.code}</div>`).join('')}</div>`:'';return`<div class="admit"><div class="achead"><img class="schoolmark" src="school-logo.jpg" onerror="this.onerror=null;this.src='icon-192.png'"><div class="school"><h3>VIVEKANANDA KENDRA VIDYALAYA, NALBARI</h3><div class="place">Nalbari, Assam</div>${!assessment&&examName?`<div class="exam">${examName}</div>`:''}<div class="title">${assessment?'ASSESSMENT TICKET':'ADMIT CARD'}</div></div><img class="swamimark" src="./Swami%20Vivekananda.png?v=20260922-full-portrait" alt="Swami Vivekananda"></div><div class="bodygrid"><div class="field"><b>Student's Name:</b><span class="studentname">${s.name}</span></div><div class="field"><b>Gr. No.:</b><span>${s.gr}</span></div><div class="field"><b>Class:</b><span>${s.className}</span></div><div class="field"><b>Section:</b><span>${s.section}</span></div><div class="field"><b>Roll No.:</b><span>${s.roll}</span></div></div>${scheduleHtml}<div class="notice"><div class="noticegrid"><ul><li>Bring this ticket/card on every assessment or examination day.</li><li>Report to the allotted room at least 30 minutes before the scheduled time.</li><li>Follow all assessment/examination rules and instructions.</li></ul><ul><li>Use only permitted stationery/materials.</li><li>Any alteration to this ticket/card will make it invalid.</li></ul></div></div><div class="signs"><div class="sigbox exam-sig">${state.examSig?`<img src="${state.examSig}" alt="Exam In-charge signature">`:'<div style="height:9.5mm"></div>'}<div class="sigline">Exam In-charge</div></div><div class="sigbox"><div class="sigline">Student's Signature</div></div><div class="sigbox"><div class="sigline">Class Teacher's Signature</div></div><div class="sigbox principal-sig">${state.principalSig?`<img src="${state.principalSig}" alt="Principal signature">`:'<div style="height:9.5mm"></div>'}<div class="sigline">Principal's Signature</div></div></div></div>`}
+
+async function generate(list,print=false){const good=sorted(list.filter(eligible));if(!good.length)return ask('No eligible students','No cards can be generated.');$('progressBox').classList.remove('hidden');$('preview').innerHTML='';state.generated=[];for(let i=0;i<good.length;i+=20){const ch=good.slice(i,i+20);state.generated.push(...ch);$('preview').insertAdjacentHTML('beforeend',ch.map(card).join(''));const d=Math.min(i+20,good.length),p=Math.round(d/good.length*100);$('progressFill').style.width=p+'%';$('progressPct').textContent=p+'%';$('progressDetail').textContent=`${d} of ${good.length} cards generated`;await new Promise(r=>setTimeout(r,0))}$('progressTitle').textContent='Generation complete';if(print){await new Promise(r=>setTimeout(r,250));window.print()}}
+$('generateSelected').onclick=()=>{const a=state.students.filter(x=>x.selected);if(!a.length)return ask('No students selected','Select students first.');generate(a)};$('generateAll').onclick=()=>{if(state.mode==='fee'&&state.students.some(x=>!eligible(x)))return ask('Pending students still exist','Use Override All Pending first if you want cards for everyone.');generate(state.students)};$('generatePdf').onclick=()=>{const go=()=>generate(state.mode==='direct'?state.students:state.students.filter(eligible),true);go()};$('printBtn').onclick=()=>state.generated.length?window.print():ask('Nothing to print','Generate admit cards first.');
+window.addEventListener('DOMContentLoaded',()=>loadScheduleSources().then(render).catch(()=>render()),{once:true});
+$('useAssessment').onchange=e=>state.sources.assessment.enabled=e.target.checked;
+$('useJuniorExam').onchange=e=>state.sources.junior.enabled=e.target.checked;
+$('useSeniorExam').onchange=e=>state.sources.senior.enabled=e.target.checked;
+$('juniorSchedule').onchange=e=>{state.sources.junior.schedule=state.publishedSchedules.find(x=>x.id===e.target.value)||null;renderSchedulePreview('junior')};
+$('seniorSchedule').onchange=e=>{state.sources.senior.schedule=state.publishedSchedules.find(x=>x.id===e.target.value)||null;renderSchedulePreview('senior')};
+$('assessmentPreset').onchange=e=>{if(e.target.value==='terminal1-2026'){state.sources.assessment.schedule=null;$('assessmentSchedule').value='';state.sources.assessment.rows=ASSESSMENT_PRESET.map(x=>({...x,enabled:true}));renderAssessmentEditor()}};
+$('assessmentSchedule').onchange=e=>{state.sources.assessment.schedule=state.publishedSchedules.find(x=>x.id===e.target.value)||null;renderAssessmentEditor()};
+$('assessmentEditor').addEventListener('change',e=>{state.sources.assessment.schedule=null;$('assessmentSchedule').value='';const i=Number(e.target.dataset.assessUse??e.target.dataset.assessDate??e.target.dataset.assessSubject);if(!Number.isInteger(i)||!state.sources.assessment.rows[i])return;if(e.target.dataset.assessUse!==undefined)state.sources.assessment.rows[i].enabled=e.target.checked;if(e.target.dataset.assessDate!==undefined)state.sources.assessment.rows[i].date=e.target.value;if(e.target.dataset.assessSubject!==undefined)state.sources.assessment.rows[i][e.target.dataset.class]=e.target.value;$('assessmentPreset').value='custom'});
+</script>
+</body></html>

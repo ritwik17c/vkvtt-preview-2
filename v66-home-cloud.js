@@ -238,10 +238,64 @@ async function loadLeavePlansOnce(){
  const snap=await getDoc(doc(db,'dailyRecords',LEAVE_PLAN_DOC));
  cacheLeavePlans(snap.exists()?(snap.data().plans||{}):{});
 }
+async function loadProvisionalProxyStatusesOnce(){
+ const refreshButton=document.getElementById('refreshProvisionalProxyBtn');
+ if(refreshButton)refreshButton.style.display='inline-block';
+ if(!currentUser||!currentProfile||!canManageProxy()){
+   window.__vkvProvisionalProxyStatuses=[];
+   return {ok:false,reason:'permission',count:0};
+ }
+ try{
+   const snap=await getDocs(collection(db,'provisionalProxyStatuses'));
+   window.__vkvProvisionalProxyStatuses=snap.docs
+     .map(d=>({...d.data(),_projectionId:d.id}))
+     .filter(p=>p&&p.active===true&&p.provisional===true);
+   if(window.__vkvCoreInitialized){
+     try{
+       renderLeave();
+       renderActiveProxyView(true);
+       if(window.renderTodayProxyStatusSummary)window.renderTodayProxyStatusSummary();
+     }catch(e){console.warn('Provisional proxy status render:',e)}
+   }
+   return {ok:true,count:window.__vkvProvisionalProxyStatuses.length};
+ }catch(e){
+   console.warn('Provisional proxy status sync:',e);
+   return {ok:false,reason:'error',message:String(e&&e.message||e),count:0};
+ }
+}
+window.refreshProvisionalProxyStatuses=async function(){
+ const button=document.getElementById('refreshProvisionalProxyBtn');
+ const status=document.getElementById('proxyRefreshStatus');
+ if(button){button.disabled=true;button.textContent='↻ Refreshing…'}
+ if(status){status.textContent='Checking for the latest provisional records…';status.style.color='#664d03'}
+ try{
+   const result=await loadProvisionalProxyStatusesOnce();
+   if(status){
+     if(result&&result.ok){
+       status.textContent='Refresh successful: '+result.count+' active provisional record'+(result.count===1?'':'s')+' loaded.';
+       status.style.color='#176534';
+     }else if(result&&result.reason==='permission'){
+       status.textContent='Refresh not performed: this account does not have Proxy Manager access.';
+       status.style.color='#a12622';
+     }else{
+       status.textContent='Refresh failed: '+((result&&result.message)||'Could not load provisional records. Check access and connection.');
+       status.style.color='#a12622';
+     }
+   }
+ }catch(e){
+   console.warn('Provisional proxy refresh:',e);
+   if(status){status.textContent='Refresh failed: '+String(e&&e.message||e);status.style.color='#a12622'}
+ }finally{
+   if(button){button.disabled=false;button.textContent='↻ Refresh Provisional Records'}
+ }
+};
 async function loadLeavePlansAndPoll(){
  await loadLeavePlansOnce();
+ await loadProvisionalProxyStatusesOnce();
  if(leavePlanPollTimer){clearInterval(leavePlanPollTimer);leavePlanPollTimer=null}
- leavePlanPollTimer=setInterval(()=>loadLeavePlansOnce().catch(e=>console.error('Scheduled leave sync:',e)),10000);
+ leavePlanPollTimer=setInterval(()=>{
+   loadLeavePlansOnce().catch(e=>console.error('Scheduled leave sync:',e));
+ },10000);
 }
 window.saveScheduledStatusPlan=async function(plan){
  if(!currentUser||!canEditStatus())throw new Error('Admin or Manager access is required.');
@@ -461,6 +515,8 @@ function applyRoleUI(){
  const role=window.__vkvRole;
  const statusAllowed=canEditStatus();
  const proxyAllowed=canManageProxy();
+ const refreshProvisionalProxyBtn=document.getElementById('refreshProvisionalProxyBtn');
+ if(refreshProvisionalProxyBtn)refreshProvisionalProxyBtn.style.display='inline-block';
 
  // Leave/OD/Vacant form is editable only by Admin/Manager.
  const leaveControls=[

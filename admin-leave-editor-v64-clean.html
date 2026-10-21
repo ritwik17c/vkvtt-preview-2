@@ -30,7 +30,7 @@ h2{margin:0 0 7px;color:var(--ink);font-size:1.2rem}h3{color:var(--ink);margin:1
 .info{background:var(--bluebg);border:1px solid #bfd8e5}
 .violet{background:var(--violetbg);color:#513e81;border:1px solid #c9bcec}
 .actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}
-button,.btn,[role="button"],summary,.tile,[data-action],[data-resolve],[data-final],[data-reopen],[data-edit-key],[data-archive-key]{
+button,.btn,[role="button"],summary,.tile,[data-action],[data-resolve],[data-final],[data-reopen],[data-edit-key],[data-delete-key]{
   cursor:pointer
 }
 button,.btn{font:inherit;font-weight:750;border:1px solid #b9ced9;border-radius:11px;padding:10px 13px;background:#e7f2f7;color:var(--ink);text-decoration:none}
@@ -116,7 +116,7 @@ body.quick-mode .wrap{max-width:none}
 @media(max-width:640px){.rangeEntryRow{grid-template-columns:1fr}}
 
 </style>
-</head>
+<script src="./vkv-theme.js?v=20260915-theme-consistency-1"></script></head>
 <body>
 <header><div class="wrap headline"><div><h1>VKV Nalbari · Leave Master Editor</h1><div class="subtitle">Principal-only leave management, clean row-based entry, reconciliation & audit · Cloud v64.0</div></div><div class="actions" style="margin-top:0"><a class="btn" href="admin-dashboard.html?v=64.0">← Admin Dashboard</a><a class="btn" href="admin-leave.html?v=64.0">🗂 Approved Leave</a></div></div></header>
 <main class="wrap">
@@ -152,10 +152,10 @@ body.quick-mode .wrap{max-width:none}
 <section class="card quick-hide">
   <div class="sectionTitle"><div><h2>🛠 Leave Editor Master Template</h2><div class="help">Edit approved Leave / OD / Special records across past, present or future dates.</div></div><button id="newBtn" class="green">＋ New Approved Record</button></div>
   <div class="grid4">
-    <div><label>Teacher</label><select id="filterTeacher"><option value="">All teachers</option></select></div>
+    <div><label>Employee</label><select id="filterTeacher"><option value="">All employees</option></select></div>
     <div><label>Category / status</label><select id="filterType"><option value="">All</option><option>VL</option><option>EL</option><option>CL</option><option>SEL</option><option>EOL</option><option value="MATERNITY">Maternity Leave</option><option value="od">OD</option><option value="special">Special Assignment</option></select></div>
     <div><label>From date (DD/MM/YYYY)</label><input id="filterFrom" class="dateInput" placeholder="DD/MM/YYYY" inputmode="numeric"></div>
-    <div><label>Search</label><input id="filterSearch" placeholder="Teacher, remarks, source…"></div>
+    <div><label>Search</label><input id="filterSearch" placeholder="Employee, remarks, source…"></div>
   </div>
   <div id="recordList" style="margin-top:12px"></div>
 </section>
@@ -164,7 +164,7 @@ body.quick-mode .wrap{max-width:none}
   <div class="sectionTitle"><div><h2 id="editorTitle">Edit leave</h2><div id="editorSource" class="help"></div></div><button id="cancelBtn">✕ Close editor</button></div>
   <div id="editorWarning" class="status warn hide"></div>
   <div class="grid2">
-    <div><label>Teacher</label><select id="editTeacher"></select></div>
+    <div><label>Employee</label><select id="editTeacher"></select></div>
     <div><label>Audit / correction reason <span style="color:#8b2d2d">*</span></label><input id="editReason" placeholder="e.g. Verified against leave application dated …"></div>
   </div>
 
@@ -199,7 +199,7 @@ body.quick-mode .wrap{max-width:none}
 
   <div class="reconcileBar"><span id="reconcileText" class="pill"></span><span id="reconcileBreakdown" class="reconcileDetail"></span></div>
 
-  <div class="actions"><button id="saveBtn" class="primary">💾 Save Approved Record</button><button id="archiveBtn" class="danger hide">Archive original record</button></div>
+  <div class="actions"><button id="saveBtn" class="primary">💾 Save Approved Record</button><button id="deleteBtn" class="danger hide">Delete Erroneous Record</button></div>
   <div id="saveMsg" class="status info hide"></div>
 </section>
 
@@ -289,7 +289,16 @@ async function verify(u){
  const p=await getDoc(doc(db,'authorizedUsers',u.uid));
  if(!p.exists()||p.data().active!==true||String(p.data().role||'')!=='admin')throw new Error('Only the Principal/Admin account can open the Leave Master Editor.');
  const m=await getDoc(doc(db,'master','current'));if(!m.exists())throw new Error('Master timetable is not available.');
- master=m.data().data||m.data();teachers=(master.teachers||[]).slice().sort((a,b)=>String(a.name).localeCompare(String(b.name)));
+ master=m.data().data||m.data();
+ const map=new Map();
+ for(const x of [...(master.teachers||[]),...(master.nonTeachingStaff||[]),...(master.staffDirectory||[]),...(master.nonTeaching||[]),...(master.staff||[])]){
+  if(!x||x.active===false)continue;
+  const raw=String(x.code||x.shortCode||x.teacherShortCode||x.timetableCode||x.employeeCode||x.staffCode||x.staffId||'').trim(),code=raw;
+  if(!code)continue;
+  const name=String(x.name||x.fullName||x.staffName||x.employeeName||code);
+  if(!map.has(code)||String(map.get(code).name||'').length<name.length)map.set(code,{...x,code,name});
+ }
+ teachers=[...map.values()].sort((a,b)=>String(a.name).localeCompare(String(b.name)));
 }
 async function loadAll(){
  const results=await Promise.allSettled([
@@ -344,9 +353,13 @@ async function syncMyAreaHistories(){
  finally{if(btn)btn.disabled=false}
 }
 function populateSelectors(){
+ const filterCode=$('filterTeacher')?.value||'';
+ const editCode=$('editTeacher')?.value||'';
  const opts=teachers.map(t=>`<option value="${safe(t.code)}">${safe(t.name)} (${safe(t.code)})</option>`).join('');
- $('filterTeacher').innerHTML='<option value="">All teachers</option>'+opts;
- $('editTeacher').innerHTML='<option value="">Select teacher…</option>'+opts;
+ $('filterTeacher').innerHTML='<option value="">All employees</option>'+opts;
+ $('editTeacher').innerHTML='<option value="">Select employee…</option>'+opts;
+ if(filterCode&&teachers.some(t=>String(t.code)===String(filterCode)))$('filterTeacher').value=filterCode;
+ if(editCode&&teachers.some(t=>String(t.code)===String(editCode)))$('editTeacher').value=editCode;
 }
 function renderControl(){
  const p=pendingItems().length,visible=p===0;
@@ -389,10 +402,10 @@ function renderRecords(){
  if(!arr.length){$('recordList').innerHTML='<div class="empty">No approved record matches the current filters.</div>';return}
  $('recordList').innerHTML=arr.map(p=>{
   const tt=teacherByCode(p.code)||{name:p.code},ds=p._kind==='manual'?[p._date]:planDates(p),past=ds.some(d=>d<todayIso()),future=ds.some(d=>d>todayIso()),dateText=p._kind==='manual'?displayDate(p._date):recordText(p),source=p._kind==='manual'?'Daily approved status':(p.source||'Scheduled / approved'),key=p._kind==='manual'?manualKey(p):p.id;
-  return `<div class="recordCard"><div class="cardTop"><div><div class="cardTitle">${safe(tt.name)} <span class="pill">${safe(p.code)}</span></div><div class="meta">${safe(statusText(p))}${p.leaveCategory?' · '+safe(catLabel(p.leaveCategory)):''}${p.leaveUnits?` · ${safe(p.leaveUnits)} leave unit${Number(p.leaveUnits)===1?'':'s'}`:''}<br><b>${safe(dateText)}</b>${p.note?'<br>'+safe(p.note):''}<br><span class="small">Source: ${safe(source)}</span></div></div><div>${past?'<span class="pill">Past</span>':''}${future?'<span class="pill warn">Future</span>':''}${p._kind==='manual'?'<span class="pill violet">Daily record</span>':''}</div></div><div class="actions"><button class="primary" data-edit-kind="${p._kind}" data-edit-key="${safe(key)}">Edit</button><button class="danger" data-archive-kind="${p._kind}" data-archive-key="${safe(key)}">Archive</button></div></div>`
+  return `<div class="recordCard"><div class="cardTop"><div><div class="cardTitle">${safe(tt.name)} <span class="pill">${safe(p.code)}</span></div><div class="meta">${safe(statusText(p))}${p.leaveCategory?' · '+safe(catLabel(p.leaveCategory)):''}${p.leaveUnits?` · ${safe(p.leaveUnits)} leave unit${Number(p.leaveUnits)===1?'':'s'}`:''}<br><b>${safe(dateText)}</b>${p.note?'<br>'+safe(p.note):''}<br><span class="small">Source: ${safe(source)}</span></div></div><div>${past?'<span class="pill">Past</span>':''}${future?'<span class="pill warn">Future</span>':''}${p._kind==='manual'?'<span class="pill violet">Daily record</span>':''}</div></div><div class="actions"><button class="primary" data-edit-kind="${p._kind}" data-edit-key="${safe(key)}">Edit</button><button class="danger" data-delete-kind="${p._kind}" data-delete-key="${safe(key)}">Delete Erroneous Record</button></div></div>`
  }).join('');
  document.querySelectorAll('[data-edit-key]').forEach(b=>b.onclick=()=>b.dataset.editKind==='manual'?startEditManual(b.dataset.editKey):startEditPlan(b.dataset.editKey));
- document.querySelectorAll('[data-archive-key]').forEach(b=>b.onclick=()=>b.dataset.archiveKind==='manual'?archiveManual(b.dataset.archiveKey):archivePlan(b.dataset.archiveKey));
+ document.querySelectorAll('[data-delete-key]').forEach(b=>b.onclick=()=>b.dataset.deleteKind==='manual'?deleteManual(b.dataset.deleteKey):deletePlan(b.dataset.deleteKey));
 }
 function renderAudit(){
  const rows=audit.slice().sort((a,b)=>Number(b.createdAtMs||0)-Number(a.createdAtMs||0)).slice(0,30);
@@ -517,12 +530,12 @@ function scanLeaveIntegrity(){
 }
 function integrityActionButtons(x,side){
  const e=x[side],label=side.toUpperCase();
- return `<button class="smallbtn" data-review-kind="${safe(e.kind)}" data-review-key="${safe(e.key)}">Review ${label}</button>${x.kind==='Exact duplicate'?` <button class="smallbtn danger" data-clean-kind="${safe(e.kind)}" data-clean-key="${safe(e.key)}">Archive ${label}</button>`:''}`;
+ return `<button class="smallbtn" data-review-kind="${safe(e.kind)}" data-review-key="${safe(e.key)}">Review ${label}</button>${x.kind==='Exact duplicate'?` <button class="smallbtn danger" data-clean-kind="${safe(e.kind)}" data-clean-key="${safe(e.key)}">Delete Erroneous Record ${label}</button>`:''}`;
 }
 function renderLeaveIntegrity(){
  const r=scanLeaveIntegrity(),issues=r.exact.length+r.conflicts.length;
  $('integritySummary').className='status '+(issues?'warn':'ok');
- $('integritySummary').innerHTML=issues?`<b>${issues} integrity issue${issues===1?'':'s'} found.</b> Exact duplicates can be archived individually after review. Contradictions require manual review.`:`<b>No duplicate or overlapping contradictory leave records detected.</b> ${r.entries.length} dated approved record instance${r.entries.length===1?' was':'s were'} checked.`;
+ $('integritySummary').innerHTML=issues?`<b>${issues} integrity issue${issues===1?'':'s'} found.</b> Exact duplicates can be deleted individually after review. Contradictions require manual review.`:`<b>No duplicate or overlapping contradictory leave records detected.</b> ${r.entries.length} dated approved record instance${r.entries.length===1?' was':'s were'} checked.`;
  $('integrityMetrics').innerHTML=`<div class="integrityMetric"><b>${r.entries.length}</b><span>Dated instances scanned</span></div><div class="integrityMetric"><b>${r.exact.length}</b><span>Exact duplicates</span></div><div class="integrityMetric"><b>${r.conflicts.length}</b><span>Overlapping conflicts</span></div><div class="integrityMetric"><b>${pendingItems().length}</b><span>Pending legacy resolutions</span></div>`;
  const rows=[...r.exact.map(x=>({...x,kind:'Exact duplicate'})),...r.conflicts.map(x=>({...x,kind:'Overlap / contradiction'}))];
  if(!rows.length){$('integrityResults').innerHTML='';return}
@@ -535,8 +548,8 @@ function renderLeaveIntegrity(){
 }
 function reviewIntegrityEntry(kind,key){kind==='manual'?startEditManual(key):startEditPlan(key)}
 async function cleanupIntegrityEntry(kind,key){
- if(!confirm('Archive this exact duplicate record? The record will be removed from active calculations but the change will be preserved in the audit trail.'))return;
- if(kind==='manual')await archiveManual(key,true);else await archivePlan(key,true);
+ if(!confirm('Delete Erroneous Record this exact duplicate record? The record will be removed from active calculations but the change will be preserved in the audit trail.'))return;
+ if(kind==='manual')await deleteManual(key,true);else await deletePlan(key,true);
 }
 
 function proposedIntegrity(rows,code){
@@ -547,7 +560,7 @@ function proposedIntegrity(rows,code){
 }
 function clearEditor(){
  editorState={mode:'new',originalIds:[],manualOriginal:null,pendingId:'',expectedUnits:null};$('dateRows').innerHTML='';$('editTeacher').value='';$('editReason').value='';resetTools();
- if(!QUICK_MODE)$('editorPanel').classList.add('hide');$('editorWarning').classList.add('hide');$('saveMsg').classList.add('hide');$('archiveBtn').classList.add('hide')
+ if(!QUICK_MODE)$('editorPanel').classList.add('hide');$('editorWarning').classList.add('hide');$('saveMsg').classList.add('hide');$('deleteBtn').classList.add('hide')
 }
 function openEditor(title,source){
  $('editorTitle').textContent=title;$('editorSource').textContent=source||'';$('editorPanel').classList.remove('hide');$('saveMsg').classList.add('hide');
@@ -567,7 +580,7 @@ function startEditPlan(id){
  const each=p.type==='half'?0.5:(p.type==='full'?Number(p.leaveUnits||1):0);
  ds.forEach(d=>addDateRow({date:d,type:p.type,category:p.leaveCategory||'',units:ds.length>1&&p.type==='full'?1:each,from:p.from||0,to:p.to||0,note:p.note||'',part:p.type==='half'?(Number(p.from||5)<=4?'am':'pm'):(p.duration==='custom'?'custom':(Number(p.from||0)===1&&Number(p.to||0)===4?'am':Number(p.from||0)===5&&Number(p.to||0)===8?'pm':'full'))}));
  $('editorWarning').className='status warn';$('editorWarning').innerHTML='<b>Editing an approved record.</b> Saving converts it to date-level records so each date may carry its own category/status.';
- $('archiveBtn').classList.remove('hide');$('archiveBtn').onclick=()=>archivePlan(id);
+ $('deleteBtn').classList.remove('hide');$('deleteBtn').onclick=()=>deletePlan(id);
  openEditor(`Edit approved leave · ${t.name}`,`${statusText(p)} · ${recordText(p)} · Source: ${p.source||'approved'}`);updateReconcile();
 }
 function startEditManual(key){
@@ -575,14 +588,14 @@ function startEditManual(key){
  editorState={mode:'edit-manual',originalIds:[],manualOriginal:{...m},pendingId:'',expectedUnits:null};$('dateRows').innerHTML='';resetTools();$('editTeacher').value=m.code||'';$('editReason').value='';
  addDateRow({date:m._date,type:m.type,category:m.leaveCategory||'',units:Number(m.leaveUnits||((m.type==='half')?0.5:(m.type==='full'?1:0))),from:m.from||0,to:m.to||0,note:m.note||m.remarks||'',part:m.type==='half'?(Number(m.from||5)<=4?'am':'pm'):(m.duration==='custom'?'custom':(Number(m.from||0)===1&&Number(m.to||0)===4?'am':Number(m.from||0)===5&&Number(m.to||0)===8?'pm':'full'))});
  $('editorWarning').className='status warn';$('editorWarning').innerHTML='<b>Editing a daily approved status.</b> Saving converts it into the master date-level leave plan.';
- $('archiveBtn').classList.remove('hide');$('archiveBtn').onclick=()=>archiveManual(key);
+ $('deleteBtn').classList.remove('hide');$('deleteBtn').onclick=()=>deleteManual(key);
  openEditor(`Edit daily approved status · ${tt.name}`,`${statusText(m)} · ${displayDate(m._date)} · Daily operational record`);updateReconcile();
 }
 function startNew(){
  editorState={mode:'new',originalIds:[],manualOriginal:null,pendingId:'',expectedUnits:null};$('dateRows').innerHTML='';resetTools();$('editTeacher').value='';$('editReason').value='New approved leave record';
  addDateRow({date:todayIso(),type:'full',units:1});
  $('editorWarning').className='status info';$('editorWarning').innerHTML='<b>New approved record.</b> One Date Row is ready. Add more Date Rows or Date-Range Rows only when required.';
- $('archiveBtn').classList.add('hide');openEditor('New approved leave / OD / special record',QUICK_MODE?'Quick Add Leave · Admin Dashboard':'Principal/Admin master template');updateReconcile();
+ $('deleteBtn').classList.add('hide');openEditor('New approved leave / OD / special record',QUICK_MODE?'Quick Add Leave · Admin Dashboard':'Principal/Admin master template');updateReconcile();
 }
 function makePlan(row,code,stamp,i){
  const id=`le_${code}_${row.date.replaceAll('-','')}_${stamp}_${i}`,p={id,code,type:row.type,mode:'single',startDate:row.date,endDate:row.date,active:true,source:'admin-leave-editor-v64',createdAtMs:Date.now(),updatedAtMs:Date.now(),updatedBy:user.uid,updatedByEmail:user.email||''};
@@ -674,21 +687,21 @@ async function reopenPending(id){
  const x=legacy.find(a=>a.id===id);if(!x)return;if(!confirm('Reopen this accounting-only item as Pending Resolution?\n\nMy Area leave history will lock again until it is resolved or re-finalised.'))return;
  await setDoc(doc(db,'legacyLeaveAccounting',id),{resolutionStatus:'pending',reopenedAt:serverTimestamp(),reopenedBy:user.uid,reopenedByEmail:user.email||'',active:true},{merge:true});x.resolutionStatus='pending';await syncLeaveControl();renderAll();
 }
-async function archiveManual(key,skipFirstConfirm=false){
+async function deleteManual(key,skipFirstConfirm=false){
  const m=manualRecords.find(x=>manualKey(x)===key);if(!m)return;const tt=teacherByCode(m.code)||{name:m.code};
- if(!skipFirstConfirm&&!confirm(`ARCHIVE DAILY APPROVED STATUS\n\n${tt.name}\n${statusText(m)} · ${displayDate(m._date)}\n\nIt will be removed from active leave/proxy calculations but preserved in the audit. Continue?`))return;
- const past=await hasPublishedPast([m._date]);if(past.length&&!confirm(`A published proxy exists on ${displayDate(m._date)}. Archiving will NOT rewrite that historical proxy.\n\nContinue?`))return;
+ if(!skipFirstConfirm&&!confirm(`DELETE DAILY APPROVED STATUS\n\n${tt.name}\n${statusText(m)} · ${displayDate(m._date)}\n\nIt will be permanently removed from active leave/proxy calculations. An audit entry will be retained. Continue?`))return;
+ const past=await hasPublishedPast([m._date]);if(past.length&&!confirm(`A published proxy exists on ${displayDate(m._date)}. Deletion will NOT rewrite that historical proxy.\n\nContinue?`))return;
  await removeManualSource(m);manualRecords=manualRecords.filter(x=>manualKey(x)!==key);
- const aid=`audit_${Date.now()}_${Math.random().toString(36).slice(2,8)}`,ad={action:'Archived daily approved status',teacherCode:m.code,teacherName:tt.name,reason:skipFirstConfirm?'Archived after Admin review':'Archived by Principal/Admin after confirmation',adminUid:user.uid,adminEmail:user.email||'',createdAtMs:Date.now(),whenText:new Date().toLocaleString('en-IN'),before:m};
+ const aid=`audit_${Date.now()}_${Math.random().toString(36).slice(2,8)}`,ad={action:'Deleted erroneous daily approved status',teacherCode:m.code,teacherName:tt.name,reason:skipFirstConfirm?'Deleted after Admin review':'Deleted by Principal/Admin after confirmation',adminUid:user.uid,adminEmail:user.email||'',createdAtMs:Date.now(),whenText:new Date().toLocaleString('en-IN'),before:m};
  await setDoc(doc(db,'leaveAudit',aid),{...ad,createdAt:serverTimestamp()});audit.push({id:aid,...ad});renderAll();clearEditor();
 }
-async function archivePlan(id,skipFirstConfirm=false){
+async function deletePlan(id,skipFirstConfirm=false){
  const p=plans[id];if(!p)return;const t=teacherByCode(p.code)||{name:p.code};
- if(!skipFirstConfirm&&!confirm(`ARCHIVE APPROVED LEAVE RECORD\n\n${t.name}\n${statusText(p)} · ${recordText(p)}\n\nThe record will be removed from active leave/proxy calculations but preserved in the audit. Continue?`))return;
- const past=await hasPublishedPast(planDates(p));if(past.length&&!confirm(`A published proxy exists on ${past.map(displayDate).join(', ')}. Archiving will NOT rewrite that historical proxy.\n\nContinue?`))return;
+ if(!skipFirstConfirm&&!confirm(`DELETE APPROVED LEAVE RECORD\n\n${t.name}\n${statusText(p)} · ${recordText(p)}\n\nThe record will be removed from active leave/proxy calculations but preserved in the audit. Continue?`))return;
+ const past=await hasPublishedPast(planDates(p));if(past.length&&!confirm(`A published proxy exists on ${past.map(displayDate).join(', ')}. Deletion will NOT rewrite that historical proxy.\n\nContinue?`))return;
  const newMap={...plans};delete newMap[id];await setDoc(doc(db,'dailyRecords','__leavePlans'),{date:'__leavePlans',dayName:'Scheduled Leave / Status Plans',plans:newMap,updatedAt:serverTimestamp(),updatedBy:user.uid,updatedByEmail:user.email||''},{merge:false});
  try{await deleteDoc(doc(db,'approvedStatusPlans',id))}catch(e){}try{await removePersonalProjection(p)}catch(e){}
- plans=newMap;const aid=`audit_${Date.now()}_${Math.random().toString(36).slice(2,8)}`,ad={action:'Archived approved leave',teacherCode:p.code,teacherName:t.name,reason:skipFirstConfirm?'Archived after Admin review':'Archived by Principal/Admin after confirmation',adminUid:user.uid,adminEmail:user.email||'',createdAtMs:Date.now(),whenText:new Date().toLocaleString('en-IN'),before:p};
+ plans=newMap;const aid=`audit_${Date.now()}_${Math.random().toString(36).slice(2,8)}`,ad={action:'Deleted erroneous approved leave',teacherCode:p.code,teacherName:t.name,reason:skipFirstConfirm?'Deleted after Admin review':'Deleted by Principal/Admin after confirmation',adminUid:user.uid,adminEmail:user.email||'',createdAtMs:Date.now(),whenText:new Date().toLocaleString('en-IN'),before:p};
  await setDoc(doc(db,'leaveAudit',aid),{...ad,createdAt:serverTimestamp()});audit.push({id:aid,...ad});renderAll();clearEditor();
 }
 
@@ -708,5 +721,5 @@ onAuthStateChanged(auth,async u=>{
  }catch(e){$('gateMsg').className='status error';$('gateMsg').innerHTML='<b>Access not available.</b><br>'+safe(e.message||e)}
 });
 </script>
-</body>
+<script type="module" src="./vkv-leave-context-history.js?v=20260915-history-2"></script>\n</body>
 </html>

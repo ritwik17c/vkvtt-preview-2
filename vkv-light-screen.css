@@ -34,6 +34,7 @@
   html[data-vkv-theme="light"] body .view,
   html[data-vkv-theme="light"] body .surface,
   html[data-vkv-theme="light"] body .gateCard,
+  html[data-vkv-theme="light"] body .loginbox,
   html[data-vkv-theme="light"] body .workspaceBadge,
   html[data-vkv-theme="light"] body .summaryCard,
   html[data-vkv-theme="light"] body .metric,
@@ -66,6 +67,70 @@
     color:#17364f!important;
     border-color:#bad0db!important;
   }
+  html[data-vkv-theme="light"] body button:hover,
+  html[data-vkv-theme="light"] body .btn:hover,
+  html[data-vkv-theme="light"] body a.btn:hover,
+  html[data-vkv-theme="light"] body .button:hover,
+  html[data-vkv-theme="light"] body .navButton:hover{
+    background:#dcecf4!important;color:#17364f!important;border-color:#6d9db6!important;
+  }
+  html[data-vkv-theme="light"] body button:active,
+  html[data-vkv-theme="light"] body .btn:active,
+  html[data-vkv-theme="light"] body a.btn:active,
+  html[data-vkv-theme="light"] body .button:active,
+  html[data-vkv-theme="light"] body .navButton:active{
+    background:#cce2ed!important;color:#17364f!important;border-color:#236d99!important;
+  }
+  /* Keep coordinator access visibly distinct from ordinary navigation while
+     retaining the established green semantic colour in the Light theme. */
+  html[data-vkv-theme="light"] body .bar a.coord{
+    background:#e7f6ea!important;color:#245c34!important;border-color:#a9d4b2!important;
+  }
+  html[data-vkv-theme="light"] body .bar a.coord:hover{
+    background:#d8efdf!important;color:#245c34!important;border-color:#78b689!important;
+  }
+  html[data-vkv-theme="light"] body .bar a.coord:active{
+    background:#c9e7d2!important;color:#245c34!important;border-color:#57986b!important;
+  }
+  /* Runtime coordinator-queue badges retain their workflow meaning instead
+     of collapsing into the generic Light-theme badge treatment. */
+  html[data-vkv-theme="light"] body #reviewList .qbAgeBadge{
+    background:#e7f6ea!important;color:#245c34!important;border:1px solid #a9d4b2!important;
+  }
+  html[data-vkv-theme="light"] body #reviewList .qbAgeBadge[style*="fff4d6"]{
+    background:#fff7df!important;color:#745917!important;border-color:#e5cd8c!important;
+  }
+  html[data-vkv-theme="light"] body #reviewList .qbAgeBadge[style*="fdeaea"]{
+    background:#fdecec!important;color:#8b2d2d!important;border-color:#e5b7b7!important;
+  }
+  html[data-vkv-theme="light"] body #reviewList .qbResubmittedBadge{
+    background:#e9f4ff!important;color:#245a7a!important;border:1px solid #a9cce2!important;
+  }
+  /* Exam timetable choices use explicit readable selected/deselected states
+     rather than the legacy 62% whole-card opacity. */
+  html[data-vkv-theme="light"] body .majorCard{
+    opacity:1!important;background:#fff!important;color:#17364f!important;border-color:#9db3bf!important;
+  }
+  html[data-vkv-theme="light"] body .majorCard b{color:#17364f!important}
+  html[data-vkv-theme="light"] body .majorCard small{color:#526d7d!important}
+  html[data-vkv-theme="light"] body .majorCard:hover{
+    background:#e8f1f4!important;color:#17364f!important;border-color:#6d9db6!important;
+  }
+  html[data-vkv-theme="light"] body .majorCard:focus-within{
+    outline:3px solid #9b6f00!important;outline-offset:2px!important;
+  }
+  html[data-vkv-theme="light"] body .majorCard.off{
+    opacity:1!important;background:#f4f7f8!important;color:#526d7d!important;
+    border-color:#9fb2bc!important;border-style:dashed!important;
+  }
+  html[data-vkv-theme="light"] body .majorCard.off b,
+  html[data-vkv-theme="light"] body .majorCard.off small{color:#526d7d!important}
+  html[data-vkv-theme="light"] body .majorCard:has(input:checked){
+    background:#eef7fb!important;color:#17364f!important;border-color:#236d99!important;
+    outline:2px solid #236d99!important;outline-offset:0!important;
+  }
+  html[data-vkv-theme="light"] body .majorCard:has(input:checked) b,
+  html[data-vkv-theme="light"] body .majorCard:has(input:checked) small{color:#17364f!important}
   html[data-vkv-theme="light"] body button.primary,
   html[data-vkv-theme="light"] body .primary,
   html[data-vkv-theme="light"] body .button.primary,
@@ -75,6 +140,70 @@
     background:#236d99!important;
     color:#fff!important;
     border-color:#236d99!important;
+  }
+  html[data-vkv-theme="light"] body button.primary:active,
+  html[data-vkv-theme="light"] body .primary:active,
+  html[data-vkv-theme="light"] body .button.primary:active,
+  html[data-vkv-theme="light"] body .tabs button.active:active,
+  html[data-vkv-theme="light"] body .navButton.active:active,
+  html[data-vkv-theme="light"] body [aria-pressed="true"]:active{
+    background:#174f73!important;color:#fff!important;border-color:#174f73!important;
+  }
+  html[data-vkv-theme="light"] body :is(a,button,input,select,textarea,[tabindex]):focus-visible{
+    outline:3px solid #9b6f00!important;outline-offset:2px!important;
+  }
+  html[data-vkv-theme="light"] body :is(button,.btn,.button,.navButton,input,select,textarea):disabled,
+  html[data-vkv-theme="light"] body :is(button,.btn,.button,.navButton)[aria-disabled="true"]{
+    background:#e6edf0!important;color:#526d7d!important;border-color:#bacbd3!important;
+    opacity:1!important;box-shadow:none!important;cursor:not-allowed!important;
+    transform:none!important;filter:none!important;
+  }
+  html[data-vkv-theme="light"] body :is(button,.btn,.button,.navButton):disabled *,
+  html[data-vkv-theme="light"] body :is(button,.btn,.button,.navButton)[aria-disabled="true"] *{color:#526d7d!important}
+  /* Proxy Manager disables whole option panels while a different status type
+     is selected. Keep their instructions readable instead of fading the
+     complete panel through the legacy opacity rule. */
+  html[data-vkv-theme="light"] body .disabledBox{
+    opacity:1!important;background:#f4f7f8!important;border-color:#9fb2bc!important;border-style:dashed!important;
+  }
+  html[data-vkv-theme="light"] body .disabledBox label,
+  html[data-vkv-theme="light"] body .disabledBox .small,
+  html[data-vkv-theme="light"] body .disabledBox .help{color:#526d7d!important}
+  /* Leave Rules marks unavailable categories by fading the whole card.
+     Keep the content readable and use the boundary/surface as the state cue. */
+  html[data-vkv-theme="light"] body .ruleCard.inactive{
+    opacity:1!important;background:#f4f7f8!important;color:#526d7d!important;
+    border-color:#9fb2bc!important;border-style:dashed!important;
+  }
+  html[data-vkv-theme="light"] body .ruleCard.inactive b,
+  html[data-vkv-theme="light"] body .ruleCard.inactive strong{color:#17364f!important}
+  /* Admin Dashboard permanent-teacher cards need a retained state after the
+     checkbox click, not merely a change in the small native checkbox. */
+  html[data-vkv-theme="light"] body .teacherChoice:hover{
+    background:#e8f1f4!important;border-color:#6d9db6!important;
+  }
+  html[data-vkv-theme="light"] body .teacherChoice:focus-within{
+    outline:3px solid #9b6f00!important;outline-offset:2px!important;
+  }
+  html[data-vkv-theme="light"] body .teacherChoice:has(input:checked){
+    background:#17364f!important;color:#fff!important;border-color:#17364f!important;
+  }
+  html[data-vkv-theme="light"] body .teacherChoice:has(input:checked) .name,
+  html[data-vkv-theme="light"] body .teacherChoice:has(input:checked) .meta,
+  html[data-vkv-theme="light"] body .teacherChoice:has(input:checked) .code{color:#fff!important}
+  /* Schedule Profiles has two independent states: operationally active and
+     clicked for editing. Keep both visible when they apply to the same card. */
+  html[data-vkv-theme="light"] body .profile:hover{background:#e8f1f4!important;border-color:#6d9db6!important}
+  html[data-vkv-theme="light"] body .profile.active{
+    background:#e7f6ea!important;color:#245c34!important;border-color:#8fc59b!important;
+  }
+  html[data-vkv-theme="light"] body .profile.active b,
+  html[data-vkv-theme="light"] body .profile.active span{color:#245c34!important}
+  html[data-vkv-theme="light"] body .profile.selected{
+    background:#eef7fb!important;border-color:#236d99!important;outline:3px solid #236d99!important;outline-offset:1px!important;
+  }
+  html[data-vkv-theme="light"] body .profile.active.selected{
+    background:#e7f6ea!important;border-color:#236d99!important;
   }
   html[data-vkv-theme="light"] body input,
   html[data-vkv-theme="light"] body select,
@@ -86,11 +215,39 @@
   html[data-vkv-theme="light"] body table{background:#fff!important;color:#17364f!important}
   html[data-vkv-theme="light"] body th{background:#edf5f9!important;color:#17364f!important;border-color:#d7e4ea!important}
   html[data-vkv-theme="light"] body td{background:#fff!important;color:#263d4e!important;border-color:#e0e9ee!important}
+  html[data-vkv-theme="light"] body a:not(.btn):visited{color:#725400!important}
+  html[data-vkv-theme="light"] body :is([aria-selected="true"],[aria-current="page"],option:checked){
+    background:#236d99!important;color:#fff!important;border-color:#236d99!important;
+  }
+  html[data-vkv-theme="light"] body :is([aria-selected="true"],[aria-current="page"]) *{color:#fff!important}
   html[data-vkv-theme="light"] body .notice,
   html[data-vkv-theme="light"] body .status{background:#fff!important;color:#17364f!important;border-color:#cbdce5!important}
   html[data-vkv-theme="light"] body .schedule{background:#fff7dd!important;color:#604b0d!important;border-color:#dfbf62!important}
   html[data-vkv-theme="light"] body .ok{background:#e7f6ea!important;color:#245c34!important;border-color:#a9d4b2!important}
   html[data-vkv-theme="light"] body .error{background:#fdecec!important;color:#8b2d2d!important;border-color:#e5b7b7!important}
+  /* QB subject mapping rows remain readable after exclusion; the dashed row
+     treatment conveys the inactive state without fading its controls. */
+  html[data-vkv-theme="light"] body #rows tr.excluded{opacity:1!important}
+  html[data-vkv-theme="light"] body #rows tr.excluded td{
+    background:#f4f7f8!important;color:#526d7d!important;border-color:#9fb2bc!important;border-style:dashed!important;
+  }
+  html[data-vkv-theme="light"] body #rows tr.excluded input,
+  html[data-vkv-theme="light"] body #rows tr.excluded label{color:#526d7d!important}
+  /* Recurring-duty weekday chips must retain an unmistakable selection after
+     the checkbox click, rather than relying on the small native tick alone. */
+  html[data-vkv-theme="light"] body .daychip{
+    background:#fff!important;color:#17364f!important;border-color:#9db3bf!important;
+  }
+  html[data-vkv-theme="light"] body .daychip:hover{
+    background:#e8f1f4!important;color:#17364f!important;border-color:#6d9db6!important;
+  }
+  html[data-vkv-theme="light"] body .daychip:focus-within{
+    outline:3px solid #9b6f00!important;outline-offset:2px!important;
+  }
+  html[data-vkv-theme="light"] body .daychip:has(input:checked){
+    background:#17364f!important;color:#fff!important;border-color:#17364f!important;
+  }
+  html[data-vkv-theme="light"] body .daychip:has(input:checked) *{color:#fff!important}
   html[data-vkv-theme="light"] body .eyebrow,
   html[data-vkv-theme="light"] body .v66-eyebrow,
   html[data-vkv-theme="light"] body .noticeHead{color:#9b6f00!important}

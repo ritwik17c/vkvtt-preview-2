@@ -56,16 +56,31 @@ body.adminDashboardPage .tile{
 }
 body.adminDashboardPage .tile:nth-child(3n+2){border-left-color:#247548!important}
 body.adminDashboardPage .tile:nth-child(3n){border-left-color:#c88a18!important}
+/* Subtle, clearly visible colour balls; preserve the established 18px size and position. */
 body.adminDashboardPage .tile::after{
-  content:""!important;position:absolute!important;right:-8px!important;bottom:-19px!important;width:82px!important;height:82px!important;opacity:.76!important;
-  background-image:linear-gradient(#dae6ec 1px,transparent 1px),linear-gradient(90deg,#dae6ec 1px,transparent 1px)!important;
-  background-size:14px 14px!important;transform:rotate(10deg)!important;pointer-events:none!important;
+  content:""!important;position:absolute!important;right:13px!important;top:12px!important;bottom:auto!important;
+  width:18px!important;height:18px!important;opacity:.92!important;border:1px solid rgba(31,102,140,.34)!important;
+  border-radius:50%!important;
+  background:radial-gradient(circle at 32% 28%,#ffffff 0%,#c9e3ef 18%,#90bfd5 62%,#6c9db7 100%)!important;
+  box-shadow:0 1px 4px rgba(23,77,112,.12)!important;transform:none!important;pointer-events:none!important;
 }
-body.adminDashboardPage .tile::before{
-  content:""!important;position:absolute!important;right:54px!important;bottom:-35px!important;width:78px!important;height:78px!important;border:1px solid rgba(31,102,140,.07)!important;
-  border-radius:50%!important;pointer-events:none!important;
+body.adminDashboardPage .tile:nth-child(3n+2)::after{
+  border-color:rgba(36,117,72,.34)!important;
+  background:radial-gradient(circle at 32% 28%,#ffffff 0%,#d4ead8 18%,#a6d2ae 62%,#78b987 100%)!important;
+  box-shadow:0 1px 4px rgba(33,104,60,.11)!important;
+}
+body.adminDashboardPage .tile:nth-child(3n)::after{
+  border-color:rgba(160,115,25,.36)!important;
+  background:radial-gradient(circle at 32% 28%,#ffffff 0%,#f5e6c1 18%,#dfc47e 62%,#bf9a48 100%)!important;
+  box-shadow:0 1px 4px rgba(147,101,20,.11)!important;
+}
+body.adminDashboardPage .tile::before{content:none!important;display:none!important}
+html.v66-ui body[data-page="admin-dashboard"] .v66-tile-motif{
+  right:13px!important;top:12px!important;bottom:auto!important;width:18px!important;height:18px!important;
+  opacity:.18!important;transform:none!important;
 }
 body.adminDashboardPage .tile b,body.adminDashboardPage .tile span{position:relative!important;z-index:1!important}
+body.adminDashboardPage .tile span{max-width:100%!important;padding-right:0!important}
 
 /* Leave editor filtering panel. */
 .leaveFilterPanel{margin-top:12px;padding:14px;border:1px solid #d5e3e9;border-radius:14px;background:#f9fcfd}

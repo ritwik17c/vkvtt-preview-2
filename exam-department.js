@@ -70,11 +70,64 @@ async function saveCloudDraft({quiet=false}={}){
 }
 $('saveDraft').onclick=async()=>{try{$('saveDraft').disabled=true;await saveCloudDraft()}catch(e){alert('Could not save cloud draft: '+(e.message||e))}finally{$('saveDraft').disabled=false}};
 $('submitDraft').onclick=async()=>{try{const exam=validateExamTimetable(state.workspace),duty=validateDutyRoster(state.workspace);if(!exam.valid||!exam.scheduled)throw new Error('Generate a complete valid examination timetable before submission.');if(!state.workspace.duties?.invigilation?.length||!duty.valid)throw new Error('Generate a complete valid duty allocation before submission.');$('submitDraft').disabled=true;await saveCloudDraft({quiet:true});const meta={...state.cloudMeta,status:'submitted',submittedAtMs:Date.now(),submittedByUid:state.user.uid,submittedByEmail:state.user.email||''};await setDoc(doc(db,'examSchedules',state.cloudId),{status:'submitted',submittedAtMs:meta.submittedAtMs,submittedByUid:meta.submittedByUid,submittedByEmail:meta.submittedByEmail,updatedAt:serverTimestamp()},{merge:true});state.cloudMeta=meta;state.dirty=false;setSaveState('Submitted to Principal',false);renderWorkflow();await renderDraftList()}catch(e){alert('Could not submit: '+(e.message||e))}finally{$('submitDraft').disabled=false}};
-$('approvePublish').onclick=async()=>{try{if(!state.isAdmin||workflowStatus()!=='submitted')return;const exam=validateExamTimetable(state.workspace),duty=validateDutyRoster(state.workspace);if(!exam.valid||!exam.scheduled||!duty.valid||!state.workspace.duties?.invigilation?.length)throw new Error('The timetable and duty allocation must pass all hard-rule checks.');if(!confirm('Approve and publish this examination schedule to all staff?'))return;$('approvePublish').disabled=true;const now=Date.now(),published={schemaVersion:1,scheduleId:state.cloudId,name:state.workspace.name,description:state.workspace.description||'',workspace:clone(state.workspace),status:'published',approvedAtMs:now,approvedByUid:state.user.uid,approvedByName:state.profile?.name||state.user.displayName||'Principal',updatedAt:serverTimestamp()},batch=writeBatch(db);batch.set(doc(db,'publishedExam','current'),published);batch.set(doc(db,'examSchedules',state.cloudId),{status:'published',approvedAtMs:now,approvedByUid:state.user.uid,approvedByEmail:state.user.email||'',updatedAt:serverTimestamp()},{merge:true});await batch.commit();state.cloudMeta={...state.cloudMeta,...published,status:'published'};state.dirty=false;setSaveState('Approved and published',false);renderWorkflow();await renderDraftList()}catch(e){alert('Could not approve and publish: '+(e.message||e))}finally{$('approvePublish').disabled=false}};
+$('approvePublish').onclick=async()=>{try{
+  if(!state.isAdmin||workflowStatus()!=='submitted')return;
+  const exam=validateExamTimetable(state.workspace),duty=validateDutyRoster(state.workspace);
+  if(!exam.valid||!exam.scheduled||!duty.valid||!state.workspace.duties?.invigilation?.length)throw new Error('The timetable and duty allocation must pass all hard-rule checks.');
+  const revisionOf=String(state.cloudMeta?.revisionOf||'').trim(),isRevision=!!revisionOf;
+  if(!confirm(isRevision?'Approve this revision and replace the existing published timetable?':'Approve and publish this examination schedule to all staff?'))return;
+  $('approvePublish').disabled=true;
+  const now=Date.now(),batch=writeBatch(db);
+  const targetId=isRevision?revisionOf:state.cloudId;
+  let originalForHistory=null;
+  if(isRevision){
+    const originalSnap=await getDoc(doc(db,'examSchedules',revisionOf));
+    if(originalSnap.exists())originalForHistory=originalSnap.data()||{};
+  }
+  const published={schemaVersion:1,scheduleId:targetId,name:state.workspace.name,description:state.workspace.description||'',workspace:clone(state.workspace),status:'published',approvedAtMs:now,approvedByUid:state.user.uid,approvedByName:state.profile?.name||state.user.displayName||'Principal',updatedAt:serverTimestamp()};
+  batch.set(doc(db,'publishedExam','current'),published);
+  batch.set(doc(db,'examSchedules',targetId),{
+    schemaVersion:1,
+    name:state.workspace.name,
+    description:state.workspace.description||'',
+    workspace:clone(state.workspace),
+    status:'published',
+    approvedAtMs:now,
+    approvedByUid:state.user.uid,
+    approvedByEmail:state.user.email||'',
+    revisedFromDraftId:isRevision?state.cloudId:'',
+    revisedAtMs:isRevision?now:0,
+    updatedAtMs:now,
+    updatedAt:serverTimestamp()
+  },{merge:true});
+  if(isRevision&&state.cloudId&&state.cloudId!==targetId)batch.delete(doc(db,'examSchedules',state.cloudId));
+  await batch.commit();
+  if(isRevision&&originalForHistory){
+    try{
+      await setDoc(doc(db,'examScheduleHistory',revisionOf+'_'+now),{
+        sourceScheduleId:revisionOf,
+        revisionDraftId:state.cloudId,
+        name:originalForHistory.name||state.workspace.name||'Examination Schedule',
+        description:originalForHistory.description||'',
+        status:'superseded',
+        supersededAtMs:now,
+        supersededByUid:state.user.uid,
+        supersededByEmail:state.user.email||'',
+        previousApprovedAtMs:Number(originalForHistory.approvedAtMs||0),
+        workspace:clone(originalForHistory.workspace||{}),
+        archivedAt:serverTimestamp()
+      });
+    }catch(historyError){console.warn('Exam schedule history archive skipped:',historyError)}
+  }
+  state.cloudId=targetId;
+  state.cloudMeta={...state.cloudMeta,...published,status:'published',revisionOf:''};
+  state.dirty=false;setSaveState(isRevision?'Revision published — original timetable replaced':'Approved and published',false);renderWorkflow();await renderDraftList();
+}catch(e){alert('Could not approve and publish: '+(e.message||e))}finally{$('approvePublish').disabled=false}};
 $('returnDraft').onclick=async()=>{try{if(!state.isAdmin||workflowStatus()!=='submitted')return;const note=prompt('Correction note for the Exam Manager:','Please review and resubmit.');if(note===null)return;await setDoc(doc(db,'examSchedules',state.cloudId),{status:'returned',reviewNote:note.trim(),returnedAtMs:Date.now(),returnedByUid:state.user.uid,updatedAt:serverTimestamp()},{merge:true});state.cloudMeta={...state.cloudMeta,status:'returned',reviewNote:note.trim()};setSaveState('Returned for correction',false);renderWorkflow();await renderDraftList()}catch(e){alert('Could not return the draft: '+(e.message||e))}};
 
 function renderAll(){
   renderMasterSummary();renderSetup();renderSessions();renderPapers();renderTeachers();renderTimetable();renderDuties();renderReview();renderWorkflow();
+  document.dispatchEvent(new CustomEvent('vkv-exam-workspace-rendered'));
 }
 
 function examBaseClass(value){return String(value||'').trim().replace(/\s+/g,' ').replace(/^((?:XI|XII))\s*(?:[-–]\s*|\s+|\(\s*)(?:SCI(?:ENCE)?|ARTS?|HUMANITIES)\s*\)?$/i,(_,grade)=>grade.toUpperCase()).replace(/(?:\s*[-–]\s*|\s+)(?:SECTION\s*)?[A-DV]$/i,'').replace(/\s*\((?:A|B|C|D|V)\)$/i,'').trim()}
@@ -104,7 +157,27 @@ function installExaminationSubjectCatalogue(classes){
   state.workspace.classes=[...new Set(catalogue.map(p=>p.className))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
   state.workspace.papers=catalogue;state.workspace.timetable={events:[],unplaced:[],dates:[],slots:[]};state.workspace.duties={invigilation:[],relievers:[],unfilled:[]};renderAll();document.dispatchEvent(new CustomEvent('vkv-exam-workspace-subjects-applied',{detail:{catalogue:true}}));return true
 }
-window.vkvExamWorkspace={applySubjectMaster:applyExaminationSubjectMaster,installSubjectCatalogue:installExaminationSubjectCatalogue,undoTimetable:undoGeneratedTimetable};
+window.vkvExamWorkspace={applySubjectMaster:applyExaminationSubjectMaster,installSubjectCatalogue:installExaminationSubjectCatalogue,undoTimetable:undoGeneratedTimetable,getWorkspace:()=>state.workspace,getMaster:()=>state.master,markDirty:message=>markDirty(message),renderReview:()=>renderReview()};
+window.vkvOpenAdmitCards=()=>{
+  const source=(window.vkvExamSharedPublishedSchedules?.length?window.vkvExamSharedPublishedSchedules:(state.cloudItems||[]));
+  const published=source.filter(item=>String(item?.status||'').toLowerCase()==='published'&&item?.workspace).map(item=>({
+    id:item.id,
+    name:String(item.name||item.workspace?.name||'').trim(),
+    status:item.status,
+    approvedAtMs:Number(item.approvedAtMs||0),
+    updatedAtMs:Number(item.updatedAtMs||item.createdAtMs||0),
+    workspace:clone(item.workspace)
+  })).filter(item=>(item.workspace?.timetable?.events?.length||item.workspace?.manualTimetable?.assignments?.length||0)>0);
+  const ids=published.map(x=>x.id).filter(Boolean);
+  try{
+    sessionStorage.setItem('vkvtt-admit-published-catalog',JSON.stringify(published));
+    localStorage.setItem('vkvtt-admit-published-catalog-last',JSON.stringify(published));
+  }catch(error){}
+  const qs=new URLSearchParams();
+  if(ids.length)qs.set('publishedIds',ids.join(','));
+  qs.set('catalogCount',String(published.length));
+  location.href='exam-admit-cards.html?v=20260921-shared-library-16&'+qs.toString();
+};
 
 function renderMasterSummary(){
   const master=state.master||{},data=master.data&&typeof master.data==='object'?{...master,...master.data}:master,source=state.workspace.sourceSchedule||{};
@@ -232,6 +305,8 @@ function changeDutyTeacher(event){const select=event.target.closest('[data-duty-
 
 function renderReview(){
   if(!state.workspace)return;const exam=validateExamTimetable(state.workspace),duty=validateDutyRoster(state.workspace),hasDuty=!!(state.workspace.duties?.invigilation?.length||state.workspace.duties?.relievers?.length||state.workspace.duties?.unfilled?.length);
+  const admitButton=$('bulkAdmitCardsOutput');
+  if(admitButton){admitButton.disabled=false;admitButton.title='Open Assessment Ticket / Admit Card generator and choose published schedule sources.'}
   const cards=[{label:'Exam timetable',value:exam.valid&&exam.scheduled?'Ready':exam.scheduled?'Issues':'Not generated',good:exam.valid&&exam.scheduled},{label:'Papers scheduled',value:exam.scheduled+'/'+exam.total,good:exam.valid&&exam.total>0},{label:'Duty allocation',value:hasDuty?(duty.valid?'Ready':'Issues'):'Not generated',good:hasDuty&&duty.valid},{label:'Unfilled positions',value:duty.unfilled,good:hasDuty&&duty.unfilled===0}];
   $('reviewSummary').innerHTML=cards.map(item=>`<div class="reviewCard ${item.good?'good':'bad'}"><strong>${safe(item.value)}</strong><span>${safe(item.label)}</span></div>`).join('');
 }
@@ -241,7 +316,36 @@ async function renderDraftList(){
     $('draftList').innerHTML=items.length?items.map(item=>{const status=item.status||'draft',canOpen=state.isAdmin||['draft','returned'].includes(status),revision=status==='published'&&item.ownerUid===state.user.uid;return `<div class="draftCard"><h4>${safe(item.name||'Untitled Examination Schedule')}</h4><p><span class="workflowPill ${safe(status)}">${safe(status==='published'?'Published':status==='submitted'?'Submitted':status==='returned'?'Returned':'Draft')}</span>${new Date(item.updatedAtMs||item.createdAtMs||Date.now()).toLocaleString('en-GB')}</p><p>${item.workspace?.timetable?.events?.length||0} papers · ${item.workspace?.duties?.invigilation?.length||0} invigilation duties</p>${item.reviewNote?`<p><b>Principal note:</b> ${safe(item.reviewNote)}</p>`:''}<div class="buttonRow">${canOpen?`<button class="button" data-open-cloud="${safe(item.id)}">Open</button>`:''}${revision?`<button class="button" data-revise-cloud="${safe(item.id)}">Start Revision</button>`:''}</div></div>`}).join(''):'<div class="empty">No cloud examination workspace has been saved yet.</div>';
   }catch(e){$('draftList').innerHTML='<div class="notice error">Cloud workspaces could not be loaded: '+safe(e.message||e)+'</div>'}
 }
-$('draftList').addEventListener('click',event=>{const open=event.target.closest('[data-open-cloud]'),revise=event.target.closest('[data-revise-cloud]'),id=open?.dataset.openCloud||revise?.dataset.reviseCloud;if(!id)return;const item=state.cloudItems.find(value=>value.id===id);if(!item?.workspace)return;if(state.dirty&&!confirm('Open this cloud workspace and discard the current unsaved changes?'))return;state.workspace=clone(item.workspace);state.cloudId=revise?'':item.id;state.cloudMeta=revise?{status:'draft',ownerUid:state.user.uid,ownerName:state.profile?.name||state.user.displayName||state.user.email,ownerEmail:state.user.email,revisionOf:item.id}:clone(item);state.dirty=!!revise;renderAll();setSaveState(revise?'New revision — save before submission':'Cloud workspace opened',!!revise);document.querySelector('[data-pane-target="setup"]').click()});
+$('draftList').addEventListener('click',event=>{const open=event.target.closest('[data-open-cloud]'),revise=event.target.closest('[data-revise-cloud]'),id=open?.dataset.openCloud||revise?.dataset.reviseCloud;if(!id)return;openCloudWorkspaceById(id,{asRevision:!!revise})});
+async function openCloudWorkspaceById(id,{asRevision=false}={}){
+  if(!id||!state.user)return false;
+  try{
+    const snap=await getDoc(doc(db,'examSchedules',id));
+    if(!snap.exists())throw new Error('Cloud examination workspace was not found.');
+    const item={id:snap.id,...(snap.data()||{})};
+    if(!item.workspace)throw new Error('This record does not contain an examination workspace.');
+    if(state.dirty&&!confirm('Open this cloud workspace and discard the current unsaved changes?'))return false;
+    state.workspace=clone(item.workspace);
+    state.cloudId=asRevision?'':item.id;
+    state.cloudMeta=asRevision?{status:'draft',ownerUid:state.user.uid,ownerName:state.profile?.name||state.user.displayName||state.user.email,ownerEmail:state.user.email,revisionOf:item.id}:clone(item);
+    state.dirty=!!asRevision;
+    renderAll();
+    setSaveState(asRevision?'New revision — save before submission':'Cloud workspace opened',!!asRevision);
+    document.querySelector('[data-pane-target="timetable"]')?.click();
+    document.dispatchEvent(new CustomEvent('vkv-exam-cloud-opened',{detail:{id:item.id,status:item.status||'draft',revisionOf:item.revisionOf||''}}));
+    return true;
+  }catch(e){alert('Could not open examination workspace: '+(e?.message||e));return false}
+}
+window.vkvExamOpenCloudWorkspace=(id,opts)=>openCloudWorkspaceById(id,opts);
+window.vkvExamDetachDeletedCloudWorkspace=id=>{
+  if(!id||state.cloudId!==id)return false;
+  state.cloudId='';
+  state.cloudMeta={status:'draft',ownerUid:state.user?.uid||'',ownerName:state.profile?.name||state.user?.displayName||state.user?.email||'',ownerEmail:state.user?.email||''};
+  state.dirty=false;
+  setSaveState('Deleted cloud draft detached',false);
+  document.dispatchEvent(new CustomEvent('vkv-exam-cloud-deleted',{detail:{id}}));
+  return true;
+};
 $('newDraft').onclick=()=>{if(state.dirty&&!confirm('Start a new draft from the active master and discard current unsaved changes?'))return;state.workspace=createFreshExamWorkspace(state.master);state.cloudId='';state.cloudMeta={status:'draft',ownerUid:state.user.uid,ownerName:state.profile?.name||state.user.displayName||state.user.email,ownerEmail:state.user.email};state.dirty=true;renderAll();setSaveState('New unsaved cloud draft',true);document.querySelector('[data-pane-target="setup"]').click()};
 
 function csvCell(value){const text=String(value??'');return /[",\n]/.test(text)?'"'+text.replace(/"/g,'""')+'"':text}
@@ -249,5 +353,5 @@ function download(name,rows){const csv='\ufeff'+rows.map(row=>row.map(csvCell).j
 $('downloadExamCsv').onclick=()=>download('exam-timetable.csv',[['Date','Day','Session','Start','End','Class','Subject'],...(state.workspace.timetable?.events||[]).map(item=>{const slot=slotById(item.slotId)||{};return [item.date,item.day,slot.name||item.slotId,slot.startTime||'',slot.endTime||'',item.className,item.subject]})]);
 $('downloadDutyCsv').onclick=()=>download('exam-duty-lists.csv',[['Role','Date','Day','Session','Time','Room / Class','Teacher','Code'],...(state.workspace.duties?.invigilation||[]).map(item=>['Invigilator',item.date,item.day,item.session,'',item.roomId,item.teacherName,item.teacherCode]),...(state.workspace.duties?.relievers||[]).map(item=>['Reliever',item.date,item.day,item.session,item.startTime+'-'+item.endTime,'',item.teacherName,item.teacherCode])]);
 function printPane(name){const pane=document.querySelector(`[data-pane="${name}"]`);document.querySelectorAll('.pane').forEach(item=>item.classList.remove('printing'));pane.classList.add('printing');window.print();setTimeout(()=>pane.classList.remove('printing'),500)}
-$('printExam').onclick=()=>printPane('timetable');$('printDuties').onclick=()=>printPane('duties');window.addEventListener('afterprint',()=>document.querySelectorAll('.pane').forEach(item=>item.classList.remove('printing')));
+$('printExam').onclick=()=>printPane('timetable');$('printDuties').onclick=()=>printPane('duties');$('bulkAdmitCardsOutput').onclick=()=>window.vkvOpenAdmitCards();window.addEventListener('afterprint',()=>document.querySelectorAll('.pane').forEach(item=>item.classList.remove('printing')));
 window.addEventListener('beforeunload',event=>{if(state.dirty){event.preventDefault();event.returnValue=''}});

@@ -192,7 +192,7 @@
     }
   </style>
 <link rel="stylesheet" href="v66-premium-unified.css?v=66.2-premium-1">
-</head>
+<script src="./vkv-theme.js?v=20260915-theme-consistency-1"></script></head>
 <body>
   <section id="accessGate" class="access-gate"><div class="brand-mark" style="margin:0 auto 15px" aria-hidden="true"><img src="school-logo.jpg?v=66.0" alt=""></div><h1>Annual Calendar 2026-27</h1><p id="accessMessage">Checking calendar availability…</p><a class="soft-btn" href="index.html?v=66.0">← Timetable Home</a></section>
   <main class="shell" id="calendarShell" style="display:none">
@@ -215,9 +215,9 @@
 
     <nav class="toolbar" aria-label="Calendar controls">
       <div class="view-tabs" role="tablist" aria-label="Calendar views">
-        <button class="tab-btn" data-view="day" type="button">Daily</button>
-        <button class="tab-btn" data-view="month" type="button">Monthly</button>
-        <button class="tab-btn active" data-view="full" type="button">Full View</button>
+        <button class="tab-btn" data-view="day" type="button" role="tab" aria-selected="false" aria-controls="dayView">Daily</button>
+        <button class="tab-btn" data-view="month" type="button" role="tab" aria-selected="false" aria-controls="monthView">Monthly</button>
+        <button class="tab-btn active" data-view="full" type="button" role="tab" aria-selected="true" aria-controls="fullView">Full View</button>
       </div>
       <div class="toolbar-actions">
         <button class="soft-btn" id="homeBtn" type="button">← Timetable Home</button>
@@ -410,7 +410,7 @@ function esc(s=''){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt
 function renderFilters(){
   const root=document.getElementById('filters');
   const cats=[['all','All'],...Object.entries(CATEGORY).map(([k,v])=>[k,v.label])];
-  root.innerHTML=cats.map(([k,label])=>`<button type="button" class="filter-chip ${activeCategory===k?'active':''}" data-cat="${k}">${esc(label)}</button>`).join('');
+  root.innerHTML=cats.map(([k,label])=>`<button type="button" class="filter-chip ${activeCategory===k?'active':''}" data-cat="${k}" aria-pressed="${activeCategory===k?'true':'false'}">${esc(label)}</button>`).join('');
   root.querySelectorAll('button').forEach(btn=>btn.addEventListener('click',()=>{activeCategory=btn.dataset.cat;renderAll();}));
 }
 function renderStats(){
@@ -518,7 +518,7 @@ function closeModal(){document.getElementById('eventModal').classList.remove('op
 function showView(name){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById(name+'View').classList.add('active');
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.view===name));
+  document.querySelectorAll('.tab-btn').forEach(b=>{const selected=b.dataset.view===name;b.classList.toggle('active',selected);b.setAttribute('aria-selected',selected?'true':'false')});
   if(name==='full')renderFull();if(name==='month')renderMonth();if(name==='day')renderDay();
 }
 function renderAll(){renderFilters();renderFull();renderMonth();renderDay()}

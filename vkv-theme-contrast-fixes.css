@@ -66,7 +66,7 @@
   html[data-vkv-theme="black-gold"] body #proxyTodayStatusSummary,
   html[data-vkv-theme="black-gold"] body #periodReminderControl,
   html[data-vkv-theme="black-gold"] body #periodReminderControl details{
-    background:#141515!important;color:#f6f2e8!important;border-color:#494538!important;
+    background:#152630!important;color:#f6f2e8!important;border-color:#34505d!important;
   }
   html[data-vkv-theme="black-gold"] body .result b,
   html[data-vkv-theme="black-gold"] body .result strong,
@@ -82,7 +82,7 @@
   html[data-vkv-theme="black-gold"] body .status .small,
   html[data-vkv-theme="black-gold"] body #proxyTodayStatusSummary .small,
   html[data-vkv-theme="black-gold"] body #periodReminderControl .small{color:#b8b1a2!important}
-  html[data-vkv-theme="black-gold"] #proxyTodayStatusSummary>div{color:#f1eadc!important;border-top-color:#3b3932!important}
+  html[data-vkv-theme="black-gold"] #proxyTodayStatusSummary>div{color:#f1eadc!important;border-top-color:#34505d!important}
 
   /* BLACK & GOLD clicked cards: dark-gold state, no pale active background. */
   html[data-vkv-theme="black-gold"].v66-ui body .myGrid>button.active,
@@ -91,7 +91,7 @@
   html[data-vkv-theme="black-gold"].v66-ui body .myGrid>button[aria-pressed="true"],
   html[data-vkv-theme="black-gold"].v66-ui body .nav>button[aria-pressed="true"],
   html[data-vkv-theme="black-gold"].v66-ui body .opsGrid>button[aria-pressed="true"]{
-    background:#292310!important;color:#fff7dc!important;border-color:#e2b72d!important;
+    background:#203a47!important;color:#fff7dc!important;border-color:#e2b72d!important;
     box-shadow:0 0 0 2px rgba(226,183,45,.12),0 8px 22px rgba(0,0,0,.24)!important;
   }
   html[data-vkv-theme="black-gold"].v66-ui body .myGrid>button.active *,
@@ -103,7 +103,7 @@
 
   /* Theme picker itself visually represents the selected appearance. */
   html[data-vkv-theme="light"] #vkvThemeSwitch button[data-vkv-theme-choice="light"][aria-pressed="true"]{background:#f7fbff!important;color:#17364f!important;border-color:#3d82a7!important;box-shadow:inset 0 0 0 1px #d4e6ef!important}
-  html[data-vkv-theme="light"] #vkvThemeSwitch button[data-vkv-theme-choice="black-gold"]{background:#171817!important;color:#f2c335!important;border-color:#75601b!important}
+  html[data-vkv-theme="light"] #vkvThemeSwitch button[data-vkv-theme-choice="black-gold"]{background:#152630!important;color:#f2c335!important;border-color:#496675!important}
   html[data-vkv-theme="black-gold"] #vkvThemeSwitch button[data-vkv-theme-choice="black-gold"][aria-pressed="true"]{background:#f2c335!important;color:#17130b!important;border-color:#f2c335!important}
   html[data-vkv-theme="black-gold"] #vkvThemeSwitch button[data-vkv-theme-choice="light"]{background:#f7fbff!important;color:#17364f!important;border-color:#bad0db!important}
 }

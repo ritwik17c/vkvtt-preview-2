@@ -10,6 +10,9 @@ function move(g,spec){const x=findTile(spec);if(x&&x.parentElement!==g)g.appendC
 function build(){const home=$('#dashboardHome');if(!home||$('#vkvAdminArchitecture'))return false;const native=home.querySelector(':scope > .tiles');if(!native)return false;const arch=document.createElement('div');arch.id='vkvAdminArchitecture';
  const setup=section('vkvAdminSetup','1 · School Setup, People & Access','Maintain the school structure, people and permissions first.');const g1=setup.querySelector('.tiles');
  g1.append(tile('openStaffManagement','👥','Staff Management','Add/edit teaching and non-teaching staff, employee codes, categories, designations and active status. This does not alter the timetable.',P2+'admin-staff-management.html?v=p2'));
+  g1.append(tile('openQuarterAllotment','🏠','Quarter Allotment','Set up staff quarters, allot or vacate quarters, and review availability and history.',P2+'quarter-allotment.html?v=1.0'));
+ g1.append(tile('openStudentSetup','🎓','Student Setup','Maintain the Student Master, import Campusdean records, register new admissions and record Transfer Certificates.',P2+'admin-student-setup.html?v=1.1'));
+ g1.append(tile('openCertificatesDocuments','📄','Certificates & Document Formats','Generate student and employee certificates, student and all-employee I-Cards, parent fee undertakings, and other official documents.',P2+'admin-certificates.html?v=1.0'));
  g1.append(tile('openClassesManager','🏫','Classes & Sections Manager','Add future classes/sections safely. Empty classes can be removed; structural timetable changes are protected.',P2+'admin-classes-manager.html?v=1'));
  const cal=move(g1,{id:'openAnnualCalendar'});relabel(cal,'🗓 Annual Calendar Manager','Add, edit and remove school calendar events.');
  const sch=move(g1,{id:'openSchedules'});relabel(sch,'🕒 Schedule Profiles Manager','Create and edit normal, heat-wave and other timing profiles.');
@@ -28,6 +31,7 @@ function build(){const home=$('#dashboardHome');if(!home||$('#vkvAdminArchitectu
 
  const leave=section('vkvAdminLeave','3 · Regular Leave, Duty & Attendance','Regular Leave and Duty are separate categories. Leave Editors prepare entries; Principal/Admin gives final approval.');const g3=leave.querySelector('.tiles');
  g3.append(tile('openLeaveManager','🗂','Leave Manager','Regular Leave, Duty/OD, Special Assignment, approval, corrections, audit and cleanup in one controlled workflow.',P2+'leave-manager.html?v=2'));
+ g3.append(tile('openLeaveMasterEditor','🛠','Leave Master Editor + Integrity','Principal/Admin authoritative workspace for creating, editing, deleting, archiving, reconciling and checking approved Leave / Duty records.',P2+'admin-leave-full-edit.html?v=20260916-master-editor-delete-1'));
  const rules=move(g3,{id:'openLeaveRules'});relabel(rules,'⚙️ Regular Leave Rules','Configure leave categories and entitlements. OD/Duty is not deducted from leave balance.');
  g3.append(tile('openSuperLeaveFilter','🔎','Leave & Duty Search','Search Regular Leave, Duty/OD, Special Assignment and Vacant Position records.',P2+'super-leave-filter.html?v=manager2'));
  const reg=move(g3,{id:'openLeaveRegister'});if(reg){relabel(reg,'🗂 Approved Leave & Duty Register','Review approved Regular Leave and Duty records with consecutive dates consolidated.');reg.onclick=()=>location.href=P2+'admin-leave.html?v=range2'}

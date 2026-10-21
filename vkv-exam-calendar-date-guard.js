@@ -80,8 +80,8 @@
     const rows=[];
     for(const box of document.querySelectorAll('[data-exam-date]')){
       const date=box.dataset.examDate,reasons=blocked.get(date)||[],label=box.closest('label');
-      if(reasons.length){box.checked=false;box.disabled=true;if(label){label.style.opacity='.62';label.style.textDecoration='line-through';label.title='Invalid examination date: '+reasons.join('; ')}}
-      else if(label){box.disabled=false;label.style.opacity='';label.style.textDecoration='';label.title='Valid examination date'}
+      if(reasons.length){box.checked=false;box.disabled=true;if(label){label.classList.add('examDateBlocked');label.title='Invalid examination date: '+reasons.join('; ')}}
+      else if(label){box.disabled=false;label.classList.remove('examDateBlocked');label.title='Valid examination date'}
     }
     const a=parse($('startDate')?.value),b=parse($('endDate')?.value);if(a&&b){for(const d=new Date(a);d<=b;d.setDate(d.getDate()+1)){const k=isoDate(d),r=blocked.get(k);if(r?.length)rows.push(`<b>${safe(fmt(k))}</b> — ${safe([...new Set(r)].join('; '))}`)}}
     const n=ensureNotice();if(n){

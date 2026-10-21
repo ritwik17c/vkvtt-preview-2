@@ -193,11 +193,20 @@ function planAppliesToDate(p,date){
 }
 function plannedStatusesForDate(date=todayKey()){
  const plans=Object.values(cachedLeavePlans());
- return plans.filter(p=>planAppliesToDate(p,date)).map(p=>({
+ const scheduled=plans.filter(p=>planAppliesToDate(p,date)).map(p=>({
    code:p.code,type:p.type,from:p.from||0,to:p.to||0,duration:p.duration||"",
    leaveCategory:p.leaveCategory||"",leaveUnits:Number(p.leaveUnits||0),
    note:p.note||"",date,day:dayNameForDate(date),planned:true,planId:p.id||""
  }));
+ const provisional=(Array.isArray(window.__vkvProvisionalProxyStatuses)?window.__vkvProvisionalProxyStatuses:[])
+   .filter(p=>p&&p.active===true&&p.provisional===true&&Array.isArray(p.dates)&&p.dates.includes(date))
+   .map(p=>({
+     code:p.code,type:p.type,from:Number(p.from||0),to:Number(p.to||0),duration:p.duration||"",
+     leaveCategory:"",leaveUnits:0,note:"Provisional — awaiting approval",
+     date,day:dayNameForDate(date),planned:true,provisional:true,
+     planId:"provisional:"+String(p.requestId||"")
+   }));
+ return [...scheduled,...provisional];
 }
 window.plannedStatusesForDate=plannedStatusesForDate;
 function approvedStatusesForDate(date=todayKey()){
@@ -566,7 +575,7 @@ function proxyRows(date=proxyDateKey()){
  return [...grouped.values()].map(g=>({...g,className:g.classes.join(" + "),entry:g.entries.join(" / ")}))
    .sort((a,b)=>a.period-b.period||a.teacher.localeCompare(b.teacher)||a.className.localeCompare(b.className));
 }
-function statusLabel(o){const cat=o&&o.leaveCategory?" · "+leaveCategoryLabel(o.leaveCategory):"";if(o.type==="full")return "Full Leave"+cat;if(o.type==="vacant")return "Vacant Position · Full Day";if(o.type==="half"){const f=Number(o.from||5),t=Number(o.to||8);return `Half Leave P${f}–P${t}`+cat}let base=o.type==="od"?"On Duty":"Special Assignment";let range=(o.duration==="half"||(o.from===5&&o.to===8))?"Half Day · P5–P8":(!o.from&&!o.to)?"Full Day":`P${o.from||1}–P${o.to||8}`;return base+" · "+range+(o.note?" · "+o.note:"")}
+function statusLabel(o){const cat=o&&o.leaveCategory?" · "+leaveCategoryLabel(o.leaveCategory):"";const provisional=o&&o.provisional?"Provisional · ":"";if(o.type==="full")return provisional+"Full Leave"+cat;if(o.type==="vacant")return "Vacant Position · Full Day";if(o.type==="half"){const f=Number(o.from||5),t=Number(o.to||8);return provisional+`Half Leave P${f}–P${t}`+cat}let base=o.type==="od"?"On Duty":"Special Assignment";let range=(o.duration==="half"||(o.from===5&&o.to===8))?"Half Day · P5–P8":(!o.from&&!o.to)?"Full Day":`P${o.from||1}–P${o.to||8}`;return provisional+base+" · "+range+(o.note?" · "+o.note:"")}
 function renderLeave(){let a=leaveData(),out=E("leaveResult");if(!a.length){out.innerHTML="No Leave, On Duty, Special Assignment or Vacant Position recorded today.";return}let day=todayName(),rows=proxyRows();let covered=[];let chips=a.map(o=>{let t=teacherByEffectiveCode(o.code),rep=activeReplacementForOriginal(o.code,todayKey());if(rep)covered.push({o,t,rep});return `<span class="tag">${esc(t?t.name:o.code)} · ${statusLabel(o)}${rep?` · Covered by ${esc(rep.tempName||rep.tempCode)}`:""}</span>`}).join("");let coverageNote=covered.length?`<div class="slotComplete" style="margin-top:10px">${covered.map(x=>`✓ ${esc(x.t?x.t.name:x.o.code)} remains recorded as ${esc(statusLabel(x.o))}; ${esc(x.rep.tempName||x.rep.tempCode)} is covering the leave vacancy, so the original teacher's periods do not enter proxy allotment.`).join("<br>")}</div>`:"";let details=rows.length?`<div class="table"><table><tr><th>Unavailable Teacher</th><th>Period</th><th>Class</th><th>Scheduled Period</th><th>Free Teachers for Proxy</th></tr>${rows.map(r=>`<tr><td>${esc(r.teacher)}</td><td>${PL(r.period)}<br><span class="small">${r.time}</span></td><td>${r.className}</td><td>${esc(r.entry)}</td><td>${r.free.slice(0,15).map(t=>`<span class="tag">${esc(t.name)} (${t.code})</span>`).join("")}</td></tr>`).join("")}</table></div>`:`<p>No affected teaching periods require proxy for ${day}.</p>`;out.innerHTML=`<div><b>Unavailable / Engaged for ${day}:</b><br>${chips}${coverageNote}</div><div class="proxycard"><div class="proxyhead">Periods Requiring Proxy · ${rows.length} timetable entr${rows.length===1?"y":"ies"}</div>${details}<div class="small">A teacher covered by an active leave-vacancy replacement remains shown on leave, but those covered periods are excluded from proxy requirements. If the replacement teacher is absent, the inherited periods become proxy requirements.</div></div>`}
 function proxyText(){
  const day=todayName(), date=displayDate(), a=Object.values(allotData()).filter(x=>x&&x.day===day).sort((x,y)=>Number(x.period)-Number(y.period)||String(x.name).localeCompare(String(y.name)));

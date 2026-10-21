@@ -15,7 +15,15 @@
 })();
 </script>
 <link rel="stylesheet" href="v66-premium-unified.css?v=66.2-premium-1">
-</head>
+<script src="./vkv-theme.js?v=20260915-theme-consistency-1"></script>
+<style id="vkvTimetableFilterContrast">
+html[data-vkv-theme="light"] .lessonCard.filterDimmed{opacity:1!important;background:#eef3f5!important;color:#294b5f!important;border-color:#9fb2bc!important;border-style:dashed!important}
+html[data-vkv-theme="light"] .lessonCard.filterDimmed h4{color:#294b5f!important}
+html[data-vkv-theme="light"] .lessonCard.filterDimmed :is(p,.combinedFlag){color:#526d7d!important}
+html[data-vkv-theme="black-gold"] .lessonCard.filterDimmed{opacity:1!important;background:#10212a!important;color:#d8edf7!important;border-color:#42606f!important;border-style:dashed!important}
+html[data-vkv-theme="black-gold"] .lessonCard.filterDimmed h4{color:#d8edf7!important}
+html[data-vkv-theme="black-gold"] .lessonCard.filterDimmed :is(p,.combinedFlag){color:#a8bdc8!important}
+</style></head>
 <body>
 <header class="topbar">
   <div class="topbarInner">
@@ -246,6 +254,6 @@
   <div class="modalCard"><h3 id="confirmTitle">Confirm action</h3><p id="confirmText"></p><div class="buttonRow end"><button id="confirmCancel" class="button quiet">Cancel</button><button id="confirmProceed" class="button danger">Continue</button></div></div>
 </div>
 
-<script type="module" src="timetable-studio.js?v=66.0"></script>
+<script type="module" src="timetable-studio.js?v=20260920-readable-teacher-filter-1"></script>
 </body>
 </html>

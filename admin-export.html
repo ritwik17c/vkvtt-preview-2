@@ -11,7 +11,7 @@
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:#263d4e;font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif}header{background:#1d638e;color:#fff;padding:18px 16px}.wrap{max-width:1180px;margin:auto}.head{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}h1{font-size:1.45rem;margin:0}.sub{opacity:.92;margin-top:4px}main{padding:18px 14px 60px}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;margin:14px 0;box-shadow:0 4px 16px #17324d0e}h2{margin:0 0 8px;color:var(--ink);font-size:1.18rem}.help{color:var(--muted);font-size:.88rem;line-height:1.5}.status{padding:11px 13px;border-radius:12px;background:var(--bluebg);margin:10px 0;line-height:1.45}.ok{background:var(--greenbg);color:#245c34;border:1px solid #a9d4b2}.error{background:var(--redbg);color:var(--red);border:1px solid #e5b7b7}.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.btn,button{font:inherit;font-weight:750;border:1px solid #b9ced9;border-radius:11px;padding:10px 13px;background:#e7f2f7;color:var(--ink);cursor:pointer;text-decoration:none}.primary{background:var(--deep);color:white;border-color:var(--deep)}.exportCards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}.exportCard{border:1px solid #d4e1e8;border-radius:14px;padding:14px;background:#fbfefd;cursor:pointer}.exportCard b{display:block;color:var(--ink);margin-bottom:4px}.exportCard span{font-size:.8rem;color:var(--muted);line-height:1.35}.preview{overflow:auto;max-height:460px;border:1px solid #d9e5eb;border-radius:12px;margin-top:10px}table{border-collapse:collapse;width:100%;min-width:850px}th,td{border:1px solid #e0e9ee;padding:7px;text-align:left;font-size:.81rem}th{background:#edf5f9;color:var(--ink);position:sticky;top:0}#app{display:none}@media(max-width:850px){.exportCards{grid-template-columns:1fr 1fr}}@media(max-width:520px){.exportCards{grid-template-columns:1fr}}
 </style>
 <link rel="stylesheet" href="vkv-black-gold-screen.css?v=20260908-blackgold-2">
-</head>
+<script src="./vkv-theme.js?v=20260915-theme-consistency-1"></script></head>
 <body>
 <header><div class="wrap head"><div><h1>VKV Nalbari · Administration</h1><div class="sub">📤 Export Master Timetable · Production</div></div><div class="actions"><a class="btn" href="./">🏠 Timetable Home</a><a class="btn" href="./admin-dashboard.html">← Admin Dashboard</a></div></div></header>
 <main class="wrap">
@@ -31,8 +31,22 @@ const $=id=>document.getElementById(id),safe=v=>String(v??'').replace(/[&<>"']/g
 let user=null,masterDoc=null,master=null;
 $('signInBtn').onclick=()=>signInWithPopup(auth,provider);
 onAuthStateChanged(auth,async u=>{user=u;if(!u){$('gateMsg').textContent='Sign in with the Admin Google account.';$('signInBtn').style.display='inline-block';return}$('signInBtn').style.display='none';try{const ps=await getDoc(doc(db,'authorizedUsers',u.uid));if(!ps.exists()||ps.data().active!==true||ps.data().role!=='admin'){throw new Error('Admin access is required.')}const ms=await getDoc(doc(db,'master','current'));if(!ms.exists())throw new Error('Master timetable not found.');masterDoc=ms.data();master=structuredClone(masterDoc.data||masterDoc);if(!Array.isArray(master.records)||!Array.isArray(master.classes)||!Array.isArray(master.teachers))throw new Error('Master timetable structure is incomplete.');$('gateMsg').className='status ok';$('gateMsg').textContent='Admin verified: '+(u.displayName||u.email||'Admin');$('app').style.display='block';render()}catch(e){$('gateMsg').className='status error';$('gateMsg').textContent=e.message||String(e)}});
-function codesOf(r){if(Array.isArray(r.codes))return r.codes.filter(Boolean);return[]}
-function teacherName(c){return master.teachers.find(t=>String(t.code)===String(c))?.name||c}
+function codesOf(r){
+ const exact=[],seen=new Set();
+ const add=c=>{c=String(c||'').trim();if(c&&!seen.has(c)&&master.teachers.some(t=>String(t.code||'').trim()===c)){seen.add(c);exact.push(c)}};
+ const entry=String(r.entry||'');
+ const rosterCodes=master.teachers.map(t=>String(t.code||'').trim()).filter(Boolean).sort((a,b)=>b.length-a.length);
+ for(const code of rosterCodes){
+  const q=code.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  if(new RegExp('(^|[^A-Za-z0-9])'+q+'(?=$|[^A-Za-z0-9])').test(entry))add(code);
+ }
+ if(exact.length)return exact;
+ if(Array.isArray(r.codes))r.codes.forEach(add);
+ if(Array.isArray(r.teacherCodes))r.teacherCodes.forEach(add);
+ [r.teacherCode,r.code].forEach(add);
+ return exact;
+}
+function teacherName(c){return master.teachers.find(t=>String(t.code||'').trim()===String(c||'').trim())?.name||c}
 function rows(){return master.records.map(r=>({Day:r.day||'',Period:Number(r.period)||'',Class:r.class||'',Assignment:r.entry||'',TeacherCodes:codesOf(r).join(', '),TeacherNames:codesOf(r).map(teacherName).join(', ')})).sort((a,b)=>String(a.Day).localeCompare(String(b.Day))||a.Period-b.Period||String(a.Class).localeCompare(String(b.Class)))}
 function render(){const a=rows();$('summary').innerHTML='<b>Session:</b> '+safe(masterDoc.session||master.session||'—')+' · <b>Teachers:</b> '+master.teachers.length+' · <b>Classes/Sections:</b> '+master.classes.length+' · <b>Timetable entries:</b> '+a.length;const cols=['Day','Period','Class','Assignment','TeacherCodes','TeacherNames'];$('preview').innerHTML='<table><thead><tr>'+cols.map(c=>'<th>'+safe(c)+'</th>').join('')+'</tr></thead><tbody>'+a.slice(0,150).map(r=>'<tr>'+cols.map(c=>'<td>'+safe(r[c])+'</td>').join('')+'</tr>').join('')+'</tbody></table>'}
 function msg(t,k='ok'){$('exportMsg').style.display='block';$('exportMsg').className='status '+k;$('exportMsg').textContent=t}

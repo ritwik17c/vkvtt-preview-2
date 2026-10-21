@@ -81,15 +81,34 @@
   }
   function statusClass(x){return isTemplate(x)&&templateApproved(x)?'published':String(x?.status||'draft').toLowerCase()}
 
+  function publishedDuplicateIds(){
+    const groups=new Map();
+    for(const x of records){
+      if(!timetablePublished(x))continue;
+      const key=String(x.name||'').trim().toLowerCase();
+      if(!key)continue;
+      if(!groups.has(key))groups.set(key,[]);
+      groups.get(key).push(x);
+    }
+    const ids=new Set();
+    for(const list of groups.values()){
+      if(list.length<2)continue;
+      const sorted=[...list].sort((a,b)=>Number(b.approvedAtMs||b.updatedAtMs||0)-Number(a.approvedAtMs||a.updatedAtMs||0));
+      for(const x of sorted.slice(1))ids.add(x.id);
+    }
+    return ids;
+  }
+
   function renderSchedules(){
     const host=$('examManagerSharedScheduleList');if(!host)return;
     const list=records.filter(isSchedule).sort((a,b)=>Number(b.updatedAtMs||b.createdAtMs||0)-Number(a.updatedAtMs||a.createdAtMs||0));
+    const duplicatePublished=publishedDuplicateIds();
     host.innerHTML=list.length?list.map(x=>{
       const status=String(x.status||'draft').toLowerCase(),own=x.ownerUid===user?.uid,c=scheduleCounts(x),canApprove=isAdmin()&&approvableStatus(x)&&c.papers>0;
       const openButton=isAdmin()?`<button class="button" data-library-open="${safe(x.id)}">Open</button>`:(own&&['draft','returned'].includes(status)?`<button class="button" data-library-open="${safe(x.id)}">Open</button>`:`<button class="button" data-library-view="${safe(x.id)}">View / Print</button>`);
       const approve=canApprove?`<button class="button primary" data-approve-timetable="${safe(x.id)}">Approve & Publish</button>`:'';
-      const del=isAdmin()&&!timetablePublished(x)?`<button class="button" style="border-color:#d99;color:#8f2525" data-library-delete="${safe(x.id)}" data-library-kind="timetable">Delete</button>`:'';
-      return `<div class="draftCard"><h4>${safe(x.name||'Untitled Examination Schedule')}</h4><p><span class="workflowPill ${safe(statusClass(x))}">${safe(statusLabel(x))}</span>${safe(fmtMs(x.updatedAtMs||x.createdAtMs))}</p><p>${c.papers} timetable assignment${c.papers===1?'':'s'} · ${c.duties} invigilation dut${c.duties===1?'y':'ies'}</p><p><small>Prepared by: ${safe(x.ownerName||x.ownerEmail||'Exam Manager')}${own?' · Your timetable':''}</small></p>${isAdmin()&&approvableStatus(x)&&!c.papers?'<div class="notice warn"><b>Approval unavailable:</b> no saved timetable assignments are present.</div>':''}<div class="buttonRow">${openButton}${timetablePublished(x)?`<button class="button primary" data-library-view="${safe(x.id)}">Print / View</button>`:''}${approve}${del}</div></div>`;
+      const amend=isAdmin()&&timetablePublished(x)?`<button class="button" data-amend-timetable="${safe(x.id)}">Amend Published Timetable</button>`:'';const del=isAdmin()&&(!timetablePublished(x)||duplicatePublished.has(x.id))?`<button class="button" style="border-color:#d99;color:#8f2525" data-library-delete="${safe(x.id)}" data-library-kind="timetable">${timetablePublished(x)?'Delete Duplicate':'Delete'}</button>`:'';
+      return `<div class="draftCard"><h4>${safe(x.name||'Untitled Examination Schedule')}</h4><p><span class="workflowPill ${safe(statusClass(x))}">${safe(statusLabel(x))}</span>${safe(fmtMs(x.updatedAtMs||x.createdAtMs))}</p><p>${c.papers} timetable assignment${c.papers===1?'':'s'} · ${c.duties} invigilation dut${c.duties===1?'y':'ies'}</p><p><small>Prepared by: ${safe(x.ownerName||x.ownerEmail||'Exam Manager')}${own?' · Your timetable':''}</small></p>${isAdmin()&&approvableStatus(x)&&!c.papers?'<div class="notice warn"><b>Approval unavailable:</b> no saved timetable assignments are present.</div>':''}<div class="buttonRow">${openButton}${timetablePublished(x)?`<button class="button primary" data-library-view="${safe(x.id)}">Print / View</button>`:''}${amend}${approve}${del}</div></div>`;
     }).join(''):'<div class="notice info">No saved examination timetable found.</div>';
   }
 
@@ -117,6 +136,22 @@
     try{
       const a=await api(),snap=await a.getDocs(a.collection(a.db,'examSchedules'));
       records=snap.docs.map(d=>({id:d.id,...d.data()})).filter(x=>x.id!=='EXAM_SUBJECT_MASTER'&&x.configOnly!==true);
+      const publishedNames=new Set(records.filter(x=>String(x.status||'').toLowerCase()==='published').map(x=>String(x.name||'').trim().toLowerCase()).filter(Boolean));
+      const revisionNewest=new Map();
+      for(const x of records){
+        const key=String(x.revisionOf||'');
+        if(!key)continue;
+        const prev=revisionNewest.get(key);
+        if(!prev||Number(x.updatedAtMs||x.createdAtMs||0)>Number(prev.updatedAtMs||prev.createdAtMs||0))revisionNewest.set(key,x);
+      }
+      records=records.filter(x=>{
+        const status=String(x.status||'draft').toLowerCase(),name=String(x.name||'').trim().toLowerCase();
+        if(x.revisionOf)return revisionNewest.get(String(x.revisionOf))?.id===x.id;
+        if(status==='draft'&&publishedNames.has(name))return false;
+        return true;
+      });
+      window.vkvExamSharedPublishedSchedules=records.filter(x=>String(x?.status||'').toLowerCase()==='published'&&x?.workspace&&((x.workspace?.timetable?.events?.length||0)||(x.workspace?.manualTimetable?.assignments?.length||x.manualTimetable?.assignments?.length||0)));
+      window.dispatchEvent(new CustomEvent('vkv-exam-shared-library-loaded',{detail:{publishedCount:window.vkvExamSharedPublishedSchedules.length}}));
       renderSchedules();renderTemplates();cleanupLegacyPanels();
     }catch(e){
       const sh=$('examManagerSharedScheduleList'),th=$('examTemplateApprovalList');
@@ -148,15 +183,59 @@
   async function approveTimetable(id){
     if(busy||!isAdmin())return;const item=records.find(x=>x.id===id);if(!item||!isSchedule(item)||!approvableStatus(item))return;
     const counts=scheduleCounts(item);if(!counts.papers){alert('This timetable cannot be approved because it contains no saved timetable assignments.');return}
-    if(!confirm(`Approve and publish “${item.name||'this examination timetable'}”?\n\nAfter approval it becomes read-only output for Exam Managers and the published examination schedule for staff.`))return;
+    const replacing=!!item.revisionOf;
+    const verb=replacing?'Replace the existing published timetable with this revision':'Approve and publish this examination timetable';
+    if(!confirm(verb+' “'+(item.name||'this examination timetable')+'”?\n\n'+(replacing?'The previous published version will be archived for audit, and only the revised timetable will remain in the published library.':'After approval it becomes read-only output for Exam Managers and the published examination schedule for staff.')))return;
     busy=true;try{
-      const a=await api(),now=Date.now(),published={schemaVersion:1,scheduleId:item.id,name:item.name||'Examination Schedule',description:item.description||'',workspace:clone(item.workspace),status:'published',approvedAtMs:now,approvedByUid:user.uid,approvedByName:profile?.name||user.displayName||user.email||'Principal',updatedAt:a.serverTimestamp()},batch=a.writeBatch(a.db);
-      batch.set(a.doc(a.db,'publishedExam','current'),published);
-      batch.set(a.doc(a.db,'examSchedules',item.id),{status:'published',approvedAtMs:now,approvedByUid:user.uid,approvedByEmail:user.email||'',updatedAtMs:now,updatedAt:a.serverTimestamp()},{merge:true});
-      await batch.commit();await load();
+      const a=await api(),now=Date.now(),batch=a.writeBatch(a.db);
+      let original=null;
+      if(replacing){
+        original=records.find(x=>x.id===item.revisionOf)||null;
+        const originalRef=a.doc(a.db,'examSchedules',item.revisionOf);
+        const published={schemaVersion:Number(item.schemaVersion||1),scheduleId:item.revisionOf,name:item.name||item.workspace?.name||'Examination Schedule',description:item.description||'',workspace:clone(item.workspace),status:'published',approvedAtMs:now,approvedByUid:user.uid,approvedByName:profile?.name||user.displayName||user.email||'Principal',updatedAt:a.serverTimestamp()};
+        batch.set(a.doc(a.db,'publishedExam','current'),published);
+        batch.set(originalRef,{
+          schemaVersion:Number(item.schemaVersion||1),
+          name:item.name||item.workspace?.name||'Examination Schedule',
+          description:item.description||'',
+          status:'published',
+          workspace:clone(item.workspace),
+          approvedAtMs:now,
+          approvedByUid:user.uid,
+          approvedByEmail:user.email||'',
+          revisedFromDraftId:item.id,
+          revisedAtMs:now,
+          updatedAtMs:now,
+          updatedAt:a.serverTimestamp()
+        },{merge:true});
+        batch.delete(a.doc(a.db,'examSchedules',item.id));
+      }else{
+        const published={schemaVersion:1,scheduleId:item.id,name:item.name||'Examination Schedule',description:item.description||'',workspace:clone(item.workspace),status:'published',approvedAtMs:now,approvedByUid:user.uid,approvedByName:profile?.name||user.displayName||user.email||'Principal',updatedAt:a.serverTimestamp()};
+        batch.set(a.doc(a.db,'publishedExam','current'),published);
+        batch.set(a.doc(a.db,'examSchedules',item.id),{status:'published',approvedAtMs:now,approvedByUid:user.uid,approvedByEmail:user.email||'',updatedAtMs:now,updatedAt:a.serverTimestamp()},{merge:true});
+      }
+      await batch.commit();
+      if(replacing&&original){
+        try{
+          const historyId=item.revisionOf+'_'+now;
+          await a.setDoc(a.doc(a.db,'examScheduleHistory',historyId),{
+            sourceScheduleId:item.revisionOf,
+            revisionDraftId:item.id,
+            name:original.name||item.name||'Examination Schedule',
+            description:original.description||'',
+            status:'superseded',
+            supersededAtMs:now,
+            supersededByUid:user.uid,
+            supersededByEmail:user.email||'',
+            previousApprovedAtMs:Number(original.approvedAtMs||0),
+            workspace:clone(original.workspace||{}),
+            archivedAt:a.serverTimestamp()
+          });
+        }catch(historyError){console.warn('Exam schedule history archive skipped:',historyError)}
+      }
+      await load();
     }catch(e){alert('Could not approve timetable: '+(e?.message||e))}finally{busy=false}
   }
-
   async function approveTemplate(id){
     if(busy||!isAdmin())return;const item=records.find(x=>x.id===id);if(!item||!isTemplate(item)||templateApproved(item))return;
     const c=templateCounts(item);if(!c.classes&&!c.subjects){alert('This template cannot be approved because it contains no reusable class/subject structure.');return}
@@ -164,10 +243,55 @@
     busy=true;try{const a=await api(),now=Date.now();await a.setDoc(a.doc(a.db,'examSchedules',item.id),{status:'approved',templateApproved:true,approvedAtMs:now,approvedByUid:user.uid,approvedByEmail:user.email||'',updatedAtMs:now,updatedAt:a.serverTimestamp()},{merge:true});await load()}catch(e){alert('Could not approve template: '+(e?.message||e))}finally{busy=false}
   }
 
+  async function startPublishedRevision(id){
+    if(busy||!isAdmin())return;
+    const item=records.find(x=>x.id===id);if(!item||!timetablePublished(item))return;
+    if(!confirm('Create an editable revision of “'+(item.name||'this published timetable')+'”?\n\nThe published original will remain unchanged until the revision is reviewed and published.'))return;
+    busy=true;
+    try{
+      const existing=records.filter(x=>String(x.revisionOf||'')===String(id)&&['draft','returned','submitted'].includes(String(x.status||'draft').toLowerCase())).sort((a,b)=>Number(b.updatedAtMs||b.createdAtMs||0)-Number(a.updatedAtMs||a.createdAtMs||0))[0];
+      if(existing){
+        if(window.vkvExamOpenCloudWorkspace)await window.vkvExamOpenCloudWorkspace(existing.id);else openCore(existing.id);
+        return;
+      }
+      const a=await api(),now=Date.now(),revisionId='REV_'+String(id).replace(/[^A-Za-z0-9_-]+/g,'_')+'_'+now;
+      const workspace=JSON.parse(JSON.stringify(item.workspace||{}));
+      await a.setDoc(a.doc(a.db,'examSchedules',revisionId),{
+        schemaVersion:Number(item.schemaVersion||1),
+        name:item.name||workspace.name||'Examination Schedule',
+        description:item.description||workspace.description||'',
+        status:'draft',
+        revisionOf:id,
+        revisionOfPublishedAtMs:Number(item.approvedAtMs||0),
+        revisionReason:'Published timetable amendment',
+        workspace,
+        ownerUid:user.uid,
+        ownerName:profile?.name||user.displayName||user.email||'Principal',
+        ownerEmail:user.email||'',
+        createdAtMs:now,
+        updatedAtMs:now,
+        updatedAt:a.serverTimestamp()
+      });
+      await load();
+      if(window.vkvExamOpenCloudWorkspace)await window.vkvExamOpenCloudWorkspace(revisionId);else setTimeout(()=>openCore(revisionId),120);
+    }catch(e){alert('Could not create timetable revision: '+(e?.message||e))}
+    finally{busy=false}
+  }
   async function removeRecord(id,kind){
-    if(busy||!isAdmin())return;const item=records.find(x=>x.id===id);if(!item)return;if(kind==='timetable'&&timetablePublished(item)){alert('Published timetables are protected from deletion in the production interface.');return}
-    const label=kind==='template'?'template':'saved timetable';if(!confirm(`ADMIN-ONLY ACTION\n\nDelete ${label} “${item.name||id}”?\n\nThis is permanent and cannot be undone.`))return;
-    busy=true;try{const a=await api();await a.deleteDoc(a.doc(a.db,'examSchedules',id));await load()}catch(e){alert('Could not delete '+label+': '+(e?.message||e))}finally{busy=false}
+    if(busy||!isAdmin())return;
+    const item=records.find(x=>x.id===id);if(!item)return;
+    const duplicatePublished=publishedDuplicateIds();
+    if(kind==='timetable'&&timetablePublished(item)&&!duplicatePublished.has(id)){alert('The only/current published timetable is protected from deletion.');return}
+    const isDup=kind==='timetable'&&timetablePublished(item)&&duplicatePublished.has(id);
+    const label=isDup?'duplicate published timetable':(kind==='template'?'template':'saved timetable');
+    if(!confirm('ADMIN-ONLY ACTION\n\nDelete '+label+' “'+(item.name||id)+'”?\n\n'+(isDup?'Another published timetable with the same title will remain. ':'')+'This is permanent and cannot be undone.'))return;
+    busy=true;try{
+      window.vkvExamDetachDeletedCloudWorkspace?.(id);
+      document.dispatchEvent(new CustomEvent('vkv-exam-cloud-deleted',{detail:{id}}));
+      const a=await api();
+      await a.deleteDoc(a.doc(a.db,'examSchedules',id));
+      await load();
+    }catch(e){alert('Could not delete '+label+': '+(e?.message||e))}finally{busy=false}
   }
 
   function openCore(id){
@@ -179,6 +303,7 @@
     if(e.target.closest?.('#refreshExamManagerSharedLibrary')){load();return}
     let b=e.target.closest?.('[data-library-open]');if(b){openCore(b.dataset.libraryOpen);return}
     b=e.target.closest?.('[data-library-view]');if(b){viewPrint(records.find(x=>x.id===b.dataset.libraryView));return}
+    b=e.target.closest?.('[data-amend-timetable]');if(b){startPublishedRevision(b.dataset.amendTimetable);return}
     b=e.target.closest?.('[data-approve-timetable]');if(b){approveTimetable(b.dataset.approveTimetable);return}
     b=e.target.closest?.('[data-approve-template]');if(b){approveTemplate(b.dataset.approveTemplate);return}
     b=e.target.closest?.('[data-library-delete]');if(b){removeRecord(b.dataset.libraryDelete,b.dataset.libraryKind);return}

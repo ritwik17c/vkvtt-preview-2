@@ -1,15 +1,15 @@
-/* VKVTT shared black + saffron screen theme.
+/* VKVTT shared deep-navy + saffron screen theme.
    Presentation only. Official print output remains white/black. */
 :root{
-  --vkv-screen-bg:#090a0a;
-  --vkv-screen-panel:#131414;
-  --vkv-screen-panel2:#181817;
-  --vkv-screen-line:#3a382f;
+  --vkv-screen-bg:#0c1720;
+  --vkv-screen-panel:#152630;
+  --vkv-screen-panel2:#1b303b;
+  --vkv-screen-line:#34505d;
   --vkv-screen-line2:#5c4b17;
   --vkv-screen-gold:#f2c335;
   --vkv-screen-gold2:#d9a91c;
   --vkv-screen-cream:#f6f2e8;
-  --vkv-screen-muted:#aaa79f;
+  --vkv-screen-muted:#a8bdc8;
   --vkv-card-gold:#e8bd3d;
   --vkv-card-gold-soft:#f0cf69;
   --vkv-card-ink:#17130b;
@@ -18,30 +18,35 @@
 @media screen{
   html{color-scheme:dark}
   body,html.v66-ui body{
-    background:radial-gradient(circle at 88% 2%,rgba(242,195,53,.07),transparent 26rem),linear-gradient(180deg,#0b0c0c,#080909 68%,#060707)!important;
+    background:radial-gradient(circle at 88% 2%,rgba(242,195,53,.07),transparent 26rem),linear-gradient(180deg,#0c1720,#0b1a24 68%,#09141c)!important;
     color:var(--vkv-screen-cream)!important;
   }
+  body .accountbar{
+    background:#152630!important;
+    color:var(--vkv-screen-cream)!important;
+    border-color:var(--vkv-screen-line)!important;
+  }
   body>header,html.v66-ui body>header:not(.topbar),.topbar{
-    background:linear-gradient(135deg,#111212 0%,#161713 58%,#211b0d 100%)!important;
+    background:linear-gradient(135deg,#123d58 0%,#176f9b 72%,#0f766e 100%)!important;
     color:#fff!important;
     border-color:var(--vkv-screen-line2)!important;
     box-shadow:0 10px 28px rgba(0,0,0,.26)!important;
   }
   body h1,body h2,body h3,body h4,body h5,body h6,body legend,body strong{color:#fffaf0!important}
   body p{color:#ddd7ca}
-  body .card,body .panel,body .view,body .surface,body .gateCard,body .workspaceBadge,body .summaryCard,body .metric,body .tile,body .qcard,body .currentBox,body .replacementItem,body .historyItem,body .resultbox,body .tableWrap,body .tablewrap,body .table-wrap,body .table-shell,body .draftCard,body .outputCard,body .reviewCard,
+  body .card,body .panel,body .view,body .surface,body .gateCard,body .loginbox,body .workspaceBadge,body .summaryCard,body .metric,body .tile,body .qcard,body .currentBox,body .replacementItem,body .historyItem,body .resultbox,body .tableWrap,body .tablewrap,body .table-wrap,body .table-shell,body .draftCard,body .outputCard,body .reviewCard,
   html.v66-ui body .card,html.v66-ui body .panel,html.v66-ui body .view,html.v66-ui body .tile{
-    background:linear-gradient(145deg,#151616,#111212)!important;
+    background:linear-gradient(145deg,#152630,#13242e)!important;
     color:var(--vkv-screen-cream)!important;
     border-color:var(--vkv-screen-line)!important;
     box-shadow:0 8px 22px rgba(0,0,0,.18)!important;
   }
   body .hero,body .schedule,body .tip,body .notice.info,body .info,body .warning,body .hardRule,body .adminWorkspaceHero{
-    background:linear-gradient(145deg,#171611,#201b0e)!important;
+    background:linear-gradient(145deg,#18313b,#193b48)!important;
     color:#e9e0c9!important;
     border-color:var(--vkv-screen-line2)!important;
   }
-  body .notice,body .status{background:#131414!important;color:var(--vkv-screen-cream)!important;border-color:var(--vkv-screen-line)!important}
+  body .notice,body .status{background:#152630!important;color:var(--vkv-screen-cream)!important;border-color:var(--vkv-screen-line)!important}
   body .ok,body .green,body .notice.success{background:#102016!important;color:#a9dbb5!important;border-color:#315d3c!important}
   body .error,body .danger,body .notice.error{background:#261313!important;color:#f0b7b7!important;border-color:#713939!important}
   body .eyebrow,body .v66-eyebrow,body .noticeHead,body .num,body .adminWorkspaceCopy .eyebrow{color:var(--vkv-screen-gold)!important}
@@ -49,12 +54,15 @@
   body .adminWorkspaceCopy strong{color:#fffaf0!important}
   body button,body .btn,body a.btn,body .button,body .navButton,
   html.v66-ui body button,html.v66-ui body .btn{
-    background:#171817!important;
+    background:#1b303b!important;
     color:var(--vkv-screen-cream)!important;
-    border-color:#5a5648!important;
+    border-color:#496675!important;
     box-shadow:none!important;
   }
-  body button:hover,body .btn:hover,body a.btn:hover,body .button:hover,body .navButton:hover{background:#211f18!important;border-color:#8b7426!important}
+  body button:hover,body .btn:hover,body a.btn:hover,body .button:hover,body .navButton:hover{background:#244655!important;border-color:#8b7426!important}
+  body button:active,body .btn:active,body a.btn:active,body .button:active,body .navButton:active{
+    background:#2d5364!important;color:#fffaf0!important;border-color:#d9a91c!important;
+  }
   body button.primary,body .primary,body .button.primary,body .tabs button.active,body .navButton.active,body [aria-pressed="true"],
   html.v66-ui body button.primary,html.v66-ui body .btn.primary{
     background:var(--vkv-screen-gold)!important;
@@ -62,39 +70,335 @@
     border-color:var(--vkv-screen-gold)!important;
     outline-color:var(--vkv-screen-gold)!important;
   }
-  body input,body select,body textarea,html.v66-ui body input,html.v66-ui body select,html.v66-ui body textarea{background:#101111!important;color:var(--vkv-screen-cream)!important;border-color:#4a4638!important}
-  body input::placeholder,body textarea::placeholder{color:#77736c!important}
-  body option{background:#101111;color:var(--vkv-screen-cream)}
+  body button.primary:active,body .primary:active,body .button.primary:active,
+  body .tabs button.active:active,body .navButton.active:active,body [aria-pressed="true"]:active{
+    background:#d9a91c!important;color:#15130b!important;border-color:#f2c335!important;
+  }
+  body :is(a,button,input,select,textarea,[tabindex]):focus-visible{
+    outline:3px solid #f2c335!important;outline-offset:2px!important;
+  }
+  body :is(button,.btn,.button,.navButton,input,select,textarea):disabled,
+  body :is(button,.btn,.button,.navButton)[aria-disabled="true"]{
+    background:#10212a!important;color:#91a6b0!important;border-color:#42606f!important;
+    opacity:1!important;box-shadow:none!important;cursor:not-allowed!important;
+    transform:none!important;filter:none!important;
+  }
+  body :is(button,.btn,.button,.navButton):disabled *,
+  body :is(button,.btn,.button,.navButton)[aria-disabled="true"] *{color:#91a6b0!important}
+  body input,body select,body textarea,html.v66-ui body input,html.v66-ui body select,html.v66-ui body textarea{background:#0d1b24!important;color:var(--vkv-screen-cream)!important;border-color:#42606f!important}
+  body input::placeholder,body textarea::placeholder{color:#78909c!important}
+  body option{background:#0d1b24;color:var(--vkv-screen-cream)}
   body input[type="checkbox"],body input[type="radio"]{accent-color:var(--vkv-screen-gold2)}
-  body .tableWrap,body .tablewrap,body .table-wrap,body .table-shell{background:#111212!important}
-  body table,html.v66-ui body table{background:#121313!important;color:#eee9dd!important}
-  body th,html.v66-ui body th{background:#1d1c17!important;color:#f4d566!important;border-color:#34322c!important}
-  body td,html.v66-ui body td{background:#121313!important;color:#eee9dd!important;border-color:#302f2a!important}
-  body tr:hover td{background:#181817!important}
+  body .tableWrap,body .tablewrap,body .table-wrap,body .table-shell{background:#13242e!important}
+  body table,html.v66-ui body table{background:#10212a!important;color:#eee9dd!important}
+  body th,html.v66-ui body th{background:#1b3644!important;color:#f4d566!important;border-color:#34505d!important}
+  body td,html.v66-ui body td{background:#10212a!important;color:#eee9dd!important;border-color:#2c4552!important}
+  body tr:hover td{background:#1b303b!important}
   body a{color:#f0cd58}
+  body a:not(.btn):visited{color:#e0bb49}
+  body :is([aria-selected="true"],[aria-current="page"],option:checked){
+    background:#d9a91c!important;color:#15130b!important;border-color:#f2c335!important;
+  }
+  body :is([aria-selected="true"],[aria-current="page"]) *{color:#15130b!important}
   body .badge,body .tag,body .chip,body .chips>*,body .pill{
     background:#282311!important;color:#f1d36c!important;border-color:#64531b!important;
   }
-  body .sidebar{background:#101111!important;border-color:#34322c!important}
+  body .sidebar{background:#0d1b24!important;border-color:#34505d!important}
   body .workspace{background:transparent!important}
   body .paneHead p,body .sectionTitle p{color:var(--vkv-screen-muted)!important}
-  body hr{border-color:#333128!important}
-  body .myGrid>button,body .nav>button,body .opsGrid>button{background:#151616!important;color:var(--vkv-screen-cream)!important;border-color:#4b4430!important;border-left-color:var(--vkv-screen-gold2)!important}
-  body .myGrid>button.active,body .nav>button.active,body .opsGrid>button.active{background:#211d10!important;color:#fffaf0!important;border-color:var(--vkv-screen-gold)!important}
+  body hr{border-color:#34505d!important}
+  /* Loading overlays are injected by legacy runtime code with pale surfaces.
+     Keep theme transitions inside the approved Deep Navy palette. */
+  body #vkvSlowLoader{background:rgba(12,23,32,.96)!important;color:#e7edf0!important}
+  body #vkvSwamijiLoader{background:rgba(12,23,32,.82)!important}
+  body #vkvSwamijiLoader .vkvLoaderCard{
+    background:#152630!important;border-color:#725d25!important;
+    box-shadow:0 12px 34px rgba(0,0,0,.3)!important;
+  }
+  body #vkvSwamijiLoader .vkvLoaderText{color:#e7edf0!important}
+  body .myGrid>button,body .nav>button,body .opsGrid>button{background:#152630!important;color:var(--vkv-screen-cream)!important;border-color:#496675!important;border-left-color:var(--vkv-screen-gold2)!important}
+  body .myGrid>button.active,body .nav>button.active,body .opsGrid>button.active{background:#203a47!important;color:#fffaf0!important;border-color:var(--vkv-screen-gold)!important}
   body.adminDashboardPage #dashboardHome{border-top-color:var(--vkv-screen-gold)!important}
   body .adminWorkspaceArt{filter:sepia(.4) brightness(1.35);opacity:.55!important}
 
   /* Legacy module surfaces that otherwise stayed pale inside the dark shell. */
   body .ruleCard,body .profile,body .timeItem,body .teacherChoice,body .item,
   body .visibility,body .leaveCalendarCard,body .needcard,body .proxycard{
-    background:linear-gradient(145deg,#171817,#121313)!important;
+    background:linear-gradient(145deg,#1b303b,#10212a)!important;
     color:var(--vkv-screen-cream)!important;
-    border-color:#484437!important;
+    border-color:#42606f!important;
   }
   body .ruleCard b,body .profile b,body .timeItem b,body .teacherChoice .name,body .item b,
   body .visibility strong,body .needcard b,body .proxycard b{color:#fff7dc!important}
-  body .profile span,body .visibility span,body .teacherChoice .meta,body .item .meta{color:#aaa79f!important}
-  body .profile.active,body .profile.selected{background:#211d10!important;border-color:#a78520!important;outline-color:#7c641e!important}
+  body .profile span,body .visibility span,body .teacherChoice .meta,body .item .meta{color:#a8bdc8!important}
+  body .profile:hover{background:#244655!important;border-color:#8b7426!important}
+  body .profile.active{background:#163524!important;color:#b9e5c7!important;border-color:#4e8c62!important}
+  body .profile.active b,body .profile.active span{color:#b9e5c7!important}
+  body .profile.selected{background:#203a47!important;border-color:#f2c335!important;outline:3px solid #f2c335!important;outline-offset:1px!important}
+  body .profile.active.selected{background:#163524!important;border-color:#f2c335!important}
+  body .teacherChoice:hover{background:#244655!important;border-color:#8b7426!important}
+  body .teacherChoice:focus-within{outline:3px solid #f2c335!important;outline-offset:2px!important}
+  body .teacherChoice:has(input:checked){background:#f2c335!important;color:#17130b!important;border-color:#f2c335!important}
+  body .teacherChoice:has(input:checked) .name,
+  body .teacherChoice:has(input:checked) .meta,
+  body .teacherChoice:has(input:checked) .code{color:#17130b!important}
+
+  /* Legacy Leave, Attendance and staff-generated panels. These components are
+     created after sign-in and otherwise retain pale inline backgrounds. */
+  body .req,body .legend,body .box,body .vkh-panel,body .vkh-row,body #hleEdit{
+    background:#152630!important;color:#f6f2e8!important;border-color:#42606f!important;
+  }
+  body .req .entry{border-color:#34505d!important;color:#e7edf0!important}
+  body .vkh-title,body .vkh-row b,body #hleEdit h3{color:#fff7dc!important}
+  body .vkh-help,body .vkh-empty,body .vkh-summary,body .vkh-row span,body .vkh-row small{color:#a8bdc8!important}
+  body .vkh-warn,body .warn{background:#392f16!important;color:#f2d88a!important;border-color:#725d25!important}
+  body .bad{color:#ffb5bd!important}
+  body tr.full td{background:#17314a!important;color:#e7edf0!important;border-color:#34505d!important}
+  body tr.half td{background:#3a2a1e!important;color:#f3e7d5!important;border-color:#5e4936!important}
+  body tr.full:hover td{background:#1e405b!important}
+  body tr.half:hover td{background:#493525!important}
+  body .cat[style*="--cl"]{color:#17130b!important}
+
+  /* Teacher-facing Question Bank enhancements inserted after initial render. */
+  body .qb-callout,body .qb-callout.tip,body .qb-mini-callout,
+  body #qbPreSubmitReview,body #qbDraftRecovery{
+    background:#152630!important;color:#e7edf0!important;border-color:#42606f!important;
+  }
+  body .qb-callout::after{background:#152630!important;border-color:#42606f!important}
+  body .qb-callout strong,body .qb-mini-callout strong,
+  body #qbPreSubmitReview b,body #qbDraftRecovery b{color:#fff7dc!important}
+  body .qb-callout.good,body #qbSubmissionReadiness[data-complete="5"]{
+    background:#163524!important;color:#b9e5c7!important;border-color:#326846!important;
+  }
+  body #qbSubmissionReadiness:not([data-complete="5"]),body #qbTeacherBulkImport .warning{
+    background:#392f16!important;color:#f2d88a!important;border-color:#725d25!important;
+  }
+  body #qbCorrectionPreview>div:not(.small):not(.actions){background:#10212a!important;color:#e7edf0!important;border-color:#42606f!important}
+  body #qbFeedbackComposer>div{background:#152630!important;color:#e7edf0!important;border:1px solid #42606f!important}
+  body #qbTeacherBulkImport tr.qbbi-bad td{background:#392f16!important;color:#f2d88a!important;border-color:#725d25!important}
+  body #qbTeacherBulkImport .qbbi-errors{color:#ffb5bd!important}
+  body .q,body .log,body .bulkbar,body #reviewList .history{
+    background:#152630!important;color:#e7edf0!important;border-color:#42606f!important;
+  }
+  body .q.selected{background:#203a47!important;color:#fff7dc!important;border-color:#f2c335!important;outline:2px solid #f2c335!important}
+  body .q.selected *,body .bulkbar strong{color:inherit!important}
+  body #reviewList .note,body #reviewList .ageWatch{
+    background:#392f16!important;color:#f2d88a!important;border:1px solid #725d25!important;
+  }
+  /* The legacy coordinator queue injects these badges at runtime. Preserve
+     fresh, ageing, overdue and resubmitted meanings after generic badge rules. */
+  body #reviewList .qbAgeBadge{
+    background:#163524!important;color:#b9e5c7!important;border:1px solid #326846!important;
+  }
+  body #reviewList .qbAgeBadge[style*="fff4d6"]{
+    background:#392f16!important;color:#f2d88a!important;border-color:#725d25!important;
+  }
+  body #reviewList .qbAgeBadge[style*="fdeaea"]{
+    background:#3a1c22!important;color:#ffb5bd!important;border-color:#713939!important;
+  }
+  body #reviewList .qbResubmittedBadge{
+    background:#14344a!important;color:#b9dcf0!important;border:1px solid #3e6f8c!important;
+  }
+  /* Preserve Question Bank workflow meaning as well as contrast. Generic
+     badge/button rules otherwise flatten fresh, watch and overdue states. */
+  body .bar a.coord{
+    background:#163524!important;color:#b9e5c7!important;border-color:#326846!important;
+  }
+  body .bar a.coord:hover{background:#1d4730!important;color:#b9e5c7!important;border-color:#4c855d!important}
+  body .bar a.coord:active{background:#22563a!important;color:#b9e5c7!important;border-color:#62a173!important}
+  body #work #list .ageFresh{
+    background:#163524!important;color:#b9e5c7!important;border:1px solid #326846!important;
+  }
+  body #work #list .ageWatch{
+    background:#392f16!important;color:#f2d88a!important;border:1px solid #725d25!important;
+  }
+  body #work #list .ageOld{
+    background:#3a1c22!important;color:#ffb5bd!important;border:1px solid #713939!important;
+  }
+  body #work #list .history{
+    background:#10212a!important;color:#e7edf0!important;border-color:#42606f!important;
+  }
+  body #work #list .history .note{
+    background:#392f16!important;color:#f2d88a!important;border:1px solid #725d25!important;
+  }
+  /* Exam timetable class/subject choices remain readable when deselected.
+     Selection is conveyed by surface, border and checkbox, not faded text. */
+  body .majorCard{
+    opacity:1!important;background:#152630!important;color:#e7edf0!important;border-color:#496675!important;
+  }
+  body .majorCard b{color:#fff7dc!important}
+  body .majorCard small{color:#a8bdc8!important}
+  body .majorCard:hover{background:#244655!important;border-color:#8b7426!important}
+  body .majorCard:focus-within{outline:3px solid #f2c335!important;outline-offset:2px!important}
+  body .majorCard.off{
+    opacity:1!important;background:#10212a!important;color:#c3d2d9!important;
+    border-color:#607985!important;border-style:dashed!important;
+  }
+  body .majorCard.off b,body .majorCard.off small{color:#c3d2d9!important}
+  body .majorCard:has(input:checked){
+    background:#203a47!important;color:#fff7dc!important;border-color:#f2c335!important;
+    outline:2px solid #f2c335!important;outline-offset:0!important;
+  }
+  body .majorCard:has(input:checked) b,body .majorCard:has(input:checked) small{color:#fff7dc!important}
+  body tr.bad td{background:#392f16!important;color:#f2d88a!important;border-color:#725d25!important}
+  /* QB subject mapping rows remain legible after exclusion and can still be
+     reviewed or re-enabled without relying on low whole-row opacity. */
+  body #rows tr.excluded{opacity:1!important}
+  body #rows tr.excluded td{
+    background:#1b303b!important;color:#c3d2d9!important;border-color:#607985!important;border-style:dashed!important;
+  }
+  body #rows tr.excluded input,body #rows tr.excluded label{color:#c3d2d9!important}
+
+  /* Class Observation and recurring-duty surfaces. Their page-local light
+     styles otherwise leave pale rows or near-black modal panels in Deep Navy. */
+  body .dutyRow,body .duty,body .modalBox,
+  body .summary>div,body .scores>div,body .feedback>div{
+    background:#152630!important;color:#f6f2e8!important;border-color:#42606f!important;
+  }
+  /* Leave Editor generates these nested cards after authentication. Keep
+     their text on an elevated navy surface instead of the legacy near-white. */
+  body .pendingCard,body .recordCard,body .toolCard,
+  body .rangeCard,body .staggerCard{
+    background:#152630!important;color:#f6f2e8!important;border-color:#42606f!important;
+  }
+  body .pendingCard .cardTitle,body .recordCard .cardTitle,
+  body .toolCard .modeLabel,body .rangeCard .modeLabel,
+  body .staggerCard .modeLabel{color:#fffaf0!important}
+  body .pendingCard .meta,body .recordCard .meta{color:#a8bdc8!important}
+  body .entryShell,body details.guide,body details.moreTools,
+  body .integrityMetric,body .rangeTotalBox,body .reconcileBar{
+    background:#152630!important;color:#f6f2e8!important;border-color:#42606f!important;
+  }
+  body details.guide summary,body details.moreTools summary,
+  body .integrityMetric b{color:#fffaf0!important}
+  body .integrityMetric span,body .reconcileDetail{color:#a8bdc8!important}
+  body .rangeTotalBox{color:#f2c335!important}
+  /* The Question Bank Teacher Guide is a printable paper on screen as well.
+     Deep Navy must not leave cream copy on its legacy white sheet or notes. */
+  body .paper{
+    background:#152630!important;color:#f6f2e8!important;border-color:#42606f!important;
+    box-shadow:0 8px 22px rgba(0,0,0,.18)!important;
+  }
+  body .paper h2{border-color:#42606f!important}
+  body .paper .note{
+    background:#163524!important;color:#b9e5c7!important;border-color:#326846!important;
+  }
+  body .paper .flow{color:#f2c335!important}
+  body .paper .muted{color:#a8bdc8!important}
+  body .daychip,body .scorebar span{
+    background:#1b303b!important;color:#f6f2e8!important;border-color:#496675!important;
+  }
+  body .daychip:hover{background:#244655!important;color:#fffaf0!important;border-color:#8b7426!important}
+  body .daychip:focus-within{outline:3px solid #f2c335!important;outline-offset:2px!important}
+  body .daychip:has(input:checked),body .scorebar input:checked+span{
+    background:#f2c335!important;color:#17130b!important;border-color:#f2c335!important;
+  }
+  body .daychip:has(input:checked) *,body .scorebar input:checked+span *{color:#17130b!important}
+  body .card>.help{background:#18313b!important;color:#c3d2d9!important;border-color:#a78520!important}
+  body .proxyNote{color:#a8bdc8!important}
+  body .proxyOn{color:#9edbb1!important}
+  body .criterion,body .guideTable th,body .guideTable td,body .ratings th,body .ratings td{border-color:#42606f!important}
+  body .sectionTitle{background:#10212a!important;color:#fff7dc!important}
+  body .modal{background:rgba(7,18,27,.84)!important}
+
+  /* Administrative access, export and notice-board utility surfaces. */
+  body .permissionBox,body .permission,body .attachmentBox,body .exportCard{
+    background:#152630!important;color:#f6f2e8!important;border-color:#42606f!important;
+  }
+  body .permissionBox label,body .permission label,body .attachmentName,body .exportCard b{color:#fff7dc!important}
+  body .exportCard span,body .attachmentBox .meta{color:#a8bdc8!important}
+  body .exportCard:hover,body .exportCard:focus-within{background:#1b303b!important;border-color:#a78520!important}
+  body .fileChip,body a.fileChip:visited{
+    background:#1b303b!important;color:#f0cd58!important;border-color:#496675!important;
+  }
+  body .fileChip:hover,body .fileChip:active{background:#2d5364!important;color:#fff7dc!important;border-color:#d9a91c!important}
+  body .pill.good{background:#163524!important;color:#b9e5c7!important;border-color:#326846!important}
+  body .pill.bad,body .pill.leaveEditor,body .leaveEditor{background:#392f16!important;color:#f2d88a!important;border-color:#725d25!important}
+  body input[type="file"]::file-selector-button{background:#1b303b;color:#f6f2e8;border:1px solid #496675;border-radius:8px;padding:7px 9px}
+  body input[type="file"]::file-selector-button:hover{background:#244655;color:#fffaf0;border-color:#8b7426}
+  body .attachmentPreview img{background:#0d1b24!important;border-color:#42606f!important}
+
+  /* Leave Import reconciliation workspace generated after workbook preview. */
+  body .importTop,body .reviewGroup,body .reconcile,body .assistToolbar{
+    background:#152630!important;color:#f6f2e8!important;border-color:#42606f!important;
+  }
+  body .sourcePane,body .reconcileGrid>div,body .assistBox,body .auditSummary{
+    background:#10212a!important;color:#e7edf0!important;border-color:#42606f!important;
+  }
+  body .sourcePane b,body .assistBox strong,body .reconcileGrid b{color:#fff7dc!important}
+  body .sourceLine,body .auditMeta,body .auditList,body .progressNote{color:#a8bdc8!important}
+  body .reviewGroupSummary::after{color:#f2c335!important}
+  body .auditBox{background:#163524!important;color:#b9e5c7!important;border-color:#326846!important}
+  body .auditHead strong,body .auditSummary summary{color:#b9e5c7!important}
+  body .reviewCard.resolved{background:#163524!important;color:#b9e5c7!important;border-color:#326846!important}
+  body .reviewCard.excluded{background:#1b303b!important;color:#c3d2d9!important;border-color:#496675!important}
+  body .badge.ready,body .confidence.confHigh{background:#163524!important;color:#b9e5c7!important;border-color:#326846!important}
+  body .badge.warning,body .confidence.confMed{background:#392f16!important;color:#f2d88a!important;border-color:#725d25!important}
+  body .badge.duplicate{background:#1b303b!important;color:#c3d2d9!important;border-color:#496675!important}
+  body .badge.invalid{background:#3a1c22!important;color:#ffb5bd!important;border-color:#713939!important}
+  body .problemTag{background:#1b303b!important;color:#c3d2d9!important;border-color:#496675!important}
+  body .filterBtn.active,body .halfChip.selected{background:#f2c335!important;color:#17130b!important;border-color:#f2c335!important}
+  body .filterBtn.active:active,body .halfChip.selected:active{background:#d9a91c!important;color:#17130b!important;border-color:#f2c335!important}
+
+  /* Timetable Studio workspace and data-generated visual editor. */
+  body .workspaceSummary,body .heroCard:not(.activeMaster),body .componentSection,
+  body .resultPanel,body .activationPanel,body .versionCard,body .entityCard,
+  body .allocationCard,body .generateHero,body .runItem,body .editorToolbar,
+  body .timetableWrap,body .modalCard{
+    background:#152630!important;color:#f6f2e8!important;border-color:#42606f!important;
+  }
+  body .sidebarNote,body .emptyState,body .resultMetric,body .scoreBoard>div,
+  body .componentSection summary,body .issue{
+    background:#1b303b!important;color:#e7edf0!important;border-color:#496675!important;
+  }
+  body .checkGrid label:hover{background:#244655!important;color:#fffaf0!important}
+  body .surface output{background:#1b303b!important;color:#f2c335!important}
+  body .ring{background:radial-gradient(circle at center,#152630 58%,transparent 59%),conic-gradient(#42a5c6 var(--progress),#34505d 0)!important;border-color:#42606f!important}
+  body .dropCell,body .periodCell{background:#10212a!important;color:#a8bdc8!important;border-color:#34505d!important}
+  body .dropCell:hover,body .dropCell.dragOver{background:#244655!important;box-shadow:inset 0 0 0 2px #f2c335!important}
+  body .lessonCard,body .unplacedCard{background:#1b303b!important;color:#f6f2e8!important;border-color:#496675!important}
+  body .lessonCard h4,body .lessonCard p,body .unplacedCard strong,body .unplacedCard span{color:inherit!important}
+  body .lessonCard.selected,body .unplacedCard.selected{background:#203a47!important;outline:3px solid #f2c335!important;border-color:#f2c335!important}
+  body .versionCard.activeVersion{background:#203a47!important;border-color:#f2c335!important;box-shadow:0 0 0 2px rgba(242,195,53,.18)!important}
+  body .dropCell.invalid,body .lessonCard.conflict,body .issue.error{background:#3a1c22!important;color:#ffb5bd!important;border-color:#713939!important}
+  body .issue.warn{background:#392f16!important;color:#f2d88a!important;border-color:#725d25!important}
+  body .issue.warn p,body .issue.error p{color:inherit!important}
+  body .statusPill,body .countPill{background:#1b303b!important;color:#c3d2d9!important;border:1px solid #496675!important}
+  body .statusPill.ready{background:#163524!important;color:#b9e5c7!important;border-color:#326846!important}
+  body .statusPill.draft,body .statusPill.unsaved{background:#392f16!important;color:#f2d88a!important;border-color:#725d25!important}
+  body .statusPill.active{background:#203a47!important;color:#f2d88a!important;border-color:#a78520!important}
+
+  /* Proxy Manager calendar, assignment and post-click operational states. */
+  body .calendarGrid .calDay{
+    background:#1b303b!important;color:#f6f2e8!important;border-color:#496675!important;
+  }
+  body .calendarGrid .calDay:hover{background:#244655!important;color:#fffaf0!important;border-color:#8b7426!important}
+  body .calendarGrid .calDay.selected{background:#f2c335!important;color:#17130b!important;border-color:#f2c335!important}
+  body .calendarGrid .calDay.selected:active{background:#d9a91c!important;color:#17130b!important;border-color:#f2c335!important}
+  body .calendarGrid .calDay.sun{background:#10212a!important;color:#91a6b0!important;border-color:#42606f!important}
+  body .calendarGrid .calDay.today{outline:2px solid #f2c335!important}
+  body .calendarGrid .calDay.rangeEdge{box-shadow:inset 0 0 0 2px #fff7dc!important}
+  body .calendarGrid .calDay:disabled{background:#10212a!important;color:#91a6b0!important;border-color:#42606f!important;opacity:1!important}
+  body .leaveBtns button.active,body .leaveDateModes button.active,body .durationBtns button.active{
+    background:#f2c335!important;color:#17130b!important;border-color:#f2c335!important;
+  }
+  body .leaveBtns button.active:active,body .leaveDateModes button.active:active,body .durationBtns button.active:active{
+    background:#d9a91c!important;color:#17130b!important;border-color:#f2c335!important;
+  }
+  body .disabledBox{opacity:1!important;border-style:dashed!important}
+  body .teacherpick{background:#152630!important;color:#f6f2e8!important;border-color:#42606f!important}
+  body .teacherpick.assigned,body .needcard.done{background:#163524!important;color:#b9e5c7!important;border-color:#326846!important}
+  body .supervisionTag,body .draftNote,body .activeScheduleBanner.custom{background:#392f16!important;color:#f2d88a!important;border-color:#725d25!important}
+  body .activeScheduleBanner{background:#152630!important;color:#e7edf0!important;border-color:#42606f!important}
+  body .copymsg,body .load{color:#a8bdc8!important}
+
+  /* Attendance diagnostics and leave-audit details. */
+  body .item .meta>div,body .item .record{
+    background:#10212a!important;color:#e7edf0!important;border-color:#42606f!important;
+  }
+  body .badge.test{background:#3a1c22!important;color:#ffb5bd!important;border-color:#713939!important}
+  body .ruleCard.inactive{background:#10212a!important;color:#91a6b0!important;border-style:dashed!important;opacity:1!important}
+  body .ruleCard.inactive b,body .ruleCard.inactive strong{color:#c3d2d9!important}
 
   /* Admin dashboard launcher cards: deliberate warm gold with dark readable copy. */
   body.adminDashboardPage .tile,
@@ -119,9 +423,9 @@
   /* Common contrast repairs for legacy semantic pills/cards. */
   body .statusChip,body .status-chip,body .categoryBadge,body .category-badge,
   body .pill.light,body .badge.light,body .tag.light{color:#19160d!important}
-  body .timeItem,body .periodCard,body .period-card{background:#181817!important;color:#f6f2e8!important;border-color:#5a5133!important}
+  body .timeItem,body .periodCard,body .period-card{background:#1b303b!important;color:#f6f2e8!important;border-color:#5a5133!important}
   body .timeItem label,body .periodCard label,body .period-card label{color:#cfc8b8!important}
-  body .timeItem input,body .periodCard input,body .period-card input{background:#0f1010!important;color:#fff!important;border-color:#655820!important}
+  body .timeItem input,body .periodCard input,body .period-card input{background:#0d1b24!important;color:#fff!important;border-color:#5f6f76!important}
   body .goldCard,body .gold-card,body .warmCard,body .warm-card{background:linear-gradient(145deg,#f0cf69,#e8bd3d)!important;color:#17130b!important;border-color:#b78d13!important}
   body .goldCard *,body .gold-card *,body .warmCard *,body .warm-card *{color:#17130b!important}
 

@@ -1,6 +1,7 @@
 import './vkv-qb-admin-pending-age.js?v=20260830-1';
 import './vkv-qb-admin-coordinator-report.js?v=20260831-pending-bands-2';
 import './vkv-qb-admin-verified-contribution.js?v=20260831-principal-context-3';
+import './vkv-qb-admin-qualitative-leaderboard.js?v=20260913-quality-1';
 import{getApps,getApp}from'https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js';
 import{getFirestore,doc,getDoc,collection,query,where,getCountFromServer}from'https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js';
 const wait=ms=>new Promise(r=>setTimeout(r,ms)),norm=s=>String(s||'').trim().toLowerCase(),txt=s=>String(s||'').trim();
