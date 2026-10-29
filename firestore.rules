@@ -205,6 +205,14 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // Archive of superseded published examination timetables.
+    // Written only when the Principal/Admin approves a revision.
+    // Archived versions are permanent: no edits, no deletions.
+    match /examScheduleHistory/{historyId} {
+      allow read, create: if isAdmin();
+      allow update, delete: if false;
+    }
+
     match /dailyRecords/{date} {
       allow get: if canReadSchool()
                  || (uidActive() && uidRole() in ['admin', 'manager', 'proxy_manager']);

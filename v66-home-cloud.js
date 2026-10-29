@@ -513,6 +513,9 @@ function applyRoleUI(){
  window.__vkvRole=String(currentProfile&&currentProfile.role||'teacher');
 
  const role=window.__vkvRole;
+ // Leave category and leave notes are visible only to Principal/Admin, Managers and Leave Editors
+ // (everyone still sees their own). Proxy Managers and other staff see type, dates and periods.
+ window.__vkvLeaveDetailsAllowed=['admin','manager','leave_editor'].includes(role)||!!(currentProfile&&currentProfile.permissions&&currentProfile.permissions.leaveEditor===true);
  const statusAllowed=canEditStatus();
  const proxyAllowed=canManageProxy();
  const refreshProvisionalProxyBtn=document.getElementById('refreshProvisionalProxyBtn');

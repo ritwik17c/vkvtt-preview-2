@@ -116,8 +116,12 @@
       return t?(t.name||t.tempName||code):(code||'Staff');
     };
     const kind=x=>String(x.type||x.kind||'').toLowerCase();
+    // Leave category and leave notes: Principal/Admin, Managers, Leave Editors, or the teacher's own entry.
+    const detailsVisible=x=>window.__vkvLeaveDetailsAllowed===true||(!!String(window.__vkvMyTeacherCode||'').trim()&&String(x&&x.code||'').trim()===String(window.__vkvMyTeacherCode||'').trim());
+    const isLeaveKind=x=>kind(x)==='full'||kind(x)==='half';
+    const noteOf=x=>(!isLeaveKind(x)||detailsVisible(x))?(x.note||x.remarks||''):'';
     const label=x=>{
-      const k=kind(x),cat=x.category||x.leaveCategory||'';
+      const k=kind(x),cat=detailsVisible(x)?(x.category||x.leaveCategory||''):'';
       if(k==='full')return 'Full Leave'+(cat?' · '+cat:'');
       if(k==='half')return 'Half Leave'+(cat?' · '+cat:'');
       if(k==='od')return 'On Duty';
@@ -143,7 +147,7 @@
         const d=plansSnap.data()||{};Object.values(d.plans||{}).forEach(p=>{if(covers(p,date))rows.push({...p,_source:'scheduled'})});
       }
       const clean=dedupe(rows),leave=clean.filter(x=>group(x)==='leave'),duty=clean.filter(x=>group(x)==='duty'),vacant=clean.filter(x=>group(x)==='vacant');
-      const fmt=a=>a.length?a.map(x=>`<div class="v662-history-item"><b>${esc(teacherName(x.code))}</b> <span>${esc(x.code||'')}</span> · ${esc(label(x))}${x.note||x.remarks?` · ${esc(x.note||x.remarks)}`:''}</div>`).join(''):'<div class="v662-none">None</div>';
+      const fmt=a=>a.length?a.map(x=>`<div class="v662-history-item"><b>${esc(teacherName(x.code))}</b> <span>${esc(x.code||'')}</span> · ${esc(label(x))}${noteOf(x)?` · ${esc(noteOf(x))}`:''}</div>`).join(''):'<div class="v662-none">None</div>';
       const block=`<div class="v662-authoritative-history"><h3>Regular Leave</h3>${fmt(leave)}<h3>Duty Leave · OD / Special Assignment</h3>${fmt(duty)}<h3>Operational Status · Vacant Position</h3>${fmt(vacant)}</div>`;
       const host=document.getElementById('historyResult');if(!host)return;
       let heading=[...host.querySelectorAll('h2,h3,h4,strong')].find(n=>/Leave\s*\/\s*OD\s*\/\s*Special Assignment\s*\/\s*Vacant/i.test(n.textContent||''));
