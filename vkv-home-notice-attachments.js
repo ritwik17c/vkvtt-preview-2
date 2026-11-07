@@ -62,7 +62,7 @@ if(app){
       if(!url){
         box.innerHTML=`<span style="display:inline-block;padding:8px 11px;border:1px dashed rgba(201,162,74,.9);border-radius:9px;background:rgba(201,162,74,.10);color:inherit;font-weight:700">${icon} ${esc(att.name||'Attachment')} · could not be loaded (${esc(failure)}). Please reload the page; if this continues, inform the office.</span>`;
       }else if(att.kind==='image'){
-        box.innerHTML=`<a href="${esc(url)}" target="_blank" rel="noopener" style="display:inline-block"><img src="${esc(url)}" alt="${esc(att.name||'Notice attachment')}" style="display:block;max-width:min(100%,420px);max-height:320px;object-fit:contain;border:1px solid #decf9d;border-radius:10px;background:#fff"></a><div style="font-size:.78rem;color:inherit;opacity:.8;margin-top:4px">🖼 ${esc(att.name||'Image attachment')}</div>`;
+        box.innerHTML=`<a href="${esc(url)}" target="_blank" rel="noopener" style="display:block"><img src="${esc(url)}" alt="${esc(att.name||'Notice attachment')}" style="display:block;width:100%;max-width:100%;height:auto;object-fit:contain;border:1px solid #decf9d;border-radius:10px;background:#fff"></a><div style="font-size:.78rem;color:inherit;opacity:.8;margin-top:4px">🖼 ${esc(att.name||'Image attachment')}</div>`;
       }else{
         box.innerHTML=`<a href="${esc(url)}" target="_blank" rel="noopener" style="display:inline-block;padding:8px 11px;border:1px solid rgba(201,162,74,.85);border-radius:9px;background:rgba(201,162,74,.14);color:inherit;text-decoration:none;font-weight:800">📄 Open PDF · ${esc(att.name||'Attachment')}</a>`;
       }
