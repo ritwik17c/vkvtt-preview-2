@@ -40,26 +40,33 @@ if(app){
 
   async function addAttachments(host,notices){
     const items=[...host.querySelectorAll(':scope > .noticeItem')];
-    for(const n of notices){
+    await Promise.all(notices.map(async n=>{
       const att=n.attachment;
-      if(!att?.path)continue;
+      if(!att?.path)return;
       const item=items.find(x=>x.dataset.manualNoticeId===String(n.id||''))||items.find(x=>cleanTitle(x.querySelector('.noticeTitle')?.textContent)===String(n.title||'').trim());
-      if(!item||item.querySelector('[data-notice-attachment]'))continue;
-      let url='',failure='';
-      try{url=await getDownloadURL(storageRef(storage,att.path))}catch(e){failure=String(e?.code||e?.message||e||'unknown error');console.warn('Staff notice attachment could not be loaded:',att.path,e)}
+      if(!item||item.querySelector('[data-notice-attachment]'))return;
+      // Show the attachment straight away, then fill in the link (or the reason it failed).
       const box=document.createElement('div');
       box.dataset.noticeAttachment='1';
       box.style.marginTop='9px';
+      const icon=att.kind==='image'?'🖼':'📄';
+      box.innerHTML=`<span style="display:inline-block;padding:8px 11px;border:1px solid #d6c58a;border-radius:9px;background:#fff;color:#6c6043;font-weight:700">${icon} ${esc(att.name||'Attachment')} · loading…</span>`;
+      item.appendChild(box);
+      let url='',failure='';
+      try{
+        url=await Promise.race([
+          getDownloadURL(storageRef(storage,att.path)),
+          new Promise((_,reject)=>setTimeout(()=>reject(new Error('timed out after 15 seconds')),15000))
+        ]);
+      }catch(e){failure=String(e?.code||e?.message||e||'unknown error');console.warn('Staff notice attachment could not be loaded:',att.path,e)}
       if(!url){
-        // Show the problem instead of silently hiding the attachment.
-        box.innerHTML=`<span style="display:inline-block;padding:8px 11px;border:1px dashed #c9a24a;border-radius:9px;background:#fffaf0;color:#6c4a00;font-weight:700">${att.kind==='image'?'🖼':'📄'} ${esc(att.name||'Attachment')} · could not be loaded (${esc(failure)}). Please reload the page; if this continues, inform the office.</span>`;
+        box.innerHTML=`<span style="display:inline-block;padding:8px 11px;border:1px dashed #c9a24a;border-radius:9px;background:#fffaf0;color:#6c4a00;font-weight:700">${icon} ${esc(att.name||'Attachment')} · could not be loaded (${esc(failure)}). Please reload the page; if this continues, inform the office.</span>`;
       }else if(att.kind==='image'){
         box.innerHTML=`<a href="${esc(url)}" target="_blank" rel="noopener" style="display:inline-block"><img src="${esc(url)}" alt="${esc(att.name||'Notice attachment')}" style="display:block;max-width:min(100%,420px);max-height:320px;object-fit:contain;border:1px solid #decf9d;border-radius:10px;background:#fff"></a><div style="font-size:.78rem;color:#6c6043;margin-top:4px">🖼 ${esc(att.name||'Image attachment')}</div>`;
       }else{
         box.innerHTML=`<a href="${esc(url)}" target="_blank" rel="noopener" style="display:inline-block;padding:8px 11px;border:1px solid #d6c58a;border-radius:9px;background:#fff;color:#17364f;text-decoration:none;font-weight:800">📄 Open PDF · ${esc(att.name||'Attachment')}</a>`;
       }
-      item.appendChild(box);
-    }
+    }));
   }
 
   async function apply(){
