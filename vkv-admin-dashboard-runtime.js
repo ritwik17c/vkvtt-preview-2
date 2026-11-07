@@ -48,6 +48,8 @@ function build(){const home=$('#dashboardHome');if(!home||$('#vkvAdminArchitectu
  g5.append(tile('openExamDepartment','🗓️','Examination Module','Prepare, submit, approve and publish exam timetables, invigilator allocations and reliever duty lists.',P2+'exam-department.html?v=20260904-template-apply-direct-3'));
  g5.append(tile('openQuestionBankAdmin','🧠','Question Bank Administration','Manage coordinators, verification, reports and Principal oversight.',P2+'admin-question-bank-v2.html?v=p2'));
  g5.append(tile('openQuestionBankImport','📥','Import Questions from Excel / Google Sheet','Import existing form responses. Repeated/duplicate form columns are consolidated into useful question fields.',P2+'admin-qb-import.html?v=1'));
+// VKV TIS runs only on the Principal's laptop (Flask, 127.0.0.1:8000); opens in a new tab.
+g5.append((()=>{const t=tile('openVkvTisClassReports','📊','Class Reports (VKV TIS)','Laptop only · start VKV TIS first (python tis_web.py), then open class-wise reports in a new tab.');t.onclick=()=>window.open('http://127.0.0.1:8000/','_blank','noopener');return t})())
 
  const data=section('vkvAdminData','6 · Data, Print, Audit & Recovery','Export, print, backup and audit without changing operational data accidentally.');const g6=data.querySelector('.tiles');
  move(g6,{id:'openImport'});const ex=move(g6,{id:'openExport'});if(ex){relabel(ex,'📤 Export Master Timetable','Export the current operational timetable to Excel, CSV or JSON.');ex.onclick=()=>location.href=P2+'admin-export.html?v=export3'}
