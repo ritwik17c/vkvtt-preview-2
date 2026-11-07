@@ -12,7 +12,7 @@ if(app){
   const auth=getAuth(app),db=getFirestore(app),storage=getStorage(app);
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const cleanTitle=s=>String(s||'').replace(/^📌\s*/,'').trim();
-  let timer=null,busy=false;
+  let timer=null,busy=false,pending=false,cachedNotices=null,cachedAt=0;
 
   function manualSignature(notices){
     return notices.map(n=>[n.id||'',n.title||'',n.body||'',n.priority||'',n.updatedAtMs||0,n.attachment?.path||''].join('|')).join('||');
@@ -50,7 +50,7 @@ if(app){
       box.dataset.noticeAttachment='1';
       box.style.marginTop='9px';
       const icon=att.kind==='image'?'🖼':'📄';
-      box.innerHTML=`<span style="display:inline-block;padding:8px 11px;border:1px solid #d6c58a;border-radius:9px;background:#fff;color:#6c6043;font-weight:700">${icon} ${esc(att.name||'Attachment')} · loading…</span>`;
+      box.innerHTML=`<span style="display:inline-block;padding:8px 11px;border:1px solid rgba(201,162,74,.65);border-radius:9px;background:rgba(201,162,74,.10);color:inherit;font-weight:700">${icon} ${esc(att.name||'Attachment')} · loading…</span>`;
       item.appendChild(box);
       let url='',failure='';
       try{
@@ -60,24 +60,31 @@ if(app){
         ]);
       }catch(e){failure=String(e?.code||e?.message||e||'unknown error');console.warn('Staff notice attachment could not be loaded:',att.path,e)}
       if(!url){
-        box.innerHTML=`<span style="display:inline-block;padding:8px 11px;border:1px dashed #c9a24a;border-radius:9px;background:#fffaf0;color:#6c4a00;font-weight:700">${icon} ${esc(att.name||'Attachment')} · could not be loaded (${esc(failure)}). Please reload the page; if this continues, inform the office.</span>`;
+        box.innerHTML=`<span style="display:inline-block;padding:8px 11px;border:1px dashed rgba(201,162,74,.9);border-radius:9px;background:rgba(201,162,74,.10);color:inherit;font-weight:700">${icon} ${esc(att.name||'Attachment')} · could not be loaded (${esc(failure)}). Please reload the page; if this continues, inform the office.</span>`;
       }else if(att.kind==='image'){
-        box.innerHTML=`<a href="${esc(url)}" target="_blank" rel="noopener" style="display:inline-block"><img src="${esc(url)}" alt="${esc(att.name||'Notice attachment')}" style="display:block;max-width:min(100%,420px);max-height:320px;object-fit:contain;border:1px solid #decf9d;border-radius:10px;background:#fff"></a><div style="font-size:.78rem;color:#6c6043;margin-top:4px">🖼 ${esc(att.name||'Image attachment')}</div>`;
+        box.innerHTML=`<a href="${esc(url)}" target="_blank" rel="noopener" style="display:inline-block"><img src="${esc(url)}" alt="${esc(att.name||'Notice attachment')}" style="display:block;max-width:min(100%,420px);max-height:320px;object-fit:contain;border:1px solid #decf9d;border-radius:10px;background:#fff"></a><div style="font-size:.78rem;color:inherit;opacity:.8;margin-top:4px">🖼 ${esc(att.name||'Image attachment')}</div>`;
       }else{
-        box.innerHTML=`<a href="${esc(url)}" target="_blank" rel="noopener" style="display:inline-block;padding:8px 11px;border:1px solid #d6c58a;border-radius:9px;background:#fff;color:#17364f;text-decoration:none;font-weight:800">📄 Open PDF · ${esc(att.name||'Attachment')}</a>`;
+        box.innerHTML=`<a href="${esc(url)}" target="_blank" rel="noopener" style="display:inline-block;padding:8px 11px;border:1px solid rgba(201,162,74,.85);border-radius:9px;background:rgba(201,162,74,.14);color:inherit;text-decoration:none;font-weight:800">📄 Open PDF · ${esc(att.name||'Attachment')}</a>`;
       }
     }));
   }
 
   async function apply(){
-    if(busy||!auth.currentUser)return;
+    if(!auth.currentUser)return;
+    if(busy){pending=true;return}
     const host=document.getElementById('notice');
     if(!host)return;
     busy=true;
     try{
-      const snap=await getDoc(doc(db,'master','current'));
-      if(!snap.exists())return;
-      const raw=snap.data()||{},master=raw.data&&typeof raw.data==='object'?raw.data:raw;
+      // One read per 5 minutes: redraws by other Home scripts reuse the notices already fetched.
+      let master=null;
+      if(cachedNotices&&Date.now()-cachedAt<300000){master={staffNotices:cachedNotices}}
+      else{
+        const snap=await getDoc(doc(db,'master','current'));
+        if(!snap.exists())return;
+        const raw=snap.data()||{};master=raw.data&&typeof raw.data==='object'?raw.data:raw;
+        cachedNotices=Array.isArray(master.staffNotices)?master.staffNotices:[];cachedAt=Date.now();
+      }
       const notices=(Array.isArray(master.staffNotices)?master.staffNotices:[])
         .filter(n=>n&&n.active!==false&&n.visible!==false)
         .sort((a,b)=>Number(b.priority==='important')-Number(a.priority==='important')||Number(b.updatedAtMs||b.createdAtMs||0)-Number(a.updatedAtMs||a.createdAtMs||0))
@@ -85,7 +92,7 @@ if(app){
       renderManualOnly(host,notices);
       await addAttachments(host,notices);
     }catch(e){console.warn('Staff notice manual-only renderer:',e)}
-    finally{busy=false}
+    finally{busy=false;if(pending){pending=false;schedule()}}
   }
 
   function schedule(){if(timer)clearTimeout(timer);timer=setTimeout(apply,120)}
