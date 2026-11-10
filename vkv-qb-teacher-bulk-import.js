@@ -2,7 +2,7 @@ import{initializeApp,getApps,getApp}from'https://www.gstatic.com/firebasejs/12.1
 import{getAuth,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js';
 import{getFirestore,doc,getDoc,setDoc,serverTimestamp}from'https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js';
 import{activeQBSubjects}from'./vkv-qb-subject-catalog.js?v=20260901-1';
-import{QB_IMPORT_COLUMNS,QB_QUESTION_TYPES,QB_DIFFICULTIES,parseExcelQuestionRows,parseWordQuestionDocument,validateQuestionImports,importFingerprint}from'./vkv-qb-bulk-import-core.js?v=20260903-word-inline-marks-3';
+import{QB_IMPORT_COLUMNS,QB_QUESTION_TYPES,QB_DIFFICULTIES,parseExcelQuestionRows,parseWordQuestionDocument,validateQuestionImports,importFingerprint}from'./vkv-qb-bulk-import-core.js?v=20261110-template-1';
 
 const cfg={apiKey:'AIzaSyDheZpyXghd1aQ9_RLhwpacVriG__wNZW4',authDomain:'vkv-nalbari-timetable.firebaseapp.com',projectId:'vkv-nalbari-timetable',storageBucket:'vkv-nalbari-timetable.firebasestorage.app',messagingSenderId:'791432856951',appId:'1:791432856951:web:61324065a54bef30f98d72'};
 const app=getApps().length?getApp():initializeApp(cfg),auth=getAuth(app),db=getFirestore(app);
@@ -111,7 +111,39 @@ async function analyse(){
 }
 
 async function downloadTemplate(){
-  try{const XLSX=await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js','XLSX'),sample={};QB_IMPORT_COLUMNS.forEach(key=>sample[key]='');Object.assign(sample,{'Class':'X','Section / Stream':'','Subject':subjects[0]||'English','Marks':2,'Difficulty':'Moderate','Question Type':'Short Answer','Question':'Write the question here.','Answer':'Optional answer.','Marking Scheme':''});const workbook=XLSX.utils.book_new(),sheet=XLSX.utils.json_to_sheet([sample],{header:QB_IMPORT_COLUMNS});XLSX.utils.book_append_sheet(workbook,sheet,'Questions');XLSX.writeFile(workbook,'VKV_QB_Teacher_Bulk_Import_Template.xlsx')}catch(error){setMessage('Could not create the template: '+(error.message||error),'warning')}}
+  try{
+    const XLSX=await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js','XLSX'),d=currentDefaults();
+    if(!d.className||!d.subject)return setMessage('Choose the Class and Subject above first; the template is prepared for them.','warning');
+    // Questions sheet: the app's own headings + one marked sample row for the chosen Class/Subject
+    const sample={};QB_IMPORT_COLUMNS.forEach(key=>sample[key]='');
+    Object.assign(sample,{'Class':d.className,'Section / Stream':d.section||'','Subject':d.subject,'Marks':Number(d.marks)||1,'Difficulty':d.difficulty||'Moderate','Question Type':d.questionType||'Short Answer','Question':'SAMPLE ROW: type your first question here (this row is rejected if left unchanged).','Answer':'Model answer (optional).','Marking Scheme':''});
+    const workbook=XLSX.utils.book_new(),sheet=XLSX.utils.json_to_sheet([sample],{header:QB_IMPORT_COLUMNS});
+    sheet['!cols']=QB_IMPORT_COLUMNS.map(h=>({wch:h==='Question'?60:h==='Answer'||h==='Marking Scheme'?40:Math.max(12,h.length+2)}));
+    XLSX.utils.book_append_sheet(workbook,sheet,'Questions');
+    // Instructions sheet: how to fill it + the exact names the app accepts
+    const lists=[subjects,classes,QB_QUESTION_TYPES,QB_DIFFICULTIES],longest=Math.max(...lists.map(x=>x.length));
+    const aoa=[
+      ['VKV Nalbari · Question Bank · Bulk Import Template'],
+      [`Prepared for: Class ${d.className}${d.section?' '+d.section:''} · ${d.subject}`],
+      [],
+      ['How to use'],
+      ['1. Fill the "Questions" sheet. Do not rename, move or delete the headings in row 1.'],
+      ['2. One question per row. Replace the SAMPLE ROW with your first question (it is rejected if left unchanged).'],
+      [`3. Class and Subject are filled in for ${d.className} · ${d.subject}. Copy them down, or leave them blank: blank cells use the Class and Subject chosen on the Bulk Import page.`],
+      ['4. If you type a Class, Subject, Question Type or Difficulty, use exactly one of the names listed below.'],
+      ['5. Marks must be a number, e.g. 1, 2, 3 or 5.'],
+      ['6. Bulk Import page: choose this file → Analyse & Preview → check every row → Submit All for Verification.'],
+      [],
+      ['Valid Subjects','Valid Classes','Question Types','Difficulty']
+    ];
+    for(let k=0;k<longest;k++)aoa.push(lists.map(list=>list[k]||''));
+    const help=XLSX.utils.aoa_to_sheet(aoa);help['!cols']=[{wch:34},{wch:16},{wch:20},{wch:12}];
+    XLSX.utils.book_append_sheet(workbook,help,'Instructions');
+    const safe=v=>String(v||'').replace(/[^A-Za-z0-9]+/g,'-').replace(/^-|-$/g,'');
+    XLSX.writeFile(workbook,`VKV_QB_Template_${safe(d.className)}_${safe(d.subject)}.xlsx`);
+    setMessage(`Template downloaded for ${d.className} · ${d.subject}. Keep the headings unchanged and replace the SAMPLE ROW with your first question.`,'ok');
+  }catch(error){setMessage('Could not create the template: '+(error.message||error),'warning')}
+}
 
 async function boot(u){
   user=u;if(!user)return;

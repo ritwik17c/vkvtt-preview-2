@@ -17,4 +17,4 @@ import './vkv-qb-paper-subquestion-drafting.js?v=20260831-e4-8';
 import './vkv-qb-paper-subquestion-marks.js?v=20260908-p2-qb-sync-1';
 import './vkv-qb-callouts-sound.js?v=20260830-1';
 import './vkv-qb-smart-defaults.js?v=20260902-safe-restore-1';
-import './vkv-qb-teacher-bulk-import.js?v=20261110-apply-defaults-1';
+import './vkv-qb-teacher-bulk-import.js?v=20261110-template-1';

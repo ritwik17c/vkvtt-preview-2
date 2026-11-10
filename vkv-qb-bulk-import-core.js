@@ -259,6 +259,7 @@ export function validateQuestionImports(items=[],subjects=[],options={}){
       else item.subject=canonical;
     }
     if(!item.questionText) item.errors.push('Question is required');
+    else if(/^\s*sample row\b/i.test(item.questionText) || /^\s*write the question here\.?\s*$/i.test(item.questionText)) item.errors.push('Sample row from the template: replace it with your own question or delete it');
     if(!(Number(item.marks)>0)) item.errors.push('Marks must be greater than 0');
     if(options.requireTeacher && !(item.teacherCode || item.teacherEmail)) item.errors.push('Teacher Code or Teacher Email is required');
     const fingerprint=importFingerprint(item,item.teacherCode || item.teacherEmail || options.teacherKey || '');
