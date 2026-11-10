@@ -1,0 +1,42 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function activeUidProfile() {
+      return signedIn()
+             && firestore.exists(/databases/(default)/documents/authorizedUsers/$(request.auth.uid))
+             && firestore.get(/databases/(default)/documents/authorizedUsers/$(request.auth.uid)).data.active == true;
+    }
+
+    function isAdmin() {
+      return activeUidProfile()
+             && firestore.get(/databases/(default)/documents/authorizedUsers/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Staff Notice Board attachments only.
+    // Signed-in VKVTT users may view/download published notice attachments.
+    // Only Principal/Admin may upload, replace or delete them.
+    match /staff-notices/{noticeId}/{fileName} {
+      allow read: if signedIn();
+      allow create, update: if isAdmin()
+                            && request.resource.size <= 10 * 1024 * 1024
+                            && request.resource.contentType in [
+                              'image/jpeg',
+                              'image/png',
+                              'image/webp',
+                              'application/pdf'
+                            ];
+      allow delete: if isAdmin();
+    }
+
+    // No other Storage path is opened by this patch.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
