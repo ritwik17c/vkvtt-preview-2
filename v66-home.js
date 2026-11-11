@@ -65,7 +65,8 @@ function teacherByEffectiveCode(code,date=todayKey()){
 }
 let __operationalTeachersCache={key:"",value:[]};
 function operationalTeachers(date=todayKey()){
- const teachers=(DATA&&DATA.teachers)||[],reps=activeTemporaryReplacements(date);
+ // Staff deactivated in Staff Management (active:false / archived) are no longer available for allotment.
+ const teachers=((DATA&&DATA.teachers)||[]).filter(t=>t&&t.active!==false&&!t.archived),reps=activeTemporaryReplacements(date);
  const repSig=reps.map(r=>[r.id,r.active,r.originalCode,r.tempCode,r.tempName,r.startDate,r.endDate].join(':')).join('|');
  const key=[date,teachers.length,repSig].join('||');
  if(__operationalTeachersCache.key===key)return __operationalTeachersCache.value;
@@ -77,7 +78,7 @@ function operationalTeachers(date=todayKey()){
  return out;
 }
 function statusAssignableTeachers(){
- const out=[...((DATA&&DATA.teachers)||[]),...((DATA&&DATA.nonTeachingStaff)||[]).filter(x=>x&&x.active!==false).map(x=>({...x,nonTeaching:true}))],seen=new Set(out.map(t=>t.code)),today=todayKey();
+ const out=[...((DATA&&DATA.teachers)||[]).filter(t=>t&&t.active!==false&&!t.archived),...((DATA&&DATA.nonTeachingStaff)||[]).filter(x=>x&&x.active!==false).map(x=>({...x,nonTeaching:true}))],seen=new Set(out.map(t=>t.code)),today=todayKey();
  for(const r of temporaryReplacementRecords()){
    if(r.active===false||!r.tempCode||!r.tempName||String(r.endDate||"")<today||seen.has(r.tempCode))continue;
    out.push({code:r.tempCode,name:r.tempName,temporary:true,originalCode:r.originalCode});seen.add(r.tempCode);
