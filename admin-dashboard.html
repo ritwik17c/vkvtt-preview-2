@@ -104,6 +104,21 @@
       <div><label>From Date (dd/mm/yyyy)</label><input id="replacementFrom" type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/yyyy"></div>
       <div><label>To Date (dd/mm/yyyy)</label><input id="replacementTo" type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/yyyy"></div>
       <div><label>Remarks</label><input id="replacementRemarks" placeholder="Optional appointment / leave-vacancy note"></div>
+      <div><label>Coverage</label><select id="replacementCoverage"><option value="whole">Whole timetable</option><option value="selected">Selected days &amp; periods</option></select></div>
+      <div style="align-self:end"><label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" id="replacementOfferProxy" checked style="width:auto"> Offer this teacher for proxies in free periods</label></div>
+    </div>
+    <div id="replacementCoverageBox" style="display:none;margin-top:10px">
+      <h3>Weekly pattern</h3>
+      <div class="help">Tick the absent teacher's periods that this teacher will take every week between the From and To dates. Only the absent teacher's own periods can be ticked.</div>
+      <div id="replacementWeekly" class="tablewrap"></div>
+      <h3>Specific dates</h3>
+      <div class="help">Add a date to set its periods exactly. A date listed here overrides the weekly pattern for that day.</div>
+      <div class="grid3">
+        <div><label>Date (dd/mm/yyyy)</label><input id="replacementDateInput" type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/yyyy"></div>
+        <div style="align-self:end"><button type="button" id="replacementAddDate">Add Date</button></div>
+        <div style="align-self:end"><label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" id="replacementDatesOnly" style="width:auto"> Use only these dates (ignore the weekly pattern)</label></div>
+      </div>
+      <div id="replacementDates" class="tablewrap"></div>
     </div>
     <div class="actions"><button class="primary" id="saveReplacement">Save Temporary Replacement</button><button id="clearReplacement">Clear Form</button></div>
     <div id="replacementMsg" class="status" style="display:none"></div>
@@ -263,26 +278,82 @@ $('saveSlot').onclick=async()=>{
  try{await persistMaster({atMs:Date.now(),type:'slot_edit',byUid:currentUser.uid,byName:currentUser.displayName||profile.name||currentUser.email||'Admin',class:before.class,day:before.day,period:Number(before.period),before:{entry:before.entry,codes:inferCodes(before)},after:{entry:after.entry,codes:after.codes}});loadSlot();msg('saveMsg','Master timetable updated.','ok')}catch(e){master.records[selectedRecordIndex]=before;msg('saveMsg','Save failed: '+safe(e.message||e),'error')}finally{$('saveSlot').disabled=false}
 };
 
-function clearReplacementForm(){$('replacementId').value='';$('replacementOriginal').selectedIndex=0;$('replacementName').value='';$('replacementCode').value='';$('replacementFrom').value='';$('replacementTo').value='';$('replacementRemarks').value='';$('saveReplacement').textContent='Save Temporary Replacement';$('replacementMsg').style.display='none'}
+// ---- Coverage: whole timetable, weekly pattern, specific dates (or both) ----
+let repDateSlots={};
+const REP_DAYS=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],REP_JS_DAYS=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+function repDayOf(iso){const m=String(iso||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?REP_JS_DAYS[new Date(+m[1],+m[2]-1,+m[3]).getDay()]:''}
+function repOriginalSlots(code){const out={};(master.records||[]).forEach(r=>{if(!code||!inferCodes(r).includes(code))return;(out[r.day]=out[r.day]||[]).push({period:Number(r.period),cls:r.class})});Object.values(out).forEach(a=>a.sort((x,y)=>x.period-y.period));return out}
+function repAllPeriods(){const set=new Set((master.records||[]).map(r=>Number(r.period)).filter(Boolean));return [...set].sort((a,b)=>a-b)}
+function repCovers(r,date,day,period){
+ if(!r||r.active===false||date<r.startDate||date>r.endDate)return false;
+ if(r.coverage!=='selected')return true;
+ const p=Number(period),ds=r.dateSlots&&r.dateSlots[date];
+ if(Array.isArray(ds))return ds.map(Number).includes(p);
+ if(r.datesOnly===true)return false;
+ const w=r.weekly&&r.weekly[day];return Array.isArray(w)&&w.map(Number).includes(p);
+}
+// date|period keys this record actually takes (only the absent teacher's real periods), within [from,to]
+function repTakenSlots(r,from,to){
+ const slots=repOriginalSlots(r.originalCode),keys=new Set();let d=new Date(from+'T00:00:00'),end=new Date(to+'T00:00:00'),guard=0;
+ while(d<=end&&guard++<800){const iso=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'),day=REP_JS_DAYS[d.getDay()];
+  (slots[day]||[]).forEach(x=>{if(repCovers(r,iso,day,x.period))keys.add(iso+'|'+x.period)});d.setDate(d.getDate()+1)}
+ return keys;
+}
+function repWeeklyFromGrid(){const w={};document.querySelectorAll('.repWeekly:checked').forEach(c=>{(w[c.dataset.day]=w[c.dataset.day]||[]).push(Number(c.dataset.period))});Object.values(w).forEach(a=>a.sort((x,y)=>x-y));return w}
+function repReadDates(){document.querySelectorAll('[data-rep-date-row]').forEach(row=>{const d=row.dataset.repDateRow;repDateSlots[d]=[...row.querySelectorAll('.repDate:checked')].map(c=>Number(c.dataset.period)).sort((a,b)=>a-b)})}
+function renderRepCoverage(weekly){
+ const selected=$('replacementCoverage').value==='selected';$('replacementCoverageBox').style.display=selected?'block':'none';if(!selected)return;
+ const code=$('replacementOriginal').value,slots=repOriginalSlots(code),periods=repAllPeriods();
+ if(weekly===undefined)weekly=repWeeklyFromGrid();
+ if(!code){$('replacementWeekly').innerHTML='<div class="empty">Choose the permanent teacher first.</div>';$('replacementDates').innerHTML='';return}
+ $('replacementWeekly').innerHTML='<table><thead><tr><th>Day</th>'+periods.map(p=>`<th>P${p}</th>`).join('')+'</tr></thead><tbody>'+REP_DAYS.map(day=>'<tr><th>'+day.slice(0,3)+'</th>'+periods.map(p=>{const x=(slots[day]||[]).find(y=>y.period===p);if(!x)return '<td style="opacity:.35;text-align:center">—</td>';const on=Array.isArray(weekly[day])&&weekly[day].map(Number).includes(p);return `<td style="text-align:center"><label style="cursor:pointer;display:block"><input type="checkbox" class="repWeekly" data-day="${day}" data-period="${p}" ${on?'checked':''} style="width:auto"><br><span class="small">${safe(x.cls)}</span></label></td>`}).join('')+'</tr>').join('')+'</tbody></table>';
+ const dates=Object.keys(repDateSlots).sort();
+ $('replacementDates').innerHTML=dates.length?'<table><thead><tr><th>Date</th><th>Periods taken on this date</th><th></th></tr></thead><tbody>'+dates.map(d=>{const day=repDayOf(d),own=slots[day]||[],sel=(repDateSlots[d]||[]).map(Number);return `<tr data-rep-date-row="${d}"><td><b>${safe(displayDate(d))}</b><br><span class="small">${safe(day)}</span></td><td>${own.length?own.map(x=>`<label style="margin-right:12px;cursor:pointer"><input type="checkbox" class="repDate" data-period="${x.period}" ${sel.includes(x.period)?'checked':''} style="width:auto"> P${x.period} <span class="small">${safe(x.cls)}</span></label>`).join(''):'<span class="small">The absent teacher has no periods on this day.</span>'}</td><td><button type="button" class="smallbtn danger" data-rep-remove-date="${d}">Remove</button></td></tr>`}).join('')+'</tbody></table>':'<div class="empty">No specific dates added.</div>';
+}
+function repCoverageSummary(r){
+ if(r.coverage!=='selected')return 'Whole timetable';
+ const w=Object.entries(r.weekly||{}).filter(([,a])=>a&&a.length).sort((a,b)=>REP_DAYS.indexOf(a[0])-REP_DAYS.indexOf(b[0])).map(([d,a])=>d.slice(0,3)+' P'+a.join(',P'));
+ const ds=Object.entries(r.dateSlots||{}).sort().map(([d,a])=>displayDate(d)+(a&&a.length?' P'+a.join(',P'):' none'));
+ return (r.datesOnly?'Specific dates only':'Weekly: '+(w.join(' · ')||'none'))+(ds.length?' | Dates: '+ds.join(' · '):'');
+}
+$('replacementCoverage').onchange=()=>renderRepCoverage();
+$('replacementOriginal').addEventListener('change',()=>{repDateSlots={};renderRepCoverage({})});
+$('replacementAddDate').onclick=()=>{const d=inputDate($('replacementDateInput').value);if(!d){msg('replacementMsg','Enter the date as dd/mm/yyyy.','warn');return}repReadDates();if(!repDateSlots[d])repDateSlots[d]=[];$('replacementDateInput').value='';renderRepCoverage()};
+document.addEventListener('click',e=>{const rm=e.target.closest('[data-rep-remove-date]');if(!rm)return;repReadDates();delete repDateSlots[rm.dataset.repRemoveDate];renderRepCoverage()});
+function clearReplacementForm(){repDateSlots={};$('replacementWeekly').innerHTML='';$('replacementDates').innerHTML='';$('replacementCoverage').value='whole';$('replacementOfferProxy').checked=true;$('replacementDatesOnly').checked=false;$('replacementDateInput').value='';renderRepCoverage({});$('replacementId').value='';$('replacementOriginal').selectedIndex=0;$('replacementName').value='';$('replacementCode').value='';$('replacementFrom').value='';$('replacementTo').value='';$('replacementRemarks').value='';$('saveReplacement').textContent='Save Temporary Replacement';$('replacementMsg').style.display='none'}
 $('clearReplacement').onclick=clearReplacementForm;
 function rangesOverlap(a1,a2,b1,b2){return a1<=b2&&b1<=a2}
 function replacementState(r){const t=todayKey();if(r.active===false)return ['Cancelled','cancelled'];if(t<r.startDate)return ['Upcoming','upcoming'];if(t>r.endDate)return [r.archived?'Completed · Archived':'Completed','completed'];return ['Active Now','active']}
 $('saveReplacement').onclick=async()=>{
  const id=$('replacementId').value.trim(),originalCode=$('replacementOriginal').value,tempName=$('replacementName').value.trim(),tempCode=$('replacementCode').value.trim().toUpperCase().replace(/\s+/g,''),startDate=inputDate($('replacementFrom').value),endDate=inputDate($('replacementTo').value),remarks=$('replacementRemarks').value.trim();
  if(!originalCode||!tempName||!tempCode||!startDate||!endDate){msg('replacementMsg','Permanent teacher, temporary teacher name/code, From Date and To Date are required.','warn');return}if(startDate>endDate){msg('replacementMsg','From Date cannot be later than To Date.','warn');return}if(master.teachers.some(t=>t.code===tempCode)){msg('replacementMsg','Temporary code '+safe(tempCode)+' already belongs to the permanent roster. Use a different temporary code.','warn');return}
- const others=master.temporaryReplacements.filter(r=>r.id!==id&&r.active!==false);
- if(others.some(r=>r.originalCode===originalCode&&rangesOverlap(startDate,endDate,r.startDate,r.endDate))){msg('replacementMsg','This permanent teacher already has another replacement overlapping these dates.','warn');return}
- if(others.some(r=>r.tempCode===tempCode&&rangesOverlap(startDate,endDate,r.startDate,r.endDate))){msg('replacementMsg','This temporary code is already being used by another overlapping replacement record.','warn');return}
- const now=Date.now(),existing=id?master.temporaryReplacements.find(r=>r.id===id):null;const rec={...(existing||{}),id:id||('TMP_'+now+'_'+Math.random().toString(36).slice(2,7)),originalCode,tempName,tempCode,startDate,endDate,remarks,active:existing?existing.active!==false:true,archived:existing?existing.archived===true:false,createdAtMs:existing?.createdAtMs||now,updatedAtMs:now};
+ const coverage=$('replacementCoverage').value==='selected'?'selected':'whole',offerForProxy=$('replacementOfferProxy').checked;
+ let weekly={},dateSlots={},datesOnly=false;
+ if(coverage==='selected'){
+  repReadDates();weekly=repWeeklyFromGrid();datesOnly=$('replacementDatesOnly').checked;
+  dateSlots=Object.fromEntries(Object.entries(repDateSlots).map(([d,a])=>[d,[...new Set((a||[]).map(Number))].sort((x,y)=>x-y)]));
+  const outside=Object.keys(dateSlots).filter(d=>d<startDate||d>endDate);if(outside.length){msg('replacementMsg','These specific dates are outside the From–To range: '+outside.map(displayDate).join(', ')+'.','warn');return}
+  const anyWeekly=!datesOnly&&Object.values(weekly).some(a=>a.length),anyDate=Object.values(dateSlots).some(a=>a.length);
+  if(!anyWeekly&&!anyDate){msg('replacementMsg','Tick at least one period in the weekly pattern or for a specific date.','warn');return}
+  if(datesOnly&&!Object.keys(dateSlots).length){msg('replacementMsg','"Use only these dates" is ticked, but no specific date has been added.','warn');return}
+ }
+ const draft={originalCode,tempCode,startDate,endDate,coverage,weekly,dateSlots,datesOnly,active:true};
+ const others=master.temporaryReplacements.filter(r=>r.id!==id&&r.active!==false&&rangesOverlap(startDate,endDate,r.startDate,r.endDate));
+ const clash=(a,b)=>{const from=a.startDate>b.startDate?a.startDate:b.startDate,to=a.endDate<b.endDate?a.endDate:b.endDate,ka=repTakenSlots(a,from,to);for(const k of repTakenSlots(b,from,to))if(ka.has(k))return k;return ''};
+ for(const r of others.filter(r=>r.originalCode===originalCode)){const k=clash(draft,r);if(k){const [d,p]=k.split('|');msg('replacementMsg',`${safe(r.tempName)} (${safe(r.tempCode)}) already takes this teacher's P${p} on ${safe(displayDate(d))}. Choose different periods or dates.`,'warn');return}}
+ const mySlots=(a,from,to)=>{const keys=new Set();repTakenSlots(a,from,to).forEach(k=>keys.add(k));return keys};
+ for(const r of others.filter(r=>r.tempCode===tempCode&&r.originalCode!==originalCode)){const from=startDate>r.startDate?startDate:r.startDate,to=endDate<r.endDate?endDate:r.endDate,mine=mySlots(draft,from,to);for(const k of mySlots(r,from,to))if(mine.has(k)){const [d,p]=k.split('|');msg('replacementMsg',`${safe(tempCode)} is already teaching for ${safe(teacherByCode(r.originalCode)?.name||r.originalCode)} in P${p} on ${safe(displayDate(d))}; one teacher cannot take two classes at once.`,'warn');return}}
+ if(others.some(r=>r.tempCode===tempCode&&String(r.tempName||'').trim().toLowerCase()!==tempName.toLowerCase())){msg('replacementMsg','Temporary code '+safe(tempCode)+' is already used for a different teacher name in these dates. Use the same name or a different code.','warn');return}
+ const now=Date.now(),existing=id?master.temporaryReplacements.find(r=>r.id===id):null;const rec={...(existing||{}),id:id||('TMP_'+now+'_'+Math.random().toString(36).slice(2,7)),originalCode,tempName,tempCode,startDate,endDate,remarks,coverage,weekly,dateSlots,datesOnly,offerForProxy,active:existing?existing.active!==false:true,archived:existing?existing.archived===true:false,createdAtMs:existing?.createdAtMs||now,updatedAtMs:now};
  const idx=master.temporaryReplacements.findIndex(r=>r.id===rec.id);if(idx>=0)master.temporaryReplacements[idx]=rec;else master.temporaryReplacements.push(rec);
  $('saveReplacement').disabled=true;
  try{await persistMaster({atMs:now,type:existing?'replacement_edit':'replacement_create',byUid:currentUser.uid,byName:currentUser.displayName||profile.name||currentUser.email||'Admin',summary:(existing?'Updated':'Created')+' temporary replacement: '+tempName+' ('+tempCode+') for '+(teacherByCode(originalCode)?.name||originalCode)+' · '+displayDate(startDate)+' to '+displayDate(endDate)});clearReplacementForm();showPanel('replacements');msg('replacementMsg','Temporary leave-vacancy replacement saved. The permanent roster and master timetable remain unchanged.','ok')}catch(e){msg('replacementMsg','Could not save replacement: '+safe(e.message||e),'error')}finally{$('saveReplacement').disabled=false}
 };
 function renderReplacementList(){
  const rows=master.temporaryReplacements.slice().sort((a,b)=>String(b.startDate).localeCompare(String(a.startDate))||String(a.tempName).localeCompare(String(b.tempName)));if(!rows.length){$('replacementList').innerHTML='<div class="empty">No temporary leave-vacancy replacement has been configured.</div>';return}
- $('replacementList').innerHTML=rows.map(r=>{const orig=teacherByCode(r.originalCode),[state,cls]=replacementState(r),today=todayKey(),canEdit=r.active!==false&&today<=r.endDate;let actions='';if(canEdit)actions+=`<button class="smallbtn" data-edit-rep="${safe(r.id)}">Edit</button> `;if(r.active!==false&&today<r.startDate)actions+=`<button class="smallbtn danger" data-cancel-rep="${safe(r.id)}">Cancel Future Assignment</button> `;if(r.active!==false&&today>=r.startDate&&today<r.endDate)actions+=`<button class="smallbtn" data-end-rep="${safe(r.id)}">End After Today</button> `;if(today>r.endDate&&!r.archived)actions+=`<button class="smallbtn" data-archive-rep="${safe(r.id)}">Archive</button>`;return `<div class="replacementItem"><div class="replacementTitle">${safe(r.tempName)} <span class="code">(${safe(r.tempCode)})</span> <span class="badge ${cls}">${safe(state)}</span></div><div class="replacementMeta"><b>Leave vacancy for:</b> ${safe(orig?orig.name:r.originalCode)} (${safe(r.originalCode)})<br><b>Period:</b> ${safe(displayDate(r.startDate))} → ${safe(displayDate(r.endDate))}${r.remarks?'<br><b>Remarks:</b> '+safe(r.remarks):''}<br><b>Roster status:</b> Temporary only — not part of the permanent roster.</div>${actions?'<div class="actions">'+actions+'</div>':''}</div>`}).join('');
+ $('replacementList').innerHTML=rows.map(r=>{const orig=teacherByCode(r.originalCode),[state,cls]=replacementState(r),today=todayKey(),canEdit=r.active!==false&&today<=r.endDate;let actions='';if(canEdit)actions+=`<button class="smallbtn" data-edit-rep="${safe(r.id)}">Edit</button> `;if(r.active!==false&&today<r.startDate)actions+=`<button class="smallbtn danger" data-cancel-rep="${safe(r.id)}">Cancel Future Assignment</button> `;if(r.active!==false&&today>=r.startDate&&today<r.endDate)actions+=`<button class="smallbtn" data-end-rep="${safe(r.id)}">End After Today</button> `;if(today>r.endDate&&!r.archived)actions+=`<button class="smallbtn" data-archive-rep="${safe(r.id)}">Archive</button>`;return `<div class="replacementItem"><div class="replacementTitle">${safe(r.tempName)} <span class="code">(${safe(r.tempCode)})</span> <span class="badge ${cls}">${safe(state)}</span></div><div class="replacementMeta"><b>Leave vacancy for:</b> ${safe(orig?orig.name:r.originalCode)} (${safe(r.originalCode)})<br><b>Period:</b> ${safe(displayDate(r.startDate))} → ${safe(displayDate(r.endDate))}<br><b>Coverage:</b> ${safe(repCoverageSummary(r))}<br><b>Proxies in free periods:</b> ${r.offerForProxy===false?'Not offered':'Offered'}${r.remarks?'<br><b>Remarks:</b> '+safe(r.remarks):''}<br><b>Roster status:</b> Temporary only — not part of the permanent roster.</div>${actions?'<div class="actions">'+actions+'</div>':''}</div>`}).join('');
 }
-function editReplacement(id){const r=master.temporaryReplacements.find(x=>x.id===id);if(!r)return;$('replacementId').value=r.id;$('replacementOriginal').value=r.originalCode;$('replacementName').value=r.tempName;$('replacementCode').value=r.tempCode;$('replacementFrom').value=displayDate(r.startDate);$('replacementTo').value=displayDate(r.endDate);$('replacementRemarks').value=r.remarks||'';$('saveReplacement').textContent='Update Temporary Replacement';window.scrollTo({top:$('replacements').offsetTop-10,behavior:'smooth'})}
+function editReplacement(id){const r=master.temporaryReplacements.find(x=>x.id===id);if(!r)return;$('replacementId').value=r.id;$('replacementOriginal').value=r.originalCode;$('replacementName').value=r.tempName;$('replacementCode').value=r.tempCode;$('replacementFrom').value=displayDate(r.startDate);$('replacementTo').value=displayDate(r.endDate);$('replacementRemarks').value=r.remarks||'';$('replacementCoverage').value=r.coverage==='selected'?'selected':'whole';$('replacementOfferProxy').checked=r.offerForProxy!==false;$('replacementDatesOnly').checked=r.datesOnly===true;repDateSlots=JSON.parse(JSON.stringify(r.dateSlots||{}));renderRepCoverage(r.weekly||{});$('saveReplacement').textContent='Update Temporary Replacement';window.scrollTo({top:$('replacements').offsetTop-10,behavior:'smooth'})}
 async function mutateReplacement(id,kind){const r=master.temporaryReplacements.find(x=>x.id===id);if(!r)return;const before=structuredClone(r),now=Date.now();if(kind==='cancel'){if(!confirm('Cancel this future temporary replacement? The record will be retained in history.'))return;r.active=false;r.updatedAtMs=now}else if(kind==='end'){if(!confirm('End this temporary replacement after today? Today will remain covered and the permanent teacher will resume from the next day.'))return;r.endDate=todayKey();r.updatedAtMs=now}else if(kind==='archive'){r.archived=true;r.updatedAtMs=now}
  try{await persistMaster({atMs:now,type:'replacement_'+kind,byUid:currentUser.uid,byName:currentUser.displayName||profile.name||currentUser.email||'Admin',summary:(kind==='cancel'?'Cancelled future assignment':kind==='end'?'Ended assignment after today':'Archived completed assignment')+': '+r.tempName+' ('+r.tempCode+') for '+(teacherByCode(r.originalCode)?.name||r.originalCode),before,after:structuredClone(r)});showPanel('replacements')}catch(e){Object.assign(r,before);alert('Could not update replacement: '+(e.message||e))}
 }

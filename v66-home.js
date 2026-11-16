@@ -47,13 +47,43 @@ function sanitisedMasterRecords(){
  return value;
 }
 function temporaryReplacementRecords(){return Array.isArray(DATA&&DATA.temporaryReplacements)?DATA.temporaryReplacements:[]}
+// ---- Visiting / temporary teacher coverage --------------------------------
+// coverage:'whole' (default, also for old records) = every period of the absent teacher.
+// coverage:'selected' = only chosen slots:
+//   weekly    {Monday:[1,2],...}       repeats every week between startDate and endDate
+//   dateSlots {'2026-11-18':[3,4],...}  exact dates; overrides the weekly pattern on that date
+//   datesOnly true                      ignore the weekly pattern; only dateSlots apply
+// offerForProxy:false keeps the visitor out of proxy / free-teacher lists.
+function replacementIsWhole(r){return !r||r.coverage!=="selected"}
+function replacementWeekDate(date,day){
+ const names=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],m=String(date||"").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+ if(!m||!names.includes(day))return date;
+ const d=new Date(+m[1],+m[2]-1,+m[3]),mon=new Date(d);mon.setDate(d.getDate()-((d.getDay()+6)%7));
+ const t=new Date(mon);t.setDate(mon.getDate()+((names.indexOf(day)+6)%7));
+ return t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0");
+}
+function replacementCoversSlot(r,slotDate,day,period){
+ if(!replacementAppliesToDate(r,slotDate))return false;
+ if(replacementIsWhole(r))return true;
+ const p=Number(period),ds=r.dateSlots&&r.dateSlots[slotDate];
+ if(Array.isArray(ds))return ds.map(Number).includes(p);
+ if(r.datesOnly===true)return false;
+ const w=r.weekly&&r.weekly[day];
+ return Array.isArray(w)&&w.map(Number).includes(p);
+}
+function visitorOfferedForProxy(t,date=todayKey()){
+ if(!t||!t.temporary)return true;
+ const reps=activeTemporaryReplacements(date).filter(r=>String(r.tempCode)===String(t.code));
+ return !reps.length||reps.some(r=>r.offerForProxy!==false);
+}
+function replacementCoverageSig(r){return JSON.stringify([r.coverage||"whole",r.weekly||null,r.dateSlots||null,r.datesOnly===true,r.offerForProxy!==false])}
 function replacementAppliesToDate(r,date=todayKey()){
  if(!r||r.active===false||!r.originalCode||!r.tempCode||!date)return false;
  const s=String(r.startDate||""),e=String(r.endDate||s);
  return !!s&&date>=s&&date<=e;
 }
 function activeTemporaryReplacements(date=todayKey()){return temporaryReplacementRecords().filter(r=>replacementAppliesToDate(r,date))}
-function activeReplacementForOriginal(code,date=todayKey()){return activeTemporaryReplacements(date).find(r=>String(r.originalCode)===String(code))||null}
+function activeReplacementForOriginal(code,date=todayKey()){return activeTemporaryReplacements(date).find(r=>String(r.originalCode)===String(code)&&replacementIsWhole(r))||null}
 function activeReplacementForTemp(code,date=todayKey()){return activeTemporaryReplacements(date).find(r=>String(r.tempCode)===String(code))||null}
 function permanentTeacherByCode(code){return ((DATA&&DATA.teachers)||[]).find(t=>t.code===code)||null}
 function nonTeachingStaffByCode(code){const x=((DATA&&DATA.nonTeachingStaff)||[]).find(t=>String(t.code)===String(code));return x?{...x,nonTeaching:true}:null}
@@ -90,7 +120,8 @@ function replaceCodeToken(text,from,to){
  return String(text||'').replace(new RegExp('(^|[^A-Za-z0-9])'+escCode+'(?=$|[^A-Za-z0-9])','g'),(m,p1)=>p1+to);
 }
 function applyTemporaryReplacementsToRecord(r,date=todayKey()){
- const codes=teacherCodesForRecord(r),active=activeTemporaryReplacements(date);
+ const codes=teacherCodesForRecord(r),slotDate=replacementWeekDate(date,r.day);
+ const active=temporaryReplacementRecords().filter(rep=>replacementIsWhole(rep)?replacementAppliesToDate(rep,date):replacementCoversSlot(rep,slotDate,r.day,r.period));
  if(!codes.length||!active.length)return {...r,codes};
  let changed=false,entry=String(r.entry||''),newCodes=[...codes];
  for(const rep of active){
@@ -107,7 +138,7 @@ function applyTemporaryReplacementsToRecord(r,date=todayKey()){
 let __operationalRecordsCache={key:'',value:[]};
 function operationalRecords(date=todayKey()){
  const reps=(DATA&&Array.isArray(DATA.temporaryReplacements)?DATA.temporaryReplacements:[]);
- const repSig=reps.map(r=>[r.id,r.active,r.originalCode,r.tempCode,r.startDate,r.endDate].join(':')).join('|');
+ const repSig=reps.map(r=>[r.id,r.active,r.originalCode,r.tempCode,r.startDate,r.endDate,replacementCoverageSig(r)].join(':')).join('|');
  const key=[date,(DATA&&DATA.activeScheduleProfileId)||'normal',repSig,sanitisedMasterRecords().length].join('||');
  if(__operationalRecordsCache.key===key)return __operationalRecordsCache.value;
  const value=sanitisedMasterRecords().filter(isOperationalRecord).map(r=>applyTemporaryReplacementsToRecord(r,date));
@@ -160,7 +191,7 @@ function rowsTable(a){return '<div class="table"><table><tr><th>Day</th><th>Peri
 function teacherResult(){let c=E("teacherSel").value,d=E("teacherDay").value,p=Number(E("teacherPeriod").value);if(!c)return E("teacherResult").innerHTML="Select a teacher.";let t=teacherByEffectiveCode(c),a=operationalRecords().filter(x=>x.codes.includes(c)&&(!d||x.day===d)&&(!p||Number(x.period)===p)).sort((a,b)=>DAYS.indexOf(a.day)-DAYS.indexOf(b.day)||a.period-b.period);let groups={};a.forEach(x=>{let k=x.day+"|"+x.period;if(!groups[k])groups[k]={day:x.day,period:x.period,time:scheduleTime(x.period),classes:[],entries:[]};groups[k].classes.push(x.class);groups[k].entries.push(x.entry)});let g=Object.values(groups);if(!g.length){const rep=activeReplacementForOriginal(c);E("teacherResult").innerHTML=rep?`<b>${esc(t?t.name:c)}</b> is currently covered by <b>${esc(rep.tempName||rep.tempCode)}</b> (${esc(rep.tempCode)}) until ${esc(displayDate(rep.endDate))}.`:"No matching teaching assignment under the active schedule.";return}let table='<div class="table"><table><tr><th>Day</th><th>Period</th><th>Time</th><th>Class</th><th>Assignment</th></tr>'+g.map(x=>`<tr><td>${x.day}</td><td>${PL(x.period)}</td><td>${esc(x.time)}</td><td>${x.classes.join(" + ")}</td><td>${x.entries.map(esc).join(" / ")}</td></tr>`).join("")+'</table></div>';E("teacherResult").innerHTML=table+`<p>Matching teaching periods: <b>${g.length}</b></p>`}
 function classResult(){let c=E("classSel").value,d=E("classDay").value;if(!c)return E("classResult").innerHTML="Select a class.";refreshPeriodSelect("classPeriod","All",classActivePeriods(c));let p=Number(E("classPeriod").value);let a=operationalRecords().filter(x=>x.class===c&&(!d||x.day===d)&&(!p||Number(x.period)===p)).sort((a,b)=>DAYS.indexOf(a.day)-DAYS.indexOf(b.day)||a.period-b.period);E("classResult").innerHTML=a.length?rowsTable(a):"No matching teaching assignment under the active schedule."}
 function dayResult(){let d=E("daySel").value,c=E("dayClass").value;if(c)refreshPeriodSelect("dayPeriod","All",classActivePeriods(c));else refreshPeriodSelect("dayPeriod","All");let p=Number(E("dayPeriod").value||0);if(!d){E("dayResult").innerHTML="Select a day. Period and Class are optional filters.";return}let a=operationalRecords().filter(x=>x.day===d&&(!p||Number(x.period)===p)&&(!c||x.class===c)).sort((a,b)=>a.period-b.period||a.class.localeCompare(b.class));E("dayResult").innerHTML=a.length?rowsTable(a):"No matching timetable entry under the active schedule."}
-function freeResult(){let d=E("freeDay").value,p=Number(E("freePeriod").value);if(!d||!p)return;if(!activeSchedulePeriods().includes(p)){E("freeResult").innerHTML="This period is not active in the current schedule.";return}let busy=new Set(operationalRecords().filter(x=>x.day===d&&Number(x.period)===p).flatMap(x=>x.codes));let statuses=leaveData();statuses.forEach(o=>{if(activeLeaveAt(o,p))busy.add(o.code)});activeTemporaryReplacements().forEach(r=>busy.add(r.originalCode));let a=operationalTeachers().filter(t=>!busy.has(t.code)&&!activeReplacementForOriginal(t.code));E("freeResult").innerHTML='<div class="small" style="margin-bottom:7px">'+PL(p)+' · '+esc(scheduleTime(p))+' · '+esc(activeScheduleName())+'</div>'+a.map(t=>`<span class="tag">${esc(t.name)} (${t.code})${t.temporary?' · Temporary replacement':''}</span>`).join("")}
+function freeResult(){let d=E("freeDay").value,p=Number(E("freePeriod").value);if(!d||!p)return;if(!activeSchedulePeriods().includes(p)){E("freeResult").innerHTML="This period is not active in the current schedule.";return}let busy=new Set(operationalRecords().filter(x=>x.day===d&&Number(x.period)===p).flatMap(x=>x.codes));let statuses=leaveData();statuses.forEach(o=>{if(activeLeaveAt(o,p))busy.add(o.code)});activeTemporaryReplacements().filter(replacementIsWhole).forEach(r=>busy.add(r.originalCode));let a=operationalTeachers().filter(t=>!busy.has(t.code)&&!activeReplacementForOriginal(t.code)&&visitorOfferedForProxy(t));E("freeResult").innerHTML='<div class="small" style="margin-bottom:7px">'+PL(p)+' · '+esc(scheduleTime(p))+' · '+esc(activeScheduleName())+'</div>'+a.map(t=>`<span class="tag">${esc(t.name)} (${t.code})${t.temporary?' · Temporary replacement':''}</span>`).join("")}
 function scheduleClockMinutes(h,m,ampm){h=Number(h);m=Number(m);if(ampm){const x=String(ampm).toLowerCase();h=h%12+(x==="pm"?12:0)}else if(h>=1&&h<=6)h+=12;return h*60+m}
 function scheduleWindow(p){const text=scheduleTime(p),matches=[...String(text).matchAll(/(\d{1,2}):(\d{2})\s*(am|pm)?/ig)];if(matches.length<2)return null;const vals=matches.map(x=>scheduleClockMinutes(x[1],x[2],x[3]));let start=vals[0],end=vals[vals.length-1];if(end<=start)end+=12*60;return [start,end]}
 function currentP(){let n=new Date(),m=n.getHours()*60+n.getMinutes();for(const p of activeSchedulePeriods()){const w=scheduleWindow(p);if(w&&m>=w[0]&&m<w[1])return p}let s=[[1,515,565],[2,565,605],[3,605,645],[4,645,685],[5,715,755],[6,755,795],[7,795,835],[8,835,875]];for(let x of s)if(activeSchedulePeriods().includes(x[0])&&m>=x[1]&&m<x[2])return x[0];return 0}
@@ -555,7 +586,7 @@ async function deleteScheduledPlan(id){
 window.renderLeavePlansList=renderLeavePlansList;
 
 function activeLeaveAt(o,p){if(o.type==="full"||o.type==="vacant")return true;if(o.type==="half"){let f=Number(o.from||5),t=Number(o.to||8);return p>=f&&p<=t}if(o.type==="od"||o.type==="special"){if(!o.from&&!o.to)return true;let f=Number(o.from||1),t=Number(o.to||8);return p>=f&&p<=t}return false}
-function freeFor(day,p,leaves,date=todayKey()){let busy=new Set(operationalRecords(date).filter(x=>x.day===day&&Number(x.period)===Number(p)).flatMap(x=>x.codes));leaves.forEach(o=>{if(activeLeaveAt(o,p))busy.add(o.code)});activeTemporaryReplacements(date).forEach(r=>busy.add(r.originalCode));return operationalTeachers(date).filter(t=>!busy.has(t.code)&&!activeReplacementForOriginal(t.code,date))}
+function freeFor(day,p,leaves,date=todayKey()){let busy=new Set(operationalRecords(date).filter(x=>x.day===day&&Number(x.period)===Number(p)).flatMap(x=>x.codes));leaves.forEach(o=>{if(activeLeaveAt(o,p))busy.add(o.code)});activeTemporaryReplacements(date).filter(replacementIsWhole).forEach(r=>busy.add(r.originalCode));return operationalTeachers(date).filter(t=>!busy.has(t.code)&&!activeReplacementForOriginal(t.code,date)&&visitorOfferedForProxy(t,date))}
 function proxyRows(date=proxyDateKey()){
  const statuses=leaveData(date), day=dayNameForDate(date), grouped=new Map();
  statuses.forEach(o=>{
@@ -682,6 +713,7 @@ function emergencyCandidates(p,key){
  const day=proxyDayName(), statuses=leaveData(proxyDateKey()), sup=supervisionData();
  return operationalTeachers(proxyDateKey()).filter(t=>{
    if(activeReplacementForOriginal(t.code,proxyDateKey()))return false;
+   if(!visitorOfferedForProxy(t,proxyDateKey()))return false;
    if(statuses.some(o=>o.code===t.code&&activeLeaveAt(o,Number(p))))return false;
    if(Object.entries(sup).some(([k,x])=>k!==key&&x&&x.day===day&&Number(x.period)===Number(p)&&x.code===t.code))return false;
    // Emergency supervision deliberately includes teachers already teaching in this period.
@@ -718,6 +750,7 @@ function candidateList(p,key){
  const day=proxyDayName(), statuses=leaveData(proxyDateKey()), allot=allotData();
  return operationalTeachers(proxyDateKey()).filter(t=>{
    if(activeReplacementForOriginal(t.code,proxyDateKey()))return false;
+   if(!visitorOfferedForProxy(t,proxyDateKey()))return false;
    if(operationalRecords(proxyDateKey()).some(x=>x.day===day&&Number(x.period)===Number(p)&&Array.isArray(x.codes)&&x.codes.includes(t.code)))return false;
    if((((VERIFIED_SUPPLEMENTAL_SLOTS()[t.code]||{})[day]||[]).map(Number)).includes(Number(p)))return false;
    if(statuses.some(o=>o.code===t.code&&activeLeaveAt(o,Number(p))))return false;
