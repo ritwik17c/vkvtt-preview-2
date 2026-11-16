@@ -71,12 +71,38 @@ function replacementCoversSlot(r,slotDate,day,period){
  const w=r.weekly&&r.weekly[day];
  return Array.isArray(w)&&w.map(Number).includes(p);
 }
+// Extra periods (selected coverage only): the visitor also teaches a chosen class in a period
+// when the absent teacher is free. The class's regular teacher for that slot is released.
+//   weeklyExtras {Monday:{"6":{cls:"X-A",subject:"English"}}}   dateExtras {'2026-11-18':{"6":{...}}}
+// A date listed in dateSlots (even with []) uses only its dateExtras, like dateSlots.
+function replacementExtrasFor(r,slotDate,day){
+ if(replacementIsWhole(r)||!replacementAppliesToDate(r,slotDate))return {};
+ if(r.dateSlots&&Array.isArray(r.dateSlots[slotDate]))return (r.dateExtras&&r.dateExtras[slotDate])||{};
+ if(r.datesOnly===true)return {};
+ return (r.weeklyExtras&&r.weeklyExtras[day])||{};
+}
+function applyVisitorExtras(records,date){
+ const reps=temporaryReplacementRecords().filter(r=>r&&r.coverage==="selected"&&(r.weeklyExtras||r.dateExtras));
+ if(!reps.length)return records;
+ const add=[],drop=new Set();
+ for(const rep of reps)for(const day of DAYS){
+   const ex=replacementExtrasFor(rep,replacementWeekDate(date,day),day);
+   for(const [p,x] of Object.entries(ex)){
+     if(!x||!x.cls)continue;const rec={day,period:Number(p),class:x.cls};
+     if(!isOperationalRecord(rec))continue;
+     drop.add(day+"|"+Number(p)+"|"+x.cls);
+     add.push({...rec,entry:((x.subject?x.subject+" ":"")+(rep.tempName||rep.tempCode)+" ("+rep.tempCode+") · Extra period").trim(),codes:[rep.tempCode],_temporaryReplacement:true,_visitorExtra:true,replacementId:rep.id});
+   }
+ }
+ if(!add.length)return records;
+ return records.filter(r=>!drop.has(r.day+"|"+Number(r.period)+"|"+r.class)).concat(add);
+}
 function visitorOfferedForProxy(t,date=todayKey()){
  if(!t||!t.temporary)return true;
  const reps=activeTemporaryReplacements(date).filter(r=>String(r.tempCode)===String(t.code));
  return !reps.length||reps.some(r=>r.offerForProxy!==false);
 }
-function replacementCoverageSig(r){return JSON.stringify([r.coverage||"whole",r.weekly||null,r.dateSlots||null,r.datesOnly===true,r.offerForProxy!==false])}
+function replacementCoverageSig(r){return JSON.stringify([r.coverage||"whole",r.weekly||null,r.dateSlots||null,r.datesOnly===true,r.offerForProxy!==false,r.weeklyExtras||null,r.dateExtras||null,r.tempName||""])}
 function replacementAppliesToDate(r,date=todayKey()){
  if(!r||r.active===false||!r.originalCode||!r.tempCode||!date)return false;
  const s=String(r.startDate||""),e=String(r.endDate||s);
@@ -141,7 +167,7 @@ function operationalRecords(date=todayKey()){
  const repSig=reps.map(r=>[r.id,r.active,r.originalCode,r.tempCode,r.startDate,r.endDate,replacementCoverageSig(r)].join(':')).join('|');
  const key=[date,(DATA&&DATA.activeScheduleProfileId)||'normal',repSig,sanitisedMasterRecords().length].join('||');
  if(__operationalRecordsCache.key===key)return __operationalRecordsCache.value;
- const value=sanitisedMasterRecords().filter(isOperationalRecord).map(r=>applyTemporaryReplacementsToRecord(r,date));
+ const value=applyVisitorExtras(sanitisedMasterRecords().filter(isOperationalRecord).map(r=>applyTemporaryReplacementsToRecord(r,date)),date);
  __operationalRecordsCache={key,value};
  return value;
 }
