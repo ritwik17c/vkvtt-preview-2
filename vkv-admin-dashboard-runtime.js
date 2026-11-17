@@ -25,6 +25,7 @@ function build(){const home=$('#dashboardHome');if(!home||$('#vkvAdminArchitectu
  g2.append(tile('openTeacherTransfer','⇄','Transfer Teacher Timetable','Transfer one teacher’s current timetable to a replacement in one controlled action.',null));
  g2.append(tile('openTeacherCodeRename','🔤','Rename Teacher Short Code','Rename a timetable short code and update active timetable references together.',null));
  const rep=move(g2,{dataOpen:'replacements'});relabel(rep,'👩‍🏫 Temporary Replacement Manager','Manage temporary leave-vacancy replacements without rewriting the permanent timetable.');
+ const blk=move(g2,{dataOpen:'classBlocks'});if(blk)relabel(blk,'⏸ Class Period Blocks','Stop chosen periods for chosen classes over a date range, e.g. early dismissal. No proxies are needed and their teachers become free.');
  move(g2,{id:'openTimetableIntegrity'});
  g2.append(tile('openMasterOverviewP2','📊','Current Master Overview','Current active-timetable teacher count, class count, entries, active schedule and replacement status.',P2+'admin-master-overview.html?v=2'));
  const oldOverview=findTile({dataOpen:'overview'});if(oldOverview)oldOverview.style.display='none';
