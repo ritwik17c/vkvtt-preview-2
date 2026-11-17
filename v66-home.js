@@ -89,7 +89,7 @@ function applyVisitorExtras(records,date){
    const ex=replacementExtrasFor(rep,replacementWeekDate(date,day),day);
    for(const [p,x] of Object.entries(ex)){
      if(!x||!x.cls)continue;const rec={day,period:Number(p),class:x.cls};
-     if(!isOperationalRecord(rec))continue;
+     if(!isOperationalRecord(rec)||classSlotBlocked(x.cls,p,replacementWeekDate(date,day),day))continue;
      drop.add(day+"|"+Number(p)+"|"+x.cls);
      add.push({...rec,entry:((x.subject?x.subject+" ":"")+(rep.tempName||rep.tempCode)+" ("+rep.tempCode+") · Extra period").trim(),codes:[rep.tempCode],_temporaryReplacement:true,_visitorExtra:true,replacementId:rep.id});
    }
@@ -97,6 +97,12 @@ function applyVisitorExtras(records,date){
  if(!add.length)return records;
  return records.filter(r=>!drop.has(r.day+"|"+Number(r.period)+"|"+r.class)).concat(add);
 }
+// Temporary class period blocks (e.g. early dismissal): master.classPeriodBlocks =
+//   [{id,active,classes:['X-A'],periods:[8],startDate,endDate,days:['Monday',…] (empty = every day),reason}]
+// A blocked class period is not taught: no proxy is needed and its teacher is free.
+function classPeriodBlockRecords(){return DATA&&Array.isArray(DATA.classPeriodBlocks)?DATA.classPeriodBlocks:[]}
+function classSlotBlocked(cls,period,slotDate,day){const p=Number(period);return classPeriodBlockRecords().some(b=>b&&b.active!==false&&!b.archived&&slotDate>=b.startDate&&slotDate<=b.endDate&&(!Array.isArray(b.days)||!b.days.length||b.days.includes(day))&&Array.isArray(b.classes)&&b.classes.includes(cls)&&Array.isArray(b.periods)&&b.periods.map(Number).includes(p))}
+function classBlockSig(){return JSON.stringify(classPeriodBlockRecords().map(b=>[b&&b.id,b&&b.active,b&&b.archived,b&&b.startDate,b&&b.endDate,b&&b.days,b&&b.classes,b&&b.periods]))}
 function visitorOfferedForProxy(t,date=todayKey()){
  if(!t||!t.temporary)return true;
  const reps=activeTemporaryReplacements(date).filter(r=>String(r.tempCode)===String(t.code));
@@ -165,9 +171,9 @@ let __operationalRecordsCache={key:'',value:[]};
 function operationalRecords(date=todayKey()){
  const reps=(DATA&&Array.isArray(DATA.temporaryReplacements)?DATA.temporaryReplacements:[]);
  const repSig=reps.map(r=>[r.id,r.active,r.originalCode,r.tempCode,r.startDate,r.endDate,replacementCoverageSig(r)].join(':')).join('|');
- const key=[date,(DATA&&DATA.activeScheduleProfileId)||'normal',repSig,sanitisedMasterRecords().length].join('||');
+ const key=[date,(DATA&&DATA.activeScheduleProfileId)||'normal',repSig,classBlockSig(),sanitisedMasterRecords().length].join('||');
  if(__operationalRecordsCache.key===key)return __operationalRecordsCache.value;
- const value=applyVisitorExtras(sanitisedMasterRecords().filter(isOperationalRecord).map(r=>applyTemporaryReplacementsToRecord(r,date)),date);
+ const value=applyVisitorExtras(sanitisedMasterRecords().filter(r=>isOperationalRecord(r)&&!classSlotBlocked(r.class,r.period,replacementWeekDate(date,r.day),r.day)).map(r=>applyTemporaryReplacementsToRecord(r,date)),date);
  __operationalRecordsCache={key,value};
  return value;
 }
@@ -188,7 +194,8 @@ function refreshScheduleUi(){
  const banner=E("activeScheduleBanner"),id=activeScheduleId(),name=activeScheduleName();
  if(banner){
    banner.classList.toggle("custom",id!=="normal");
-   banner.innerHTML='<b>🗓 Active Schedule:</b> '+esc(name);
+   const bd=todayKey(),bday=dayNameForDate(bd),bl=classPeriodBlockRecords().filter(b=>b&&b.active!==false&&!b.archived&&bd>=b.startDate&&bd<=b.endDate&&(!Array.isArray(b.days)||!b.days.length||b.days.includes(bday)));
+   banner.innerHTML='<b>🗓 Active Schedule:</b> '+esc(name)+(bl.length?'<br><b>⏸ Periods not held today:</b> '+bl.map(b=>esc((b.classes||[]).join(', '))+' — P'+(b.periods||[]).join(', P')+(b.reason?' ('+esc(b.reason)+')':'')).join('; '):'');
  }
  refreshPeriodSelect("teacherPeriod","All");
  refreshPeriodSelect("classPeriod","All",E("classSel")&&E("classSel").value?classActivePeriods(E("classSel").value):activeSchedulePeriods());

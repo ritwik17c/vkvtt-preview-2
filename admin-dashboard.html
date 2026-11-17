@@ -59,6 +59,7 @@
       <a class="tile" id="openExamDepartmentDirect" href="exam-department.html?v=1.1.0" style="text-decoration:none;background:linear-gradient(145deg,#fff8df,#eef8ff);border-color:#d9c277"><b>🗓️ Examination Department</b><span>Prepare, submit, approve and publish examination timetables, invigilation and reliever duties.</span></a>
       <div class="tile" id="openSchedules"><b>🗓 Schedule Profiles</b><span>Normal, Heat Wave and other timing profiles.</span></div>
       <div class="tile" data-open="replacements"><b>👩‍🏫 Temporary Leave-Vacancy Replacements</b><span>Assign a temporary local teacher for a defined period without adding that person to the main roster.</span></div>
+      <div class="tile" data-open="classBlocks" style="background:linear-gradient(145deg,#fff4ec,#f3f8fc);border-color:#e3b99a"><b>⏸ Class Period Blocks</b><span>Temporarily stop chosen periods for chosen classes over a date range, e.g. when classes leave early. No proxies are needed and their teachers become free.</span></div>
       <div class="tile" data-open="teachers"><b>👥 Teachers & Workload</b><span>Permanent teacher directory and current master teaching load.</span></div>
 
       <div class="tile" id="openAttendance" style="background:#eaf7ec;border-color:#add2b5"><b>📍 Pilot Attendance</b><span>Schedules, school/OD geofences, daily verification, late and early-departure review.</span></div>
@@ -125,6 +126,29 @@
     <div id="replacementMsg" class="status" style="display:none"></div>
     <h3>Saved Temporary Replacements</h3>
     <div id="replacementList"></div>
+  </section>
+  <section id="classBlocks" class="card panel">
+    <div class="sectionTop"><div><div class="breadcrumb">Admin Dashboard → Class Period Blocks</div><h2>⏸ Class Period Blocks</h2></div><button data-back-dashboard>← Admin Dashboard</button></div>
+    <div class="help">Use this when some classes will not have certain periods for a few days, for example when they are allowed to leave early. On the chosen dates, those periods are treated as not held: no proxy is needed, and the teachers of those periods are free for other proxies. The master timetable itself is not changed.</div>
+    <input type="hidden" id="blockId">
+    <div class="grid3">
+      <div><label>From Date (dd/mm/yyyy)</label><input id="blockFrom" type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/yyyy"></div>
+      <div><label>To Date (dd/mm/yyyy)</label><input id="blockTo" type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/yyyy"></div>
+      <div><label>Reason</label><input id="blockReason" type="text" maxlength="120" placeholder="e.g. Early dismissal for winter"></div>
+    </div>
+    <h3 style="margin-bottom:4px">Periods</h3>
+    <div id="blockPeriods" style="display:flex;flex-wrap:wrap;gap:8px 16px"></div>
+    <h3 style="margin-bottom:4px">Days</h3>
+    <div class="help" style="margin-top:0">Leave all days ticked to apply on every school day in the range.</div>
+    <div id="blockDays" style="display:flex;flex-wrap:wrap;gap:8px 16px"></div>
+    <h3 style="margin-bottom:4px">Classes</h3>
+    <div class="actions" style="margin-top:0"><button type="button" class="smallbtn" id="blockAllClasses">Tick all classes</button><button type="button" class="smallbtn" id="blockNoClasses">Clear classes</button></div>
+    <div id="blockClasses" style="display:flex;flex-wrap:wrap;gap:8px 16px"></div>
+    <div id="blockPreview" class="help"></div>
+    <div class="actions"><button class="primary" id="saveBlock">Save Class Period Block</button><button id="clearBlock">Clear Form</button></div>
+    <div id="blockMsg" class="status" style="display:none"></div>
+    <h3>Saved Class Period Blocks</h3>
+    <div id="blockList"></div>
   </section>
 
   <section id="teachers" class="card panel">
@@ -244,7 +268,7 @@ function renderDashboardLoadError(e){
 function renderAll(){
  renderDashboardSummary();
  fill($('editDay'),DAYS.map(x=>({value:x,label:x})));fill($('editClass'),master.classes.map(x=>({value:x,label:x})));fill($('replacementOriginal'),master.teachers.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(t=>({value:t.code,label:t.name+' ('+t.code+')'})));
- renderTeacherTable();renderClassTable();renderReplacementList();renderNonTeachingList();renderHistory();renderOverview();
+ renderTeacherTable();renderClassTable();renderReplacementList();renderBlockList();if(!$('blockClasses').children.length)renderBlockForm({});renderNonTeachingList();renderHistory();renderOverview();
  if(!$('editDay').value)$('editDay').value='Monday';if(!$('editClass').value)$('editClass').value=master.classes[0]||'';updatePeriods();
 }
 function fill(sel,items){const old=sel.value;sel.innerHTML=items.map(x=>'<option value="'+safe(x.value)+'">'+safe(x.label)+'</option>').join('');if([...sel.options].some(o=>o.value===old))sel.value=old}
@@ -388,6 +412,57 @@ async function mutateReplacement(id,kind){const r=master.temporaryReplacements.f
  try{await persistMaster({atMs:now,type:'replacement_'+kind,byUid:currentUser.uid,byName:currentUser.displayName||profile.name||currentUser.email||'Admin',summary:(kind==='cancel'?'Cancelled future assignment':kind==='end'?'Ended assignment after today':'Archived completed assignment')+': '+r.tempName+' ('+r.tempCode+') for '+(teacherByCode(r.originalCode)?.name||r.originalCode),before,after:structuredClone(r)});showPanel('replacements')}catch(e){Object.assign(r,before);alert('Could not update replacement: '+(e.message||e))}
 }
 document.addEventListener('click',e=>{const edit=e.target.closest('[data-edit-rep]');if(edit)return editReplacement(edit.dataset.editRep);const cancel=e.target.closest('[data-cancel-rep]');if(cancel)return mutateReplacement(cancel.dataset.cancelRep,'cancel');const end=e.target.closest('[data-end-rep]');if(end)return mutateReplacement(end.dataset.endRep,'end');const arc=e.target.closest('[data-archive-rep]');if(arc)return mutateReplacement(arc.dataset.archiveRep,'archive')});
+
+/* ---------- Class Period Blocks (master.classPeriodBlocks) ---------- */
+const BLOCK_DAYS=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+function blocks(){if(!Array.isArray(master.classPeriodBlocks))master.classPeriodBlocks=[];return master.classPeriodBlocks}
+function tickList(id,cls,items,checked){$(id).innerHTML=items.map(x=>`<label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" class="${cls}" value="${safe(x.value)}" ${checked(x.value)?'checked':''} style="width:auto"> ${safe(x.label)}</label>`).join('')}
+function renderBlockForm(b){
+ b=b||{};const ps=repAllPeriods(),days=Array.isArray(b.days)&&b.days.length?b.days:BLOCK_DAYS;
+ tickList('blockPeriods','blockPeriod',ps.map(p=>({value:p,label:'P'+p+((master.times&&master.times[String(p)])?' ('+master.times[String(p)]+')':'')})),p=>(b.periods||[]).map(Number).includes(Number(p)));
+ tickList('blockDays','blockDay',BLOCK_DAYS.map(d=>({value:d,label:d})),d=>days.includes(d));
+ tickList('blockClasses','blockClass',(master.classes||[]).map(c=>({value:c,label:c})),c=>(b.classes||[]).includes(c));
+ renderBlockPreview();
+}
+function blockFromForm(){
+ const days=[...document.querySelectorAll('.blockDay:checked')].map(c=>c.value);
+ return {startDate:inputDate($('blockFrom').value),endDate:inputDate($('blockTo').value),reason:$('blockReason').value.trim(),periods:[...document.querySelectorAll('.blockPeriod:checked')].map(c=>Number(c.value)).sort((a,b)=>a-b),days:days.length===BLOCK_DAYS.length?[]:days,classes:[...document.querySelectorAll('.blockClass:checked')].map(c=>c.value)}
+}
+function blockWeeklySlots(b){const days=b.days&&b.days.length?b.days:BLOCK_DAYS;return (master.records||[]).filter(r=>days.includes(r.day)&&(b.classes||[]).includes(r.class)&&(b.periods||[]).map(Number).includes(Number(r.period)))}
+function blockTeacherNames(recs){const set=new Set();recs.forEach(r=>inferCodes(r).forEach(c=>set.add(teacherByCode(c)?.name||c)));return [...set].sort()}
+function renderBlockPreview(){const b=blockFromForm();if(!b.classes.length||!b.periods.length){$('blockPreview').textContent='';return}const recs=blockWeeklySlots(b),names=blockTeacherNames(recs);$('blockPreview').innerHTML=`<b>${recs.length}</b> timetabled class period(s) a week will not be held.`+(names.length?' Teachers freed in those periods: '+names.map(safe).join(', ')+'.':'')}
+function blockState(b){const t=todayKey();if(b.active===false)return ['Cancelled','warn'];if(t<b.startDate)return ['Upcoming','ok'];if(t>b.endDate)return ['Ended',''];return ['In force','ok']}
+function blockDaysText(b){return b.days&&b.days.length?b.days.map(d=>d.slice(0,3)).join(', '):'Every day'}
+function renderBlockList(){
+ if(!$('blockList'))return;
+ const rows=blocks().slice().sort((a,b)=>String(b.startDate).localeCompare(String(a.startDate)));
+ if(!rows.length){$('blockList').innerHTML='<div class="empty">No class period block has been set.</div>';return}
+ $('blockList').innerHTML=rows.map(b=>{const [st]=blockState(b),t=todayKey(),live=b.active!==false&&t<=b.endDate;
+  return `<div class="card" style="margin:8px 0;padding:12px"><div><b>${safe(displayDate(b.startDate))} – ${safe(displayDate(b.endDate))}</b> · <span class="small">${safe(st)}</span>${b.reason?' · '+safe(b.reason):''}</div><div class="small">Periods: ${(b.periods||[]).map(p=>'P'+p).join(', ')} · Days: ${safe(blockDaysText(b))}</div><div class="small">Classes: ${(b.classes||[]).map(safe).join(', ')}</div><div class="actions" style="margin-top:6px">${live?`<button class="smallbtn" data-edit-block="${safe(b.id)}">Edit</button><button class="smallbtn danger" data-cancel-block="${safe(b.id)}">Cancel Block</button>`:''}</div></div>`}).join('');
+}
+function clearBlockForm(){$('blockId').value='';$('blockFrom').value='';$('blockTo').value='';$('blockReason').value='';renderBlockForm({});$('saveBlock').textContent='Save Class Period Block';$('blockMsg').style.display='none'}
+function editBlock(id){const b=blocks().find(x=>x.id===id);if(!b)return;$('blockId').value=b.id;$('blockFrom').value=displayDate(b.startDate);$('blockTo').value=displayDate(b.endDate);$('blockReason').value=b.reason||'';renderBlockForm(b);$('saveBlock').textContent='Update Class Period Block';$('blockFrom').scrollIntoView({behavior:'smooth',block:'center'})}
+$('clearBlock').onclick=clearBlockForm;
+$('blockAllClasses').onclick=()=>{document.querySelectorAll('.blockClass').forEach(c=>c.checked=true);renderBlockPreview()};
+$('blockNoClasses').onclick=()=>{document.querySelectorAll('.blockClass').forEach(c=>c.checked=false);renderBlockPreview()};
+document.addEventListener('change',e=>{if(e.target.closest('.blockClass,.blockPeriod,.blockDay'))renderBlockPreview()});
+$('saveBlock').onclick=async()=>{
+ const id=$('blockId').value.trim(),b=blockFromForm();
+ if(!b.startDate||!b.endDate){msg('blockMsg','Enter valid From and To dates as dd/mm/yyyy.','warn');return}
+ if(b.endDate<b.startDate){msg('blockMsg','The To date cannot be before the From date.','warn');return}
+ if(!b.periods.length){msg('blockMsg','Tick at least one period.','warn');return}
+ if(!document.querySelectorAll('.blockDay:checked').length){msg('blockMsg','Tick at least one day.','warn');return}
+ if(!b.classes.length){msg('blockMsg','Tick at least one class.','warn');return}
+ const now=Date.now(),existing=id?blocks().find(x=>x.id===id):null,before=existing?structuredClone(existing):null;
+ const rec={...(existing||{}),...b,id:existing?existing.id:'BLK-'+now,active:true,updatedAtMs:now,updatedByUid:currentUser.uid};if(!existing){rec.createdAtMs=now;rec.createdByUid=currentUser.uid}
+ if(existing)Object.assign(existing,rec);else blocks().push(rec);
+ const summary=(existing?'Updated':'Added')+' class period block '+displayDate(b.startDate)+'–'+displayDate(b.endDate)+': P'+b.periods.join(', P')+' for '+b.classes.join(', ');
+ try{await persistMaster({atMs:now,type:existing?'class_block_edit':'class_block_add',byUid:currentUser.uid,byName:currentUser.displayName||profile.name||currentUser.email||'Admin',summary,before,after:structuredClone(rec)});clearBlockForm();msg('blockMsg','Saved. '+summary+'.','ok')}
+ catch(e){if(existing)Object.assign(existing,before);else master.classPeriodBlocks=blocks().filter(x=>x.id!==rec.id);msg('blockMsg','Could not save: '+(e.message||e),'warn')}
+};
+async function cancelBlock(id){const b=blocks().find(x=>x.id===id);if(!b)return;if(!confirm('Cancel this class period block? The periods will be held again as per the timetable. The record is kept in history.'))return;const before=structuredClone(b),now=Date.now();b.active=false;b.updatedAtMs=now;
+ try{await persistMaster({atMs:now,type:'class_block_cancel',byUid:currentUser.uid,byName:currentUser.displayName||profile.name||currentUser.email||'Admin',summary:'Cancelled class period block '+displayDate(b.startDate)+'–'+displayDate(b.endDate)+' for '+(b.classes||[]).join(', '),before,after:structuredClone(b)})}catch(e){Object.assign(b,before);alert('Could not cancel: '+(e.message||e))}}
+document.addEventListener('click',e=>{const ed=e.target.closest('[data-edit-block]');if(ed)return editBlock(ed.dataset.editBlock);const c=e.target.closest('[data-cancel-block]');if(c)return cancelBlock(c.dataset.cancelBlock)});
 
 function clearNonTeachingForm(){$('nonTeachingId').value='';$('nonTeachingName').value='';$('nonTeachingCode').value='';$('nonTeachingDesignation').value='';$('nonTeachingEmail').value='';$('nonTeachingRemarks').value='';$('saveNonTeaching').textContent='Save Non-Teaching Staff';$('nonTeachingMsg').style.display='none'}
 $('clearNonTeaching').onclick=clearNonTeachingForm;
