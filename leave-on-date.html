@@ -1,0 +1,100 @@
+<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate"><title>VKVTT · Leave on a Date</title><link rel="stylesheet" href="vkv-black-gold-screen.css?v=20260908-blackgold-2"><script src="./vkv-theme.js?v=20260916-comprehensive-leave-1"></script>
+<style>:root{--ink:#17364f;--muted:#617685;--line:#cbdce5;--bg:#edf6f1;--green:#e7f6ea;--amber:#fff5d9;--red:#fde8e8}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif}header{background:#123d68;color:#fff;padding:16px}.wrap{max-width:1080px;margin:auto;padding:0 14px}.head{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}main{padding-bottom:50px}.card{background:#fff;border:1px solid var(--line);border-radius:17px;padding:17px;margin:14px 0;box-shadow:0 4px 16px #17324d0d}.status{padding:11px 13px;border-radius:11px;border:1px solid #c9dfe9;background:#eef7fb}.ok{background:var(--green);border-color:#acd5b5}.warn{background:var(--amber);border-color:#e3cc86}.btn,button{display:inline-block;padding:9px 12px;border:1px solid #b9ced9;border-radius:10px;background:#e7f2f7;color:var(--ink);text-decoration:none;font-weight:800;cursor:pointer;font:inherit;font-weight:800}.hide{display:none!important}.small{font-size:.88rem;color:var(--muted);line-height:1.45}.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;align-items:end}label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:4px;font-weight:700}input,select{width:100%;padding:10px;border:1px solid #c7d5de;border-radius:9px;background:#fff;color:var(--ink);font:inherit}.day{border:1px solid rgba(130,160,180,.45);border-radius:14px;padding:13px 14px;margin:10px 0;background:transparent;color:inherit}.day.busy{border-left:6px solid #d08a12;background:rgba(208,138,18,.10)}.day.none{opacity:.7}.dayHead h3{color:inherit}.dayHead{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline}.dayHead h3{margin:0;font-size:1.05rem}.chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.chip{font-size:.8rem;font-weight:800;padding:4px 9px;border-radius:999px;border:1px solid #c9dbe4;background:#eef6fa}.chip.lv{background:#e5f2ff;border-color:#a9c9ea}.chip.hf{background:#fff0e2;border-color:#ebc79f}.chip.od{background:#e7f6ea;border-color:#acd5b5}.chip.pd{background:#f3eefc;border-color:#cdbdea}table{width:100%;border-collapse:collapse;font-size:.9rem}th,td{text-align:left;padding:7px 8px;border-bottom:1px solid #e1eaef;vertical-align:top}th{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}.tag{font-size:.75rem;font-weight:800;padding:2px 7px;border-radius:7px;background:#f3eefc;border:1px solid #cdbdea;white-space:nowrap}.tablewrap{overflow-x:auto}</style></head>
+<body><header><div class="wrap head"><div><h1 style="margin:0">📅 Leave on a Date</h1><div>Who is away on a chosen date or range · approved and pending</div></div><div><a class="btn" href="leave-manager.html">← Leave Management</a> <a class="btn" href="./">🏠 Home</a></div></div></header>
+<main class="wrap">
+<section class="card"><div id="gate" class="status">Checking access…</div></section>
+<section id="tool" class="card hide">
+ <div class="filters">
+  <div><label for="fromDate">Date</label><input id="fromDate" type="date"></div>
+  <div><label for="span">Show</label><select id="span"><option value="1">This date only</option><option value="7">7 days from this date</option><option value="14">14 days from this date</option><option value="31">31 days from this date</option></select></div>
+  <div><label for="kind">Include</label><select id="kind"><option value="leave">Leave only (full and half day)</option><option value="all">Leave, OD and Special Assignment</option></select></div>
+  <div><label for="limit">Warn when away (people)</label><input id="limit" type="number" min="1" max="60" value="5"></div>
+  <div><label for="pending">Pending requests</label><select id="pending"><option value="1">Show separately</option><option value="0">Hide</option></select></div>
+ </div>
+ <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button id="refresh" type="button">↻ Refresh data</button><span id="loaded" class="small"></span></div>
+ <div id="summary" class="status" style="margin-top:12px"></div>
+ <div id="days"></div>
+ <p class="small">People are counted once per day, even if they have more than one entry. Sundays are skipped in a range. School holidays are not checked, so please read the dates against the Annual Calendar.</p>
+</section>
+</main>
+<script type="module">
+import{initializeApp,getApps,getApp}from'https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js';
+import{getAuth,onAuthStateChanged,setPersistence,browserLocalPersistence}from'https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js';
+import{getFirestore,doc,getDoc,getDocs,collection}from'https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore-lite.js';
+const cfg={apiKey:'AIzaSyDheZpyXghd1aQ9_RLhwpacVriG__wNZW4',authDomain:'vkv-nalbari-timetable.firebaseapp.com',projectId:'vkv-nalbari-timetable',storageBucket:'vkv-nalbari-timetable.firebasestorage.app',messagingSenderId:'791432856951',appId:'1:791432856951:web:61324065a54bef30f98d72'},app=getApps().length?getApp():initializeApp(cfg),auth=getAuth(app),db=getFirestore(app);
+await setPersistence(auth,browserLocalPersistence).catch(()=>{});
+const $=id=>document.getElementById(id),mail=v=>String(v||'').trim().toLowerCase(),norm=v=>String(v??'').trim().toLowerCase().replace(/[\s_-]+/g,''),txt=v=>String(v||'').trim();
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const fmt=s=>{const m=String(s||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?`${m[3]}/${m[2]}/${m[1]}`:String(s||'')};
+const DAYNAMES=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+/* ---- access (same rules as Leave Management) ---- */
+function tokens(p){const out=[];const collect=v=>{if(v==null)return;if(typeof v==='string'){out.push(v);return}if(Array.isArray(v)){v.forEach(collect);return}if(typeof v==='object')for(const[k,x]of Object.entries(v)){if(x===true||x==='true'||x===1)out.push(k);else if(typeof x==='string'||Array.isArray(x)||typeof x==='object')collect(x)}};for(const k of['role','roles','delegatedRoles','responsibilities','authorities','permissions','access','duties','delegatedDuties','assignedRoles','features','capabilities'])collect(p?.[k]);for(const[k,v]of Object.entries(p||{}))if(v===true&&/(leave|admin|principal|manager|editor)/i.test(k))out.push(k);return out.map(norm).filter(Boolean)}
+function isAdmin(p){return tokens(p).some(x=>['admin','principal','principaladmin','superadmin'].includes(x))}
+function isManager(p){return tokens(p).includes('manager')}
+function isLeaveEditor(p){return isManager(p)||tokens(p).some(x=>['leave','leaveeditor','leavemanager','manageleave','canmanageleave','editleave'].some(a=>x===a||x.includes(a)))}
+async function profiles(u){let uidP=null,emailP=null;try{const s=await getDoc(doc(db,'authorizedUsers',u.uid));if(s.exists()&&s.data().active!==false)uidP=s.data()}catch(_){}const e=mail(u.email);if(e)try{const s=await getDoc(doc(db,'viewerEmails',e));if(s.exists()&&s.data().active!==false)emailP=s.data()}catch(_){}return{uidP,emailP}}
+/* ---- staff names (same as the Approved Register) ---- */
+let M={},approved=[],pending=[],pendingNote='';
+const LEAVE_CODE_ALIASES={RC2:'RC'};
+function canonical(code){const a={...LEAVE_CODE_ALIASES,...(M.teacherCodeAliases||{})},seen=new Set();code=txt(code);while(code&&a[code]&&!seen.has(code)){seen.add(code);code=txt(a[code])}return code}
+let STAFF=null;
+function staffMap(){if(STAFF)return STAFF;STAFF=new Map();const add=(list,group)=>{for(const x of list||[]){if(!x||x.active===false)continue;const raw=txt(x.code||x.shortCode||x.teacherShortCode||x.timetableCode||x.employeeCode),code=canonical(raw)||raw;if(!code)continue;const name=txt(x.name||x.fullName||raw||'Staff');const cur=STAFF.get(code);if(!cur)STAFF.set(code,{code,name,group});else if(cur.name.length<name.length)cur.name=name}};add(M.teachers,'Teaching');add(M.nonTeachingStaff,'Non-teaching');add(M.staffDirectory,'Staff');return STAFF}
+const person=c=>{c=canonical(c)||c;return staffMap().get(c)||{code:c,name:c||'Staff',group:''}};
+/* ---- record shapes ---- */
+function typeOf(x){let t=String(x.type||x.statusType||'').toLowerCase();if(['on duty','duty','duty leave'].includes(t))t='od';if(t==='special assignment')t='special';if(t==='others'||t==='other')t='other';if(t==='vacant position')t='vacant';return t}
+function datesOf(x){if(Array.isArray(x.dates)&&x.dates.length&&(x.mode==='multiple'||!x.startDate))return{list:[...new Set(x.dates.filter(Boolean))]};const a=String(x.startDate||x.date||x.fromDate||''),b=String(x.endDate||x.toDate||a);return{from:a,to:b}}
+const appliesOn=(d,day)=>day.list?day.list.includes(d):(d>=day.from&&d<=day.to);
+function periodsText(x){const ps=Array.isArray(x.periods)?[...new Set(x.periods.map(Number).filter(n=>n>0))].sort((a,b)=>a-b):[];if(ps.length)return ps.map(p=>'P'+p).join(' + ');if(x.coverage==='half-am')return'First half';if(x.coverage==='half-pm')return'Second half';const f=Number(x.from||x.fromPeriod||0),t=Number(x.to||x.toPeriod||0);return f||t?`P${f||1}–P${t||f}`:''}
+function kindOf(t){return t==='full'?'leave':t==='half'?'half':t==='od'?'od':t==='special'?'special':t==='other'?'other':''}
+const KIND_LABEL={leave:'Full-day leave',half:'Half-day / part leave',od:'On Duty (OD)',special:'Special Assignment',other:'Others'};
+function pendKind(e){const st=e.statusType||(['od','special','other'].includes(e.type)?e.type:'leave');if(st==='od')return'od';if(st==='special')return'special';if(st==='other')return'other';return e.coverage&&e.coverage!=='full'?'half':'leave'}
+async function load(){
+ $('loaded').textContent='Loading…';STAFF=null;
+ const[ms,ap]=await Promise.all([getDoc(doc(db,'master','current')),getDocs(collection(db,'approvedStatusPlans'))]);
+ const raw=ms.exists()?ms.data()||{}:{},wrapped=raw.data&&typeof raw.data==='object'?raw.data:{};M={...raw,...wrapped};
+ approved=[];ap.forEach(d=>{const x=d.data()||{};if(x.active===false)return;const k=kindOf(typeOf(x));if(!k)return;const code=canonical(txt(x.code||x.teacherCode||x.staffCode||''));if(!code)return;approved.push({code,kind:k,cat:String(x.leaveCategory||x.category||'').toUpperCase(),when:datesOf(x),periods:periodsText(x),note:txt(x.note||x.remarks)})});
+ pending=[];pendingNote='';
+ try{const pr=await getDocs(collection(db,'provisionalLeavePlans'));pr.forEach(d=>{const r=d.data()||{};if(r.approvalStatus!=='provisional')return;const code=canonical(txt(r.code||''));const entries=Array.isArray(r.entries)&&r.entries.length?r.entries:[r];entries.forEach(e=>pending.push({code,kind:pendKind(e),cat:String(e.leaveCategory||'').toUpperCase(),when:datesOf(e),periods:e.coverage==='full'?'':periodsText(e),pending:true}))})}
+ catch(_){pendingNote='Pending requests could not be read with this account.'}
+ $('loaded').textContent='Data loaded at '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})+'. Changing the date does not reload it.';
+ render();
+}
+function render(){
+ const start=$('fromDate').value;if(!start){$('summary').textContent='Choose a date.';$('days').innerHTML='';return}
+ const span=Number($('span').value)||1,all=$('kind').value==='all',showPend=$('pending').value==='1',limit=Math.max(1,Number($('limit').value)||5);
+ const wanted=k=>all?['leave','half','od','special','other'].includes(k):['leave','half'].includes(k);
+ const days=[];const d=new Date(start+'T00:00:00');
+ for(let i=0;days.length<span&&i<span*2+2;i++,d.setDate(d.getDate()+1)){if(span>1&&d.getDay()===0)continue;days.push(iso(d))}
+ let busyDays=0,peakN=0,peakDay='';
+ const html=days.map(day=>{
+  const byPerson=new Map();
+  approved.filter(r=>wanted(r.kind)&&appliesOn(day,r.when)).forEach(r=>{const p=byPerson.get(r.code)||{items:[],pend:false};p.items.push(r);byPerson.set(r.code,p)});
+  const pendBy=new Map();
+  if(showPend)pending.filter(r=>wanted(r.kind)&&appliesOn(day,r.when)).forEach(r=>{const p=pendBy.get(r.code)||[];p.push(r);pendBy.set(r.code,p)});
+  const n=byPerson.size,counts={leave:0,half:0,od:0,special:0,other:0};
+  byPerson.forEach(p=>{const ks=p.items.map(r=>r.kind);const k=ks.includes('leave')?'leave':ks.includes('half')?'half':ks.includes('od')?'od':ks.includes('special')?'special':'other';counts[k]++});
+  if(n>peakN){peakN=n;peakDay=day}
+  const busy=n>=limit;if(busy)busyDays++;
+  const dn=DAYNAMES[new Date(day+'T00:00:00').getDay()];
+  const chips=[`<span class="chip">${n} ${n===1?'person':'people'} away</span>`,counts.leave?`<span class="chip lv">Full-day leave: ${counts.leave}</span>`:'',counts.half?`<span class="chip hf">Half-day / part: ${counts.half}</span>`:'',counts.od?`<span class="chip od">OD: ${counts.od}</span>`:'',counts.special?`<span class="chip od">Special: ${counts.special}</span>`:'',counts.other?`<span class="chip">Others: ${counts.other}</span>`:'',pendBy.size?`<span class="chip pd">Pending requests: ${pendBy.size}</span>`:''].join('');
+  const rows=[...byPerson.entries()].map(([code,p])=>{const s=person(code);return`<tr><td><b>${esc(s.name)}</b><div class="small">${esc(code)}${s.group?' · '+esc(s.group):''}</div></td><td>${p.items.map(r=>esc(KIND_LABEL[r.kind])+(r.cat&&r.kind!=='od'&&r.kind!=='special'?' · '+esc(r.cat):'')+(r.periods?' · '+esc(r.periods):'')).join('<br>')}</td><td>Approved</td></tr>`})
+   .concat([...pendBy.entries()].map(([code,list])=>{const s=person(code);return`<tr><td><b>${esc(s.name)}</b><div class="small">${esc(code)}${s.group?' · '+esc(s.group):''}</div></td><td>${list.map(r=>esc(KIND_LABEL[r.kind])+(r.cat?' · '+esc(r.cat):'')+(r.periods?' · '+esc(r.periods):'')).join('<br>')}</td><td><span class="tag">Pending approval</span></td></tr>`}));
+  rows.sort((a,b)=>a.localeCompare(b));
+  return`<div class="day ${busy?'busy':''} ${!n&&!pendBy.size?'none':''}"><div class="dayHead"><h3>${esc(fmt(day))} · ${esc(dn)}${busy?' · ⚠ '+n+' away':''}</h3></div><div class="chips">${chips}</div>${rows.length?`<div class="tablewrap"><table><thead><tr><th>Staff</th><th>Leave / duty</th><th>Status</th></tr></thead><tbody>${rows.join('')}</tbody></table></div>`:'<div class="small">Nobody is on approved leave'+(all?' or duty':'')+' on this date.</div>'}</div>`;
+ }).join('');
+ $('days').innerHTML=html;
+ const s=$('summary');
+ if(span===1){s.className='status '+(peakN>=limit?'warn':'ok');s.innerHTML=`<b>${fmt(start)}</b>: ${peakN} ${peakN===1?'person':'people'} with approved ${all?'leave or duty':'leave'}.`+(pendingNote?' '+esc(pendingNote):'')}
+ else{s.className='status '+(busyDays?'warn':'ok');s.innerHTML=`${days.length} school days from <b>${fmt(start)}</b>. Highest: <b>${peakN}</b> ${peakN===1?'person':'people'}${peakDay?' on '+fmt(peakDay):''}. `+(busyDays?`⚠ ${busyDays} day${busyDays===1?'':'s'} with ${limit} or more away.`:`No day reaches ${limit} away.`)+(pendingNote?' '+esc(pendingNote):'')}
+}
+['fromDate','span','kind','pending','limit'].forEach(id=>$(id).addEventListener('change',render));$('limit').addEventListener('input',render);
+$('refresh').onclick=()=>load().catch(e=>{$('loaded').textContent='Could not load: '+(e.message||e)});
+const t=new Date();t.setDate(t.getDate()+1);$('fromDate').value=iso(t);
+onAuthStateChanged(auth,async u=>{const gate=$('gate');$('tool').classList.add('hide');
+ if(!u){gate.className='status warn';gate.textContent='Please sign in from VKVTT Home first.';return}
+ try{const{uidP,emailP}=await profiles(u);
+  if(!(isAdmin(uidP)||isLeaveEditor(uidP)||isLeaveEditor(emailP))){gate.className='status warn';gate.textContent='This page is for the Principal, Admin and Leave Editors.';return}
+  gate.className='status ok';gate.textContent='Access confirmed. Choose a date (tomorrow is selected).';$('tool').classList.remove('hide');await load();
+ }catch(e){gate.className='status warn';gate.textContent='Could not load leave data: '+(e.message||e)}});
+</script></body></html>
