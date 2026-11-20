@@ -12,7 +12,7 @@
 ### Release safety
 
 - `sw.js` and `vkv-build.json` clear browser caches and service workers for the whole `ritwik17c.github.io` site. Change them only for a deliberate release, never just to test a preview.
-- Pages that are not linked from the app but are kept on purpose: `admin-qb-ai-review.html`, `admin-qb-quality-audit.html`, `admin-qb-principal-self-approval.html`, `admin-qb-subject-mapping.html`, `admin-uid-staff-link.html`, `admin-leave-editor-access-repair.html`, plus the redirect stubs `qb-safe.html` and `exam-admit-cards-v2.html`.
+- Occasional admin tools, linked from Question Bank Administration → "Occasional tools": `admin-qb-subject-mapping.html`, `admin-qb-quality-audit.html` (reads every question) and `admin-qb-ai-review.html` (paid AI use). `admin-uid-staff-link.html` is linked from User Access & Roles. `admin-qb-principal-self-approval.html` is a one-time repair for the Principal's older questions; new Principal questions are approved directly. Redirect stubs kept: `qb-safe.html` and `exam-admit-cards-v2.html`.
 
 ## v66.0 — Timetable Studio
 
