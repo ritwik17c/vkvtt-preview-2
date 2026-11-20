@@ -43,17 +43,24 @@ function staffMap(){if(STAFF)return STAFF;STAFF=new Map();const add=(list,group)
 const person=c=>{c=canonical(c)||c;return staffMap().get(c)||{code:c,name:c||'Staff',group:''}};
 /* ---- record shapes ---- */
 function typeOf(x){let t=String(x.type||x.statusType||'').toLowerCase();if(['on duty','duty','duty leave'].includes(t))t='od';if(t==='special assignment')t='special';if(t==='others'||t==='other')t='other';if(t==='vacant position')t='vacant';return t}
-function datesOf(x){if(Array.isArray(x.dates)&&x.dates.length&&(x.mode==='multiple'||!x.startDate))return{list:[...new Set(x.dates.filter(Boolean))]};const a=String(x.startDate||x.date||x.fromDate||''),b=String(x.endDate||x.toDate||a);return{from:a,to:b}}
+function nd(v){v=String(v||'').trim();let m=v.match(/^(\d{4})-(\d{2})-(\d{2})/);if(m)return`${m[1]}-${m[2]}-${m[3]}`;m=v.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);return m?`${m[3]}-${String(m[2]).padStart(2,'0')}-${String(m[1]).padStart(2,'0')}`:v}
+function datesOf(x){if(Array.isArray(x.dates)&&x.dates.length&&(x.mode==='multiple'||!x.startDate))return{list:[...new Set(x.dates.map(nd).filter(Boolean))]};const a=nd(x.startDate||x.date||x.fromDate||x.verifiedFromDate||x.vlFromDate||''),b=nd(x.endDate||x.toDate||x.verifiedToDate||x.vlToDate||a);return{from:a,to:b}}
 const appliesOn=(d,day)=>day.list?day.list.includes(d):(d>=day.from&&d<=day.to);
 function periodsText(x){const ps=Array.isArray(x.periods)?[...new Set(x.periods.map(Number).filter(n=>n>0))].sort((a,b)=>a-b):[];if(ps.length)return ps.map(p=>'P'+p).join(' + ');if(x.coverage==='half-am')return'First half';if(x.coverage==='half-pm')return'Second half';const f=Number(x.from||x.fromPeriod||0),t=Number(x.to||x.toPeriod||0);return f||t?`P${f||1}–P${t||f}`:''}
 function kindOf(t){return t==='full'?'leave':t==='half'?'half':t==='od'?'od':t==='special'?'special':t==='other'?'other':''}
-const KIND_LABEL={leave:'Full-day leave',half:'Half-day / part leave',od:'On Duty (OD)',special:'Special Assignment',other:'Others'};
+const KIND_LABEL={vacancy:'Leave vacancy',leave:'Full-day leave',half:'Half-day / part leave',od:'On Duty (OD)',special:'Special Assignment',other:'Others'};
 function pendKind(e){const st=e.statusType||(['od','special','other'].includes(e.type)?e.type:'leave');if(st==='od')return'od';if(st==='special')return'special';if(st==='other')return'other';return e.coverage&&e.coverage!=='full'?'half':'leave'}
 async function load(){
  $('loaded').textContent='Loading…';STAFF=null;
  const[ms,ap]=await Promise.all([getDoc(doc(db,'master','current')),getDocs(collection(db,'approvedStatusPlans'))]);
  const raw=ms.exists()?ms.data()||{}:{},wrapped=raw.data&&typeof raw.data==='object'?raw.data:{};M={...raw,...wrapped};
- approved=[];ap.forEach(d=>{const x=d.data()||{};if(x.active===false)return;const k=kindOf(typeOf(x));if(!k)return;const code=canonical(txt(x.code||x.teacherCode||x.staffCode||''));if(!code)return;approved.push({code,kind:k,cat:String(x.leaveCategory||x.category||'').toUpperCase(),when:datesOf(x),periods:periodsText(x),note:txt(x.note||x.remarks)})});
+ approved=[];const seenIds=new Set();
+ const addPlan=(id,x)=>{if(!x||x.active===false)return;const pid=String(x.id||x.canonicalLeaveId||id||'');if(pid&&seenIds.has(pid))return;const k=kindOf(typeOf(x));if(!k)return;const code=canonical(txt(x.code||x.teacherCode||x.staffCode||''));if(!code)return;const when=datesOf(x);if(!when.list&&!when.from)return;if(pid)seenIds.add(pid);approved.push({code,kind:k,cat:String(x.leaveCategory||x.category||'').toUpperCase(),when,periods:periodsText(x),note:txt(x.note||x.remarks)})};
+ ap.forEach(d=>addPlan(d.id,d.data()||{}));
+ // Older / imported plans kept in one document (the Home page and Proxy Manager read these too)
+ try{const lp=await getDoc(doc(db,'dailyRecords','__leavePlans'));if(lp.exists())Object.entries(lp.data().plans||{}).forEach(([k,x])=>addPlan(k,x))}catch(_){}
+ // A teacher whose whole timetable is given to a temporary teacher is away for those dates
+ (Array.isArray(M.temporaryReplacements)?M.temporaryReplacements:[]).forEach(r=>{if(!r||r.active===false||r.archived||r.coverage==='selected'||!r.startDate||!r.originalCode)return;const code=canonical(txt(r.originalCode));if(approved.some(a=>a.code===code&&a.when.from===r.startDate&&a.kind==='vacancy'))return;approved.push({code,kind:'vacancy',cat:'',when:{from:nd(r.startDate),to:nd(r.endDate||r.startDate)},periods:'covered by '+(r.tempName||r.tempCode||'a temporary teacher'),note:''})});
  pending=[];pendingNote='';
  try{const pr=await getDocs(collection(db,'provisionalLeavePlans'));pr.forEach(d=>{const r=d.data()||{};if(r.approvalStatus!=='provisional')return;const code=canonical(txt(r.code||''));const entries=Array.isArray(r.entries)&&r.entries.length?r.entries:[r];entries.forEach(e=>pending.push({code,kind:pendKind(e),cat:String(e.leaveCategory||'').toUpperCase(),when:datesOf(e),periods:e.coverage==='full'?'':periodsText(e),pending:true}))})}
  catch(_){pendingNote='Pending requests could not be read with this account.'}
@@ -63,7 +70,7 @@ async function load(){
 function render(){
  const start=$('fromDate').value;if(!start){$('summary').textContent='Choose a date.';$('days').innerHTML='';return}
  const span=Number($('span').value)||1,all=$('kind').value==='all',showPend=$('pending').value==='1',limit=Math.max(1,Number($('limit').value)||5);
- const wanted=k=>all?['leave','half','od','special','other'].includes(k):['leave','half'].includes(k);
+ const wanted=k=>all?['vacancy','leave','half','od','special','other'].includes(k):['vacancy','leave','half'].includes(k);
  const days=[];const d=new Date(start+'T00:00:00');
  for(let i=0;days.length<span&&i<span*2+2;i++,d.setDate(d.getDate()+1)){if(span>1&&d.getDay()===0)continue;days.push(iso(d))}
  let busyDays=0,peakN=0,peakDay='';
@@ -73,12 +80,12 @@ function render(){
   const pendBy=new Map();
   if(showPend)pending.filter(r=>wanted(r.kind)&&appliesOn(day,r.when)).forEach(r=>{const p=pendBy.get(r.code)||[];p.push(r);pendBy.set(r.code,p)});
   const n=byPerson.size,counts={leave:0,half:0,od:0,special:0,other:0};
-  byPerson.forEach(p=>{const ks=p.items.map(r=>r.kind);const k=ks.includes('leave')?'leave':ks.includes('half')?'half':ks.includes('od')?'od':ks.includes('special')?'special':'other';counts[k]++});
+  byPerson.forEach(p=>{const ks=p.items.map(r=>r.kind);const k=ks.includes('leave')||ks.includes('vacancy')?'leave':ks.includes('half')?'half':ks.includes('od')?'od':ks.includes('special')?'special':'other';counts[k]++});
   if(n>peakN){peakN=n;peakDay=day}
   const busy=n>=limit;if(busy)busyDays++;
   const dn=DAYNAMES[new Date(day+'T00:00:00').getDay()];
   const chips=[`<span class="chip">${n} ${n===1?'person':'people'} away</span>`,counts.leave?`<span class="chip lv">Full-day leave: ${counts.leave}</span>`:'',counts.half?`<span class="chip hf">Half-day / part: ${counts.half}</span>`:'',counts.od?`<span class="chip od">OD: ${counts.od}</span>`:'',counts.special?`<span class="chip od">Special: ${counts.special}</span>`:'',counts.other?`<span class="chip">Others: ${counts.other}</span>`:'',pendBy.size?`<span class="chip pd">Pending requests: ${pendBy.size}</span>`:''].join('');
-  const rows=[...byPerson.entries()].map(([code,p])=>{const s=person(code);return`<tr><td><b>${esc(s.name)}</b><div class="small">${esc(code)}${s.group?' · '+esc(s.group):''}</div></td><td>${p.items.map(r=>esc(KIND_LABEL[r.kind])+(r.cat&&r.kind!=='od'&&r.kind!=='special'?' · '+esc(r.cat):'')+(r.periods?' · '+esc(r.periods):'')).join('<br>')}</td><td>Approved</td></tr>`})
+  const rows=[...byPerson.entries()].map(([code,p])=>{const s=person(code);return`<tr><td><b>${esc(s.name)}</b><div class="small">${esc(code)}${s.group?' · '+esc(s.group):''}</div></td><td>${p.items.map(r=>esc(KIND_LABEL[r.kind])+(r.cat&&r.kind!=='od'&&r.kind!=='special'?' · '+esc(r.cat):'')+(r.periods?' · '+esc(r.periods):'')).join('<br>')}</td><td>${p.items.every(r=>r.kind==='vacancy')?'Temporary replacement':'Approved'}</td></tr>`})
    .concat([...pendBy.entries()].map(([code,list])=>{const s=person(code);return`<tr><td><b>${esc(s.name)}</b><div class="small">${esc(code)}${s.group?' · '+esc(s.group):''}</div></td><td>${list.map(r=>esc(KIND_LABEL[r.kind])+(r.cat?' · '+esc(r.cat):'')+(r.periods?' · '+esc(r.periods):'')).join('<br>')}</td><td><span class="tag">Pending approval</span></td></tr>`}));
   rows.sort((a,b)=>a.localeCompare(b));
   return`<div class="day ${busy?'busy':''} ${!n&&!pendBy.size?'none':''}"><div class="dayHead"><h3>${esc(fmt(day))} · ${esc(dn)}${busy?' · ⚠ '+n+' away':''}</h3></div><div class="chips">${chips}</div>${rows.length?`<div class="tablewrap"><table><thead><tr><th>Staff</th><th>Leave / duty</th><th>Status</th></tr></thead><tbody>${rows.join('')}</tbody></table></div>`:'<div class="small">Nobody is on approved leave'+(all?' or duty':'')+' on this date.</div>'}</div>`;
