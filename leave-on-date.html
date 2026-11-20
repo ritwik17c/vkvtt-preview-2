@@ -8,7 +8,7 @@
   <div><label for="fromDate">Date</label><input id="fromDate" type="date"></div>
   <div><label for="span">Show</label><select id="span"><option value="1">This date only</option><option value="7">7 days from this date</option><option value="14">14 days from this date</option><option value="31">31 days from this date</option></select></div>
   <div><label for="kind">Include</label><select id="kind"><option value="leave">Leave only (full and half day)</option><option value="all">Leave, OD and Special Assignment</option></select></div>
-  <div><label for="limit">Warn when away (people)</label><input id="limit" type="number" min="1" max="60" value="5"></div>
+  <div><label for="limit">Warn when away (people)</label><input id="limit" type="number" min="1" max="60" value="3"></div>
   <div><label for="pending">Pending requests</label><select id="pending"><option value="1">Show separately</option><option value="0">Hide</option></select></div>
  </div>
  <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button id="refresh" type="button">↻ Refresh data</button><span id="loaded" class="small"></span></div>
@@ -69,7 +69,7 @@ async function load(){
 }
 function render(){
  const start=$('fromDate').value;if(!start){$('summary').textContent='Choose a date.';$('days').innerHTML='';return}
- const span=Number($('span').value)||1,all=$('kind').value==='all',showPend=$('pending').value==='1',limit=Math.max(1,Number($('limit').value)||5);
+ const span=Number($('span').value)||1,all=$('kind').value==='all',showPend=$('pending').value==='1',limit=Math.max(1,Number($('limit').value)||3);
  const wanted=k=>all?['vacancy','leave','half','od','special','other'].includes(k):['vacancy','leave','half'].includes(k);
  const days=[];const d=new Date(start+'T00:00:00');
  for(let i=0;days.length<span&&i<span*2+2;i++,d.setDate(d.getDate()+1)){if(span>1&&d.getDay()===0)continue;days.push(iso(d))}
