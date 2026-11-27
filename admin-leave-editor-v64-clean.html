@@ -298,6 +298,8 @@ async function verify(u){
   const name=String(x.name||x.fullName||x.staffName||x.employeeName||code);
   if(!map.has(code)||String(map.get(code).name||'').length<name.length)map.set(code,{...x,code,name});
  }
+ // Temporary teachers (Temporary Replacement Manager), current and past
+ for(const r of(Array.isArray(master.temporaryReplacements)?master.temporaryReplacements:[])){const code=String(r&&r.tempCode||'').trim(),name=String(r&&r.tempName||'').trim();if(!code||!name||map.has(code))continue;map.set(code,{code,name:name+' (temporary)',temporary:true})}
  teachers=[...map.values()].sort((a,b)=>String(a.name).localeCompare(String(b.name)));
 }
 async function loadAll(){
